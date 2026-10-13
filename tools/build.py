@@ -155,6 +155,7 @@ def navegacion(actual):
     <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu">Menú <span class="menu-btn__icono" aria-hidden="true"></span></button>
   </div>
 </header>
+<div data-centinela aria-hidden="true" style="position:absolute;top:0;height:8px;width:1px"></div>
 <div class="menu" id="menu">
   <nav aria-label="Menú"><ul>{menu}</ul></nav>
   <div class="menu__pie">
@@ -278,8 +279,7 @@ def pagina_inicio():
     </div>
     <div class="hero__foto">{local("concierto", 1600, 1067, "Público con las manos en alto frente a un escenario iluminado, en blanco y negro", "(min-width: 900px) 50vw, 100vw", lazy=False)}</div>
   </div>
-  <div data-centinela aria-hidden="true"></div>
-</section>
+  </section>
 
 <section class="seccion" id="trabajos" aria-labelledby="t-trabajos">
   <div class="wrap">
@@ -375,7 +375,6 @@ def pagina_fotografia():
   <p class="lead" data-r style="--d:2">Gastronomía, deporte, música, eventos y moda. Tocá cualquier foto para verla en grande.</p>
 </div>
 <div class="filtros"><div class="wrap filtros__in" role="toolbar" aria-label="Filtrar por categoría">{chips}</div></div>
-<div data-centinela aria-hidden="true"></div>
 <div class="wrap"><div class="galeria">
 {figs}</div></div>
 </main>
@@ -421,7 +420,6 @@ def pagina_proyecto(slug, titulo, lead, datos, contenido, sig_titulo, sig_url, d
 {contenido}
   <a class="siguiente" href="{sig_url}"><span class="etiqueta">Siguiente proyecto</span><strong>{sig_titulo} {flecha()}</strong></a>
 </div>
-<div data-centinela aria-hidden="true"></div>
 </main>
 {contacto()}"""
     return cabeza(f"{titulo} · Juan Guzman", desc, f"/proyectos/{slug}.html", og) + cuerpo + cierre()

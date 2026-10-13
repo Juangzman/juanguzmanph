@@ -8,7 +8,7 @@
   const nav = document.querySelector('.nav');
   const centinela = document.querySelector('[data-centinela]');
   if (nav && centinela && 'IntersectionObserver' in window) {
-    new IntersectionObserver(([e]) => nav.classList.toggle('is-solid', !e.isIntersecting), { rootMargin: '-64px 0px 0px 0px' }).observe(centinela);
+    new IntersectionObserver(([e]) => nav.classList.toggle('is-solid', !e.isIntersecting), { threshold: 0 }).observe(centinela);
   } else if (nav) {
     nav.classList.add('is-solid');
   }

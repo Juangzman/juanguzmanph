@@ -424,7 +424,8 @@ html[data-menu-open] { overflow: hidden; }
 
 /* Titular del hero: cada linea sube desde su mascara */
 .lineas { display: block; }
-.lineas > span { display: block; overflow: hidden; padding-bottom: 0.04em; margin-bottom: -0.04em; }
+/* el padding superior deja lugar a tildes y a la virgulilla de la Ñ dentro de la mascara */
+.lineas > span { display: block; overflow: hidden; padding-top: 0.14em; margin-top: -0.14em; padding-bottom: 0.04em; margin-bottom: -0.04em; }
 .lineas > span > span { display: block; }
 .js .lineas > span > span { transform: translateY(105%); transition: transform 1000ms var(--ease-out); transition-delay: calc(120ms + var(--i) * 90ms); }
 .js .is-listo .lineas > span > span { transform: none; }
