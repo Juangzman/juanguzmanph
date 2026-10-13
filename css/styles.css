@@ -412,8 +412,8 @@ html[data-menu-open] { overflow: hidden; }
 
 .siguiente { display: block; margin-top: var(--seccion); padding-block: clamp(48px, 8vw, 96px); border-top: 1px solid var(--linea); }
 .siguiente .etiqueta { display: block; margin-bottom: 12px; }
-.siguiente strong { font-family: var(--f-display); font-weight: 400; font-size: clamp(56px, 12vw, 160px); line-height: 0.88; display: inline-flex; align-items: center; gap: 0.15em; transition: color 300ms ease; }
-.siguiente i { font-size: 0.5em; transition: transform 400ms var(--ease-out); }
+.siguiente strong { font-family: var(--f-display); font-weight: 400; font-size: clamp(56px, 12vw, 160px); line-height: 0.88; display: block; transition: color 300ms ease; }
+.siguiente i { font-size: 0.5em; display: inline-block; vertical-align: 0.35em; margin-left: 0.1em; transition: transform 400ms var(--ease-out); }
 @media (hover: hover) and (pointer: fine) { .siguiente:hover strong { color: var(--terracota); } .siguiente:hover i { transform: translateX(12px); } }
 
 /* ---------- Entrada al hacer scroll ---------- */
