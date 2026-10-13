@@ -58,7 +58,8 @@ def full(f, w, h):
 import json
 _FOTOS = json.loads((RAIZ / "tools" / "fotos.json").read_text())
 _DIS = json.loads((RAIZ / "tools" / "diseno.json").read_text())
-NOMBRES = {"musica": "Música", "deportes": "Deportes", "gastronomia": "Gastronomía", "moda": "Moda"}
+NOMBRES = {"conciertos": "Conciertos", "eventos": "Eventos", "deportes": "Deportes", "gastronomia": "Gastronomía",
+           "producto": "Producto", "moda": "Moda", "book": "Book", "retratos": "Retratos"}
 CATEGORIAS = [(k, NOMBRES[k], [(s, w, h) for s, w, h in _FOTOS[k]]) for k in NOMBRES]
 DIM = {s: (w, h) for k in _FOTOS for s, w, h in _FOTOS[k]}
 
@@ -75,15 +76,16 @@ def pieza(slug, alt, sizes="100vw", lazy=True):
     return local("d/" + slug, w, h, alt, sizes, lazy)
 
 
-PORTADAS = {"musica": "musica-02", "deportes": "deportes-02", "gastronomia": "gastronomia-01", "moda": "moda-01"}
-ORDEN_INICIO = ["musica", "deportes", "gastronomia", "moda"]
+PORTADAS = {k: f"{k}-01" for k in NOMBRES}
+PORTADAS["deportes"] = "deportes-02"
+ORDEN_INICIO = list(NOMBRES)
 
 # Hero: (horizontal para escritorio, vertical para celular, categoria, descripcion)
 HERO = [
-    ("musica-01", "musica-02", "Música", "Show en vivo con luces sobre el escenario"),
+    ("conciertos-02", "conciertos-03", "Conciertos", "Show en vivo con luces sobre el escenario"),
     ("deportes-14", "deportes-02", "Deportes", "Ciclista de mountain bike en un sendero de montaña"),
     ("gastronomia-10", "gastronomia-01", "Gastronomía", "Hamburguesa con papas sobre una mesa de madera"),
-    ("musica-06", "musica-03", "Música", "Banda en blanco y negro con haces de luz"),
+    ("conciertos-07", "conciertos-04", "Conciertos", "Banda en blanco y negro con haces de luz"),
     ("moda-05", "moda-01", "Moda", "Producción de trajes de baño junto a una pileta"),
 ]
 
@@ -102,7 +104,7 @@ def flecha(clase="ph-arrow-right"):
 
 
 def cabeza(titulo, descripcion, ruta, imagen_og=None):
-    og = imagen_og or f"{SITIO}/img/f/musica-01-1600.jpg"
+    og = imagen_og or f"{SITIO}/img/f/conciertos-02-1600.jpg"
     return f"""<!doctype html>
 <html lang="es-AR">
 <head>
@@ -207,8 +209,8 @@ def cierre(visor=False):
 TRABAJOS = [  # (titulo, rubro, tipo, url, slug de imagen, alt)
     ("Villguz Refrigeración", "Rebranding, redes y web", "Diseño", "/proyectos/villguz.html",
      ("d", "vg-remera-espalda"), "Remera de trabajo con la nueva marca de Villguz"),
-    ("Tucumán Urban Indie", "Conciertos", "Fotografía", "/fotografia.html#musica",
-     ("f", "musica-05"), "Cantante en el escenario con luces violetas"),
+    ("Tucumán Urban Indie", "Conciertos", "Fotografía", "/fotografia.html#conciertos",
+     ("f", "conciertos-06"), "Cantante en el escenario con luces violetas"),
     ("Batalla de Tucumán", "Mountain bike", "Fotografía", "/fotografia.html#deportes",
      ("f", "deportes-01"), "Ciclista bajando un terraplén de piedras"),
     ("Tete Pizzería", "Gastronomía", "Fotografía", "/fotografia.html#gastronomia",
@@ -220,11 +222,11 @@ TRABAJOS = [  # (titulo, rubro, tipo, url, slug de imagen, alt)
 ]
 
 SERVICIOS = [
-    ("ph-camera", "Fotografía", "Gastronomía, producto, deportes, conciertos, eventos y moda, con dirección de arte en cada sesión."),
+    ("ph-camera", "Fotografía", "Conciertos, eventos, deportes, gastronomía, producto, moda, book y retratos, con dirección de arte en cada sesión."),
     ("ph-pen-nib", "Identidad visual", "Logotipo, manual de marca y sistema gráfico para que tu marca se vea igual en todos lados."),
     ("ph-devices", "UX/UI y web", "Sitios y plataformas pensados para tu cliente, prototipados en Figma y listos para usar."),
     ("ph-instagram-logo", "Redes y <span class=\"nw\">e-commerce</span>", "Carruseles, historias y campañas que acompañan tus ventas."),
-    ("ph-film-slate", "Filmmaking", "Reels y videos cortos con la misma mirada que mi fotografía."),
+    ("ph-film-slate", "Filmmaker", "Reels y videos cortos con la misma mirada que mi fotografía."),
 ]
 
 FORMACION = [
@@ -326,7 +328,7 @@ def pagina_inicio():
     <div class="seccion__cab">
       <div style="display:grid;gap:20px">
         <h2 id="t-foto" data-r>Fotografía</h2>
-        <p class="lead" data-r style="--d:1">Música, deporte, gastronomía y moda. Cada imagen con un propósito claro.</p>
+        <p class="lead" data-r style="--d:1">Conciertos, eventos, deportes, gastronomía, producto, moda, book y retratos. Cada imagen con un propósito claro.</p>
       </div>
       <a class="link" href="/fotografia.html" data-r style="--d:2">Ver galería completa {flecha()}</a>
     </div>
@@ -352,8 +354,7 @@ def pagina_inicio():
     <div class="sobre__texto">
       <h2 id="t-sobre" data-r>Sobre mí</h2>
       <p class="texto" data-r style="--d:1">Soy Juan Alfredo Guzman, fotógrafo y diseñador digital en San Miguel de Tucumán. Trabajo de forma remota con marcas, negocios y personas.</p>
-      <p class="texto" data-r style="--d:2">Mi formación en marketing digital y e-commerce me lleva a pensar cada imagen en función de un resultado. Vengo de la fotografía y el filmmaking, y esa mirada guía mi dirección de arte.</p>
-      <p class="texto" data-r style="--d:3">Fuera del trabajo toco el bajo y le hago el mantenimiento a mi moto.</p>
+      <p class="texto" data-r style="--d:2">Mi formación en marketing digital y e-commerce me lleva a pensar cada imagen en función de un resultado. Soy fotógrafo y filmmaker, y esa mirada guía mi dirección de arte.</p>
       <div class="datos" data-r style="--d:3">
         <div><h4>Formación</h4><ul>{formacion}</ul></div>
         <div><h4>Herramientas</h4><ul class="herramientas">{herramientas}</ul></div>
@@ -364,7 +365,7 @@ def pagina_inicio():
 </main>
 {contacto()}"""
     return (cabeza("Juan Guzman · Fotografía y diseño",
-                   "Fotógrafo y diseñador digital en Tucumán. Fotografía de conciertos, deportes, gastronomía y moda, identidad visual, UX/UI y contenido para redes.",
+                   "Fotógrafo y diseñador digital en Tucumán. Fotografía de conciertos, eventos, deportes, gastronomía, producto, moda, book y retratos, identidad visual, UX/UI y contenido para redes.",
                    "/") + cuerpo + cierre())
 
 
@@ -395,7 +396,7 @@ def pagina_fotografia():
 <main id="contenido">
 <div class="wrap pag-cab">
   <h1 class="lineas" style="font-size:clamp(64px,15vw,184px)"><span><span style="--i:0">Fotografía</span></span></h1>
-  <p class="lead" data-r style="--d:2">Música, deporte, gastronomía y moda. Tocá cualquier foto para verla en grande.</p>
+  <p class="lead" data-r style="--d:2">Conciertos, eventos, deportes, gastronomía, producto, moda, book y retratos. Tocá cualquier foto para verla en grande.</p>
 </div>
 <div class="filtros"><div class="wrap filtros__in" role="toolbar" aria-label="Filtrar por categoría">{chips}</div></div>
 <div class="wrap"><div class="galeria">
@@ -504,8 +505,7 @@ def proyectos():
   </div>
   {bloque("Video de lanzamiento", "Animación vertical para historias y reels: el auto entra en escena, aparece el mensaje principal y cierra con la financiación y la marca.")}
   <div class="mosaico">
-    {video("/video/yaris.mp4", "/video/yaris.jpg", "c4 desplazado", "Video de lanzamiento del Toyota Yaris Cross")}
-    {video("/video/villguz-logo.mp4", "/video/villguz-logo.jpg", "c4", "Animación del logotipo de Villguz")}
+    {video("/video/yaris.mp4", "/video/yaris.jpg", "c4 centro", "Video de lanzamiento del Toyota Yaris Cross")}
   </div>"""
 
     return {
