@@ -1,0 +1,118 @@
+{
+ "vg-logo": [
+  1600,
+  1600
+ ],
+ "vg-remera-espalda": [
+  1600,
+  1400
+ ],
+ "vg-remera-frente": [
+  1600,
+  1400
+ ],
+ "vg-botella": [
+  1600,
+  1067
+ ],
+ "vg-gorra": [
+  1280,
+  960
+ ],
+ "vg-credencial": [
+  1600,
+  1200
+ ],
+ "vg-llavero": [
+  1600,
+  1024
+ ],
+ "vg-sello": [
+  1600,
+  1152
+ ],
+ "vg-taza": [
+  1600,
+  1067
+ ],
+ "vg-feed-inverter": [
+  1080,
+  1350
+ ],
+ "vg-feed-inverter-2": [
+  1080,
+  1350
+ ],
+ "vg-feed-aa": [
+  1080,
+  1350
+ ],
+ "vg-feed-heladera": [
+  1080,
+  1350
+ ],
+ "vg-feed-lavarropas": [
+  1080,
+  1350
+ ],
+ "vg-feed-oficial-1": [
+  1080,
+  1350
+ ],
+ "vg-feed-oficial-2": [
+  1080,
+  1350
+ ],
+ "vg-historia-trabajador": [
+  1080,
+  1920
+ ],
+ "vg-historia-corea": [
+  1080,
+  1920
+ ],
+ "vg-historia-venta": [
+  1080,
+  1920
+ ],
+ "vg-web-hero": [
+  1600,
+  900
+ ],
+ "vg-web-banner": [
+  1600,
+  750
+ ],
+ "vg-cartel": [
+  1600,
+  644
+ ],
+ "vg-flyer-qr": [
+  596,
+  842
+ ],
+ "vg-flyer-whatsapp": [
+  596,
+  842
+ ],
+ "vg-flyer-costos": [
+  595,
+  842
+ ],
+ "fiat-argo": [
+  1080,
+  1920
+ ],
+ "fiat-cronos": [
+  1080,
+  1920
+ ],
+ "fiat-strada": [
+  1080,
+  1920
+ ],
+ "fiat-titano": [
+  1080,
+  1920
+ ]
+}

@@ -38,6 +38,42 @@
   /* ---------- Titular del hero ---------- */
   requestAnimationFrame(() => requestAnimationFrame(() => { document.body.classList.add('is-listo'); html.classList.add('listo'); }));
 
+  /* ---------- Hero: fotos que se funden ---------- */
+  const heroFotos = document.querySelector('[data-hero]');
+  if (heroFotos) {
+    const diapos = [...heroFotos.querySelectorAll('.diapo')];
+    const cat = document.querySelector('[data-hero-cat]');
+    const num = document.querySelector('[data-hero-num]');
+    const barra = document.querySelector('[data-hero-barra]');
+    const DUR = 6000;
+    let i = 0, timer = null;
+    const correrBarra = () => {
+      if (!barra) return;
+      barra.classList.remove('corre'); void barra.offsetWidth;
+      barra.style.setProperty('--dur', DUR + 'ms'); barra.classList.add('corre');
+    };
+    const mostrar = (n) => {
+      diapos[i].classList.remove('activa');
+      i = (n + diapos.length) % diapos.length;
+      const d = diapos[i];
+      const img = d.querySelector('img');
+      if (img.loading === 'lazy') img.loading = 'eager';
+      d.classList.add('activa');
+      if (cat) cat.textContent = d.dataset.cat;
+      if (num) num.textContent = String(i + 1).padStart(2, '0');
+      correrBarra();
+    };
+    const iniciar = () => { clearInterval(timer); correrBarra(); timer = setInterval(() => mostrar(i + 1), DUR); };
+    if (diapos.length > 1 && !reduce) {
+      // precarga la segunda foto apenas termina la primera
+      const primera = diapos[0].querySelector('img');
+      const precargar = () => { const s = diapos[1] && diapos[1].querySelector('img'); if (s) s.loading = 'eager'; };
+      if (primera.complete) precargar(); else primera.addEventListener('load', precargar, { once: true });
+      iniciar();
+      document.addEventListener('visibilitychange', () => { if (document.hidden) clearInterval(timer); else iniciar(); });
+    }
+  }
+
   /* ---------- Entradas al hacer scroll ---------- */
   const reveal = document.querySelectorAll('[data-r]');
   if (!reduce && 'IntersectionObserver' in window) {
