@@ -277,7 +277,7 @@ def pagina_inicio():
         <a class="btn btn--secundario" href="#contacto">Escribime</a>
       </div>
     </div>
-    <div class="hero__foto">{local("concierto", 1600, 1067, "Público con las manos en alto frente a un escenario iluminado, en blanco y negro", "(min-width: 900px) 50vw, 100vw", lazy=False)}</div>
+    <div class="hero__foto paralaje">{local("concierto", 1600, 1067, "Público con las manos en alto frente a un escenario iluminado, en blanco y negro", "(min-width: 900px) 50vw, 100vw", lazy=False)}</div>
   </div>
   </section>
 
@@ -319,7 +319,7 @@ def pagina_inicio():
 
 <section class="seccion" id="sobre" aria-labelledby="t-sobre" style="padding-top:0">
   <div class="wrap sobre">
-    <div class="sobre__foto img-carga" data-r>{remota("mS6satP1zghi9fVVNLxIgfro8.jpg", 3195, 4792, "Retrato de Juan Guzman", "(min-width: 900px) 40vw, 100vw")}</div>
+    <div class="sobre__foto img-carga paralaje" data-r>{remota("mS6satP1zghi9fVVNLxIgfro8.jpg", 3195, 4792, "Retrato de Juan Guzman", "(min-width: 900px) 40vw, 100vw")}</div>
     <div class="sobre__texto">
       <h2 id="t-sobre" data-r>Sobre mí</h2>
       <p class="texto" data-r style="--d:1">Soy Juan Alfredo Guzman, fotógrafo y diseñador digital en San Miguel de Tucumán. Trabajo de forma remota con marcas, negocios y personas.</p>
@@ -453,7 +453,7 @@ def proyectos():
   </div>"""
 
     pana = f"""
-  <div class="portada img-carga" data-r>{remota("hxVvXtWb2eFpZWbkRtnShDyA.png", 5400, 4000, "Aplicaciones de la marca Pana GOGA", "(min-width: 900px) 90vw, 100vw", lazy=False)}</div>
+  <div class="portada img-carga paralaje" data-r>{remota("hxVvXtWb2eFpZWbkRtnShDyA.png", 5400, 4000, "Aplicaciones de la marca Pana GOGA", "(min-width: 900px) 90vw, 100vw", lazy=False)}</div>
   {bloque("La idea", "Una marca para una panadería de autor que pone en valor el tiempo lento y el pan tradicional.", "El tono de voz es cercano, humano y sensorial, como la experiencia de entrar a la panadería.")}
   {bloque("Sistema visual", "Paleta de tonos tierra con un marrón profundo como color principal, y una combinación de Montserrat con Francoeur para equilibrar claridad y calidez.")}
   <div class="mosaico">

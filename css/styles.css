@@ -443,3 +443,38 @@ html[data-menu-open] { overflow: hidden; }
 .fila__img img { object-position: 50% 35%; }
 .portada.pantalla { aspect-ratio: auto; }
 html, body { overflow-x: clip; }
+
+/* =========================================================
+   Movimiento premium
+   ========================================================= */
+
+/* Transicion entre paginas (View Transitions, navegadores modernos).
+   La barra de navegacion queda fija; el contenido se funde. */
+@view-transition { navigation: auto; }
+.nav { view-transition-name: nav; }
+::view-transition-old(root) { animation: vt-sale 220ms var(--ease-out) both; }
+::view-transition-new(root) { animation: vt-entra 480ms var(--ease-out) both; }
+@keyframes vt-sale { to { opacity: 0; filter: blur(3px); } }
+@keyframes vt-entra { from { opacity: 0; transform: translateY(14px); } }
+
+/* Entrada del hero: la foto se revela de abajo hacia arriba y se asienta */
+.js .hero__foto img { clip-path: inset(100% 0 0 0); scale: 1.12; transition: clip-path 1300ms var(--ease-in-out) 250ms, scale 1800ms var(--ease-out) 250ms; }
+.js .is-listo .hero__foto img { clip-path: inset(0 0 0 0); scale: 1; }
+
+/* Parallax sutil, solo con scroll-driven animations (sin JS de scroll) */
+.paralaje > * { display: block; height: 100%; }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .paralaje { position: relative; }
+    .paralaje > * { position: absolute; inset: -7% 0; width: 100%; height: auto; animation: paralaje linear both; animation-timeline: view(); animation-range: cover; }
+    .paralaje > img, .paralaje picture img { width: 100%; height: 100%; object-fit: cover; }
+    @keyframes paralaje { from { translate: 0 -6%; } to { translate: 0 6%; } }
+    
+  }
+}
+.paralaje picture img { height: 100%; width: 100%; object-fit: cover; }
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  .js .hero__foto img { clip-path: none; scale: 1; }
+}
