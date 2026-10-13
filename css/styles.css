@@ -466,8 +466,9 @@ html, body { overflow-x: clip; }
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     .paralaje { position: relative; }
-    .paralaje > * { position: absolute; left: 0; top: -7%; width: 100%; height: 114%; animation: paralaje linear both; animation-timeline: view(); animation-range: cover; }
-    .paralaje > img, .paralaje picture img { width: 100%; height: 100%; object-fit: cover; }
+    .paralaje > :is(img, picture) { position: absolute; left: 0; top: -7%; width: 100%; height: 114%; animation: paralaje linear both; animation-timeline: view(); animation-range: cover; }
+    .paralaje > img { object-fit: cover; }
+    .paralaje picture img { width: 100%; height: 100%; object-fit: cover; }
     @keyframes paralaje { from { translate: 0 -6%; } to { translate: 0 6%; } }
     
   }
