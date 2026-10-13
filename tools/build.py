@@ -9,6 +9,10 @@ from pathlib import Path
 import html
 
 RAIZ = Path(__file__).resolve().parent.parent
+import hashlib
+def _ver(ruta):
+    """Huella corta del archivo para que el navegador no use una version vieja en cache."""
+    return hashlib.md5((RAIZ / ruta).read_bytes()).hexdigest()[:8]
 CDN = "https://framerusercontent.com/images/"
 
 EMAIL = "juanguzmanph@gmail.com"
@@ -122,8 +126,8 @@ def cabeza(titulo, descripcion, ruta, imagen_og=None):
 <link rel="preconnect" href="https://framerusercontent.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@300..600&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
-<link rel="stylesheet" href="/css/styles.css">
-<script defer src="/js/main.js"></script>
+<link rel="stylesheet" href="/css/styles.css?v={_ver('css/styles.css')}">
+<script defer src="/js/main.js?v={_ver('js/main.js')}"></script>
 </head>
 <body>
 <a class="sr-only" href="#contenido">Saltar al contenido</a>
