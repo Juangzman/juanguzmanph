@@ -517,7 +517,7 @@ def relativas(doc, prefijo):
     inicio = prefijo or "./"
     doc = doc.replace('href="/"', f'href="{inicio}"')
     doc = doc.replace('href="/#', f'href="{prefijo}index.html#')
-    doc = re.sub(r'(href|src|srcset)="/(?!/)', lambda m: f'{m.group(1)}="{prefijo}', doc)
+    doc = re.sub(r'(href|src|srcset|data-full)="/(?!/)', lambda m: f'{m.group(1)}="{prefijo}', doc)
     doc = re.sub(r', /(?=img/)', f', {prefijo}', doc)
     return doc
 

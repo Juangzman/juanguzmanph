@@ -36,7 +36,7 @@
   }
 
   /* ---------- Titular del hero ---------- */
-  requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add('is-listo')));
+  requestAnimationFrame(() => requestAnimationFrame(() => { document.body.classList.add('is-listo'); html.classList.add('listo'); }));
 
   /* ---------- Entradas al hacer scroll ---------- */
   const reveal = document.querySelectorAll('[data-r]');
