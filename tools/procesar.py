@@ -26,8 +26,7 @@ FOTOS = {
          + [(PG+"Fotografia Gastronomia", "CG1_"+x) for x in "0125 0077 0186 0141 0046 0174 0560".split()],
  "producto": [(PG+"Vibra dulce", "_LEA"+x) for x in "2165 2181 2204 2189 2218 2184 2199 2230 2212 2234".split()],
  "moda": [("EG", x) for x in "CG1_0192 3_(1) CG1_0154 CG1_9905 CG1_0254".split()],
- "book": [(BK+"Belen y Emma", "CG1_"+x) for x in "4438 4376 4565 4433 4499 4388 4540 4399".split()]
-         + [(BK+"Mica"+X, "IMG_"+x) for x in "0382 0436 0331 0440 0397".split()],
+ "book": [(BK+"Belen y Emma", "CG1_"+x) for x in "4438 4376 4565 4433 4499 4388 4540 4399".split()],
  "retratos": [(BK+"Belen y Emma", "CG1_"+x) for x in "4574 4471 4578 4569 4362".split()],
 }
 srgb = ImageCms.createProfile("sRGB")

@@ -82,10 +82,10 @@ ORDEN_INICIO = list(NOMBRES)
 
 # Hero: (horizontal para escritorio, vertical para celular, categoria, descripcion)
 HERO = [
-    ("conciertos-02", "conciertos-03", "Conciertos", "Show en vivo con luces sobre el escenario"),
+    ("conciertos-01", "conciertos-01", "Conciertos", "Público con las manos en alto frente al escenario, en blanco y negro"),
     ("deportes-14", "deportes-02", "Deportes", "Ciclista de mountain bike en un sendero de montaña"),
     ("gastronomia-10", "gastronomia-01", "Gastronomía", "Hamburguesa con papas sobre una mesa de madera"),
-    ("conciertos-07", "conciertos-04", "Conciertos", "Banda en blanco y negro con haces de luz"),
+    ("eventos-10", "eventos-02", "Eventos", "Músicos tocando en vivo en la inauguración de La Sala"),
     ("moda-05", "moda-01", "Moda", "Producción de trajes de baño junto a una pileta"),
 ]
 
@@ -104,7 +104,7 @@ def flecha(clase="ph-arrow-right"):
 
 
 def cabeza(titulo, descripcion, ruta, imagen_og=None):
-    og = imagen_og or f"{SITIO}/img/f/conciertos-02-1600.jpg"
+    og = imagen_og or f"{SITIO}/img/f/conciertos-01-1600.jpg"
     return f"""<!doctype html>
 <html lang="es-AR">
 <head>
