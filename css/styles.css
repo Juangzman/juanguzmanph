@@ -436,3 +436,8 @@ html[data-menu-open] { overflow: hidden; }
   .js [data-r] { transform: none; }
   .js .lineas > span > span { transform: none; }
 }
+
+/* Ajustes */
+.nw { white-space: nowrap; }
+.datos .herramientas { display: flex; flex-wrap: wrap; gap: 8px; }
+.fila__img img { object-position: 50% 35%; }

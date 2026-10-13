@@ -213,22 +213,22 @@ def cierre(visor=False):
 # ----------------------------------------------------------------------------
 TRABAJOS = [
     ("Villguz Refrigeración", "Identidad y web", "Diseño", "/proyectos/villguz.html",
-     remota("3SJY065xbSk48zsbDRvZwlHRfo.jpg", 1080, 1350, "Pieza de Instagram de Villguz Refrigeración", "(min-width: 900px) 260px, 100vw")),
+     remota("6pbUvDWK0VDV2ztUf8KaI05LGo.png", 1080, 1920, "Historia de Instagram de Villguz con un técnico trabajando", "(min-width: 900px) 260px, 100vw")),
     ("Carreras MTB", "Deporte", "Fotografía", "/fotografia.html#deportes",
      local("mtb", 1067, 1600, "Ciclista de mountain bike tomando una curva en un sendero", "(min-width: 900px) 260px, 100vw")),
     ("Pana GOGA", "Identidad de marca", "Diseño", "/proyectos/pana-goga.html",
-     remota("hxVvXtWb2eFpZWbkRtnShDyA.png", 5400, 4000, "Aplicaciones de la marca Pana GOGA", "(min-width: 900px) 260px, 100vw")),
+     remota("q9dmkLIpQ5ubBnPHSzGg1YmlPD0.png", 3000, 2000, "Cartel de la fachada de Pana GOGA", "(min-width: 900px) 260px, 100vw")),
     ("Tucumán urban indie", "Conciertos", "Fotografía", "/fotografia.html#conciertos",
      remota("GQDhEs2rckKZrHb1lOFEpsS3ddE.jpg", 3840, 5760, "Banda tocando en vivo en Tucumán", "(min-width: 900px) 260px, 100vw")),
-    ("Marketing y e-commerce", "Redes y video", "Diseño", "/proyectos/marketing.html",
-     remota("dZzj1KezR9t6zHgxy1ZTzQqPVj8.png", 1080, 1920, "Historia de Instagram para una campaña", "(min-width: 900px) 260px, 100vw")),
+    ("Marketing y <span class=\"nw\">e-commerce</span>", "Redes y video", "Diseño", "/proyectos/marketing.html",
+     remota("eVvKZTysTmFRyBY2m0p5FmgBU.png", 1080, 1080, "Pieza para redes de un gimnasio", "(min-width: 900px) 260px, 100vw")),
 ]
 
 SERVICIOS = [
     ("ph-camera", "Fotografía", "Gastronomía, producto, deportes, conciertos, eventos y retrato, con dirección de arte en cada sesión."),
     ("ph-pen-nib", "Identidad visual", "Logotipo, manual de marca y sistema gráfico para que tu marca se vea igual en todos lados."),
     ("ph-devices", "UX/UI y web", "Sitios y plataformas pensados para tu cliente, prototipados en Figma y listos para usar."),
-    ("ph-instagram-logo", "Redes y e-commerce", "Piezas para Instagram, campañas y tiendas online que acompañan tus ventas."),
+    ("ph-instagram-logo", "Redes y <span class=\"nw\">e-commerce</span>", "Piezas para Instagram, campañas y tiendas online que acompañan tus ventas."),
     ("ph-film-slate", "Filmmaking", "Videos cortos para redes con la misma mirada que mi fotografía."),
 ]
 
@@ -422,7 +422,8 @@ def pagina_proyecto(slug, titulo, lead, datos, contenido, sig_titulo, sig_url, d
 </div>
 </main>
 {contacto()}"""
-    return cabeza(f"{titulo} · Juan Guzman", desc, f"/proyectos/{slug}.html", og) + cuerpo + cierre()
+    import re as _re
+    return cabeza(_re.sub(r"<[^>]+>", "", titulo) + " · Juan Guzman", desc, f"/proyectos/{slug}.html", og) + cuerpo + cierre()
 
 
 def proyectos():
@@ -494,11 +495,11 @@ def proyectos():
             "Identidad para una panadería de autor que celebra el tiempo lento y el pan de siempre.",
             [("Cliente", "Pana GOGA"), ("Servicio", "Identidad de marca"),
              ("Tipografías", "Montserrat y Francoeur"), ("Color", "Tonos tierra, #735541")],
-            pana, "Marketing y e-commerce", "/proyectos/marketing.html",
+            pana, "Marketing y <span class=\"nw\">e-commerce</span>", "/proyectos/marketing.html",
             "Caso de estudio: identidad de marca para Pana GOGA, panadería de autor.",
             f"{CDN}hxVvXtWb2eFpZWbkRtnShDyA.png?scale-down-to=1024"),
         "marketing": pagina_proyecto(
-            "marketing", "Marketing y e-commerce",
+            "marketing", "Marketing y <span class=\"nw\">e-commerce</span>",
             "Piezas verticales y video para redes y tiendas online, pensadas para vender.",
             [("Formatos", "Historias, reels y posts"), ("Servicios", "Diseño y edición de video"),
              ("Herramientas", "Photoshop, After Effects, CapCut"), ("Uso", "Instagram y e-commerce")],
