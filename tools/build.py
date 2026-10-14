@@ -86,14 +86,14 @@ ORDEN_INICIO = list(NOMBRES)
 # Hero: fotos de la carpeta "Fotos para el incio", en el orden en que se muestran
 # (slug, categoria, descripcion)
 HERO = [
-    ("inicio-13", "Conciertos", "Público con las manos en alto frente al escenario, en blanco y negro"),
+    ("inicio-13", "Conciertos", "Público con las manos en alto frente al escenario, en blanco y negro", "55% 45%"),
     ("inicio-04", "Deportes", "Ciclista de mountain bike levantando polvo en una curva"),
-    ("inicio-01", "Moda", "Pareja de novios frente a un castillo"),
+    ("inicio-01", "Moda", "Pareja de novios frente a un castillo", "30% 60%"),
     ("inicio-12", "Conciertos", "Cantante con el público en un recital"),
-    ("inicio-09", "Eventos", "DJ con luces azules en Medusa"),
-    ("inicio-07", "Gastronomía", "Manos espolvoreando harina sobre un bollo de masa"),
+    ("inicio-09", "Eventos", "DJ con luces azules en Medusa", "50% 50%"),
+    ("inicio-07", "Gastronomía", "Manos espolvoreando harina sobre un bollo de masa", "62% 55%"),
     ("inicio-02", "Deportes", "Ciclista bajando entre raíces en el monte"),
-    ("inicio-03", "Moda", "Producción de trajes de baño en grupo"),
+    ("inicio-03", "Moda", "Producción de trajes de baño en grupo", "50% 40%"),
     ("inicio-14", "Conciertos", "Escenario iluminado frente a una multitud"),
     ("inicio-05", "Eventos", "Consola de sonido en primer plano durante un show"),
     ("inicio-10", "Deportes", "Ciclista de mountain bike en un descenso"),
@@ -257,15 +257,26 @@ def img_trabajo(ref, alt, sizes):
     return f'<img src="{ref[1]}" width="720" height="1280" loading="lazy" decoding="async" alt="{e(alt)}">'
 
 
+HERO_DIM = {sl: (w, h, nombres, reales) for sl, w, h, nombres, reales in json.loads((RAIZ / "tools" / "hero.json").read_text())}
+
+
 def hero():
     slides = ""
-    for i, (slug, cat, alt) in enumerate(HERO):
-        wa, ha = DIM[slug]
+    for i, (slug, cat, alt, *foco) in enumerate(HERO):
+        w, h, nombres, reales = HERO_DIM[slug]
+        vertical = h >= w * 0.95
         carga = 'fetchpriority="high"' if i == 0 else 'loading="lazy"'
-        slides += f"""    <picture class="diapo{' activa' if i == 0 else ''}" data-cat="{cat}">
-      <source type="image/webp" srcset="/img/f/{slug}-800.webp 800w, /img/f/{slug}-1600.webp 1600w" sizes="100vw">
-      <img src="/img/f/{slug}-1600.jpg" srcset="/img/f/{slug}-800.jpg 800w, /img/f/{slug}-1600.jpg 1600w" sizes="100vw" width="{wa}" height="{ha}" {carga} decoding="async" alt="{e(alt)}">
-    </picture>
+        src = lambda ext: ", ".join(f"/img/h/{slug}-{n}.{ext} {r}w" for n, r in zip(nombres, reales))
+        f = f' style="--foco:{foco[0]}"' if foco else ""
+        # las verticales en pantallas anchas: foto entera sobre una copia desenfocada (sin recortar ni agrandar)
+        fondo = (f'<img class="diapo__fondo" src="/img/h/{slug}-960.jpg" width="{reales[0]}" height="{round(h * reales[0] / w)}" '
+                 f'{"loading=\"lazy\" " if i else ""}decoding="async" alt="">') if vertical else ""
+        slides += f"""    <div class="diapo{' diapo--v' if vertical else ''}{' activa' if i == 0 else ''}" data-cat="{cat}"{f}>
+      {fondo}<picture>
+        <source type="image/webp" srcset="{src('webp')}" sizes="100vw">
+        <img src="/img/h/{slug}-1600.jpg" srcset="{src('jpg')}" sizes="100vw" width="{w}" height="{h}" {carga} decoding="async" alt="{e(alt)}">
+      </picture>
+    </div>
 """
     return f"""<section class="hero" aria-labelledby="t-hero">
   <div class="hero__fotos" data-hero>

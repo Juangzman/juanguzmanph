@@ -52,23 +52,32 @@
       barra.classList.remove('corre'); void barra.offsetWidth;
       barra.style.setProperty('--dur', DUR + 'ms'); barra.classList.add('corre');
     };
+    // carga una diapositiva y espera a que la foto este decodificada (asi nunca aparece a medio cargar)
+    const lista = (d) => Promise.all([...d.querySelectorAll('img')].map((im) => {
+      if (im.loading === 'lazy') im.loading = 'eager';
+      return (im.complete && im.naturalWidth ? Promise.resolve() : new Promise((ok) => { im.addEventListener('load', ok, { once: true }); im.addEventListener('error', ok, { once: true }); }))
+        .then(() => (im.decode ? im.decode().catch(() => {}) : null));
+    }));
+    let pedido = 0;
     const mostrar = (n) => {
-      diapos[i].classList.remove('activa');
-      i = (n + diapos.length) % diapos.length;
-      const d = diapos[i];
-      const img = d.querySelector('img');
-      if (img.loading === 'lazy') img.loading = 'eager';
-      d.classList.add('activa');
-      if (cat) cat.textContent = d.dataset.cat;
-      if (num) num.textContent = String(i + 1).padStart(2, '0');
-      correrBarra();
+      const destino = (n + diapos.length) % diapos.length;
+      const yo = ++pedido;
+      lista(diapos[destino]).then(() => {
+        if (yo !== pedido) return;
+        diapos[i].classList.remove('activa');
+        i = destino;
+        const d = diapos[i];
+        d.classList.add('activa');
+        if (cat) cat.textContent = d.dataset.cat;
+        if (num) num.textContent = String(i + 1).padStart(2, '0');
+        correrBarra();
+        lista(diapos[(i + 1) % diapos.length]); // deja lista la siguiente
+      });
     };
     const iniciar = () => { clearInterval(timer); correrBarra(); timer = setInterval(() => mostrar(i + 1), DUR); };
     if (diapos.length > 1 && !reduce) {
       // precarga la segunda foto apenas termina la primera
-      const primera = diapos[0].querySelector('img');
-      const precargar = () => { const s = diapos[1] && diapos[1].querySelector('img'); if (s) s.loading = 'eager'; };
-      if (primera.complete) precargar(); else primera.addEventListener('load', precargar, { once: true });
+      lista(diapos[0]).then(() => lista(diapos[1]));
       iniciar();
       document.addEventListener('visibilitychange', () => { if (document.hidden) clearInterval(timer); else iniciar(); });
     }
