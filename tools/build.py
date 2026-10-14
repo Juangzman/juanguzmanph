@@ -265,7 +265,7 @@ AREAS = [
 
 SERVICIOS = [
     ("ph-camera", "Fotografía", "Conciertos, eventos, deportes, gastronomía, producto, moda, book y retratos, con dirección de arte en cada sesión."),
-    ("ph-browser", "Diseño y desarrollo web", "Sitios rápidos, pensados primero para el celular, con turnos online, contacto por WhatsApp y paneles internos a medida. Los diseño y los programo yo."),
+    ("ph-browser", "Diseño y desarrollo web", "Webs únicas, pensadas para el celular, que transmiten confianza y te traen consultas. También sistemas a medida para ordenar turnos, clientes y pagos."),
     ("ph-pen-nib", "Identidad visual", "Logotipo, manual de marca y sistema gráfico para que tu marca se vea igual en todos lados."),
     ("ph-instagram-logo", "Redes y <span class=\"nw\">e-commerce</span>", "Carruseles, historias y campañas que acompañan tus ventas."),
     ("ph-film-slate", "Filmmaker", "Reels y videos cortos con la misma mirada que mi fotografía."),
@@ -425,7 +425,7 @@ def pagina_inicio():
         <span class="etiqueta">Proyecto destacado · Diseño web</span>
         <h3>Web Villguz</h3>
         <span class="meta">villguzrefrigeracion.com</span>
-        <p class="texto">Diseñada y programada de cero: turnos por WhatsApp, marcas oficiales, consejos y sistemas internos para el equipo.</p>
+        <p class="texto">Una web pensada para que el cliente confíe y pida turno en un minuto, con sistemas propios para ordenar el trabajo del equipo.</p>
         <div class="acciones">
           <a class="btn btn--primario" href="/proyectos/villguz-web.html">Ver el caso {flecha()}</a>
           <a class="btn btn--secundario" href="{VG_URL}" target="_blank" rel="noopener">En vivo {flecha("ph-arrow-up-right")}</a>
@@ -589,7 +589,7 @@ def proyectos():
     {fig("vg-flyer-whatsapp", "Flyer con QR a WhatsApp", "c4", "596/842")}
     {fig("vg-flyer-costos", "Flyer de costos de asistencia técnica", "c4 ancho", "596/842")}
   </div>
-  {bloque("La web", "La identidad llega a la web: un sitio nuevo, diseñado y programado desde cero, donde el cliente encuentra su equipo, aprende a cuidarlo y pide turno por WhatsApp.")}
+  {bloque("La web", "La nueva identidad llega a la web: un sitio pensado para que el cliente confíe, encuentre su equipo y pida turno desde el celular.")}
   {vitrina_villguz()}
   <div class="acciones" data-r>
     <a class="btn btn--primario" href="/proyectos/villguz-web.html">Ver el caso de la web {flecha()}</a>
@@ -611,13 +611,13 @@ def proyectos():
 
     web = f"""
   <div class="portada portada--web" data-r>{navegador("vg-web-hero", "Portada de la web de Villguz Refrigeración", desliza=False, sizes="(min-width: 900px) 90vw, 100vw", lazy=False)}</div>
-  {bloque("El desafío", "Villguz necesitaba una web que funcionara como su mostrador: que el cliente encuentre su equipo, entienda qué le pasa y pida turno sin tener que llamar.", "Tenía que verse tan confiable como las marcas oficiales que representa y funcionar perfecto en celulares de todo tipo.")}
-  {bloque("La solución", "Diseñé y programé el sitio desde cero con la nueva identidad. Cada sección responde una pregunta del cliente, en el orden en que se la hace.", puntos=["Portada con pedido de turno y WhatsApp a un toque", "Marcas oficiales y equipos que repara, con sus fallas más comunes", "Consejos de uso, cómo trabaja el taller y estado de la orden", "Historia de la empresa y turno online que llega por WhatsApp"])}
+  {bloque("El desafío", "Villguz necesitaba que su web hiciera el trabajo del mostrador: que el cliente confíe, encuentre lo que busca y pida turno sin tener que llamar.", "Tenía que estar a la altura de las marcas oficiales que representa y verse perfecta en cualquier celular.")}
+  {bloque("La solución", "Una web nueva, hecha a medida con la identidad de la marca. Cada sección responde una duda del cliente y lo acerca a pedir turno.", puntos=["Pedir turno o escribir por WhatsApp, siempre a un toque", "Marcas oficiales que transmiten respaldo", "Consejos que ayudan al cliente antes de que algo se rompa", "La historia de una empresa familiar con más de 30 años"])}
   {vitrina_villguz()}
   {logros()}
-  {bloque("Sección por sección", "Bloques de vidrio sobre el azul de la marca, títulos en Bebas Neue y un verde que solo aparece donde hay que actuar.")}
+  {bloque("Sección por sección", "Una estética clara y moderna, con los colores de la marca y el verde reservado para lo importante: pedir turno.")}
   {secciones_villguz()}
-  {bloque("Sistemas internos", "Detrás de la web hay dos herramientas con contraseña para el equipo: el sistema de turnos y el panel de liquidaciones. Usan la misma identidad y guardan los datos en Google Drive.")}
+  {bloque("Sistemas internos", "Detrás de la web, el equipo tiene sus propias herramientas privadas para organizar los turnos y las cuentas, con la misma identidad visual.")}
   {sistemas_villguz()}
   <div class="acciones" data-r>
     <a class="btn btn--primario" href="{VG_URL}" target="_blank" rel="noopener">Ver la web en vivo {flecha("ph-arrow-up-right")}</a>
@@ -627,9 +627,9 @@ def proyectos():
     return {
         "villguz-web": pagina_proyecto(
             "villguz-web", "Web Villguz",
-            "Diseño UX/UI y desarrollo de villguzrefrigeracion.com: turnos por WhatsApp, marcas oficiales y sistemas internos para el equipo.",
+            "Diseño y desarrollo de la web de un servicio técnico oficial: más confianza, más turnos y un equipo mejor organizado.",
             [("Cliente", "Villguz Refrigeración"), ("Servicios", "UX/UI, diseño y desarrollo web"),
-             ("Tecnología", "HTML, CSS, JavaScript y Google Apps Script"),
+             ("Entregables", "Web, turnos online y sistemas internos"),
              ("En línea", f'<a class="link" href="{VG_URL}" target="_blank" rel="noopener">villguzrefrigeracion.com</a>')],
             web, "Villguz Refrigeración", "/proyectos/villguz.html",
             "Caso de diseño web: villguzrefrigeracion.com, diseñada y programada por Juan Guzman.",
@@ -668,12 +668,12 @@ def vitrina_villguz(lazy=True):
 
 
 LOGROS_WEB = [
-    ("ph-device-mobile", "Primero el celular", "Diseñada y probada en el teléfono, donde la usan los clientes, con el botón de turno siempre a mano."),
-    ("ph-whatsapp-logo", "Turnos por WhatsApp", "El formulario arma el pedido con los datos del cliente y lo abre en WhatsApp, listo para enviar."),
-    ("ph-seal-check", "Marcas oficiales", "Samsung, LG, Whirlpool, BGH, Eslabón de Lujo, Beko y Vondom, con sus colores originales como pide cada fábrica."),
-    ("ph-lightbulb", "Contenido que educa", "Fallas comunes por equipo y consejos de uso conectados con Instagram, para ganar confianza antes del service."),
-    ("ph-paint-brush", "Identidad aplicada", "El azul y el verde de la marca, Bebas Neue y Montserrat, y superficies de vidrio que ordenan cada sección."),
-    ("ph-lightning", "Liviana y propia", "Programada a mano, sin plantillas ni plugins, y publicada en GitHub Pages con dominio propio."),
+    ("ph-device-mobile", "Pensada para el celular", "Tus clientes te buscan desde el teléfono. La web se ve y se usa perfecto ahí, donde se decide."),
+    ("ph-chat-circle-text", "Más consultas, menos vueltas", "Botones claros para escribirte, pedir turno o presupuesto, y cada consulta llega directo a tu WhatsApp."),
+    ("ph-seal-check", "Confianza al primer vistazo", "Una imagen profesional y fiel a tu marca, que muestra respaldo y experiencia."),
+    ("ph-compass", "Fácil de recorrer", "El contenido ordenado según lo que busca tu cliente, para que encuentre lo que necesita sin perderse."),
+    ("ph-lightning", "Rápida y única", "Un diseño hecho para tu marca, sin plantillas, que carga rápido y está pensado para que te encuentren."),
+    ("ph-trend-up", "Lista para crecer", "Publicada con tu propio dominio y preparada para sumar secciones, turnos o sistemas cuando los necesites."),
 ]
 
 
@@ -694,12 +694,12 @@ def secciones_villguz():
 
 
 SISTEMAS = [
-    ("ph-calendar-check", "Turnos", "Agenda interna para el equipo de atención: guía cada llamada paso a paso, ordena a los clientes por urgencia y arma el día de cada técnico.",
-     ["Atención guiada por teléfono, WhatsApp, local o caso de fábrica", "Alertas de plazo: amarillo a los 3 días hábiles, rojo a los 5",
-      "Turnos por técnico, repuestos en espera, fletes y fuera de zona", "Lista del día para mandar a cada técnico por WhatsApp"]),
-    ("ph-receipt", "Liquidación y administración", "Panel con contraseña para liquidar cada semana a técnicos, ayudantes y fleteros, con los datos guardados en Google Drive.",
-     ["Semana de pago de sábado a viernes", "Porcentaje de mano de obra editable por técnico",
-      "Trabajos con y sin garantía, visitas y fletes", "Liquidación para imprimir y firmar, con historial de pagos"]),
+    ("ph-calendar-check", "Agenda de turnos", "Un sistema simple para que tu equipo tome cada pedido, organice la agenda y no se olvide de ningún cliente.",
+     ["Todos los pedidos en un solo lugar", "Avisos cuando un cliente lleva mucho tiempo esperando",
+      "La agenda del día lista para compartir con el equipo", "Fácil de usar, aunque no seas de la compu"]),
+    ("ph-receipt", "Administración y pagos", "Un panel privado para llevar las cuentas del negocio claras y al día, sin hacer cálculos a mano.",
+     ["Liquidaciones y pagos que se calculan solos", "Resúmenes listos para imprimir o enviar",
+      "Historial de todo lo que se pagó", "Acceso con contraseña y datos guardados en la nube"]),
 ]
 
 
@@ -746,7 +746,7 @@ def pagina_diseno():
     sq = "(min-width: 900px) 25vw, 50vw"
     secciones = [
         area("web", 1, "Diseño web",
-             "Diseño y programo sitios que trabajan para el negocio: rápidos, claros y pensados para el celular. La web de Villguz Refrigeración es el último: el cliente encuentra su equipo, entiende qué le pasa y pide turno por WhatsApp en un minuto.",
+             "Webs que trabajan para tu negocio: transmiten confianza, se ven perfectas en cualquier pantalla y convierten visitas en clientes. Como la de Villguz Refrigeración, donde el cliente encuentra lo que necesita y pide turno en un minuto.",
              f"""{vitrina_villguz()}
   {logros()}
   {secciones_villguz()}
@@ -755,7 +755,7 @@ def pagina_diseno():
     <a class="btn btn--secundario" href="{VG_URL}" target="_blank" rel="noopener">Ver la web en vivo {flecha("ph-arrow-up-right")}</a>
   </div>""", ("Ver el caso completo", "/proyectos/villguz-web.html")),
         area("sistemas", 2, "Sistemas internos",
-             "Herramientas web a medida para ordenar el día a día: un sistema de turnos para el equipo de atención y un panel de liquidaciones. Funcionan en la compu y en el celular, con contraseña y datos en Google Drive. Las capturas se muestran sin datos de clientes.",
+             "Herramientas a medida para ordenar el día a día de tu negocio: menos planillas sueltas, menos errores y todo el equipo con la misma información, desde la compu o el celular.",
              sistemas_villguz(), ("Pedime una demo", "#contacto")),
         area("rebranding", 3, "Rebranding",
              "Rediseño integral de Villguz Refrigeración: nueva marca, uniformes, papelería y merchandising para que un servicio técnico se vea tan confiable como las marcas que representa.",
