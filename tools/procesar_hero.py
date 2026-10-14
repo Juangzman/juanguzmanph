@@ -8,14 +8,7 @@ ANCHOS = (960, 1600, 2560)
 os.makedirs(f"{REPO}/img/h", exist_ok=True)
 data = []
 for i, it in enumerate(FOTOS["inicio"], 1):
-    if it[0] == "@cr2":
-        _, cr2, prev = it
-        giro = Image.open(cr2).getexif().get(274, 1)
-        im = abrir(prev)
-        im = im.transpose({3: Image.ROTATE_180, 6: Image.ROTATE_270, 8: Image.ROTATE_90}[giro]) if giro in (3, 6, 8) else im
-    else:
-        im = abrir(it[1])
-    im = im.convert("RGB")
+    im = abrir(it[1]).convert("RGB")
     slug = f"inicio-{i:02d}"
     hechos = []
     for w in ANCHOS:

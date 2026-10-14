@@ -2,12 +2,13 @@
 import json, os, sys
 from PIL import Image, ImageOps, ImageCms
 Image.MAX_IMAGE_PIXELS = None
-SRC = "/mnt/user-data/uploads/Cloude Juan Guzman Web"
+# Carpeta del SSD con todo el material. En la Mac suele ser /Volumes/<nombre del SSD>/Cloude Juan Guzman Web
+# Se puede cambiar sin tocar el código:  FOTOS_SSD="/Volumes/MiSSD/Cloude Juan Guzman Web" python3 tools/procesar.py
+SRC = os.environ.get("FOTOS_SSD", "/mnt/user-data/uploads/Cloude Juan Guzman Web")
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 F = SRC + "/Fotos/"
 SUBIR = SRC + "/Fotos para subir/"
-RAW = "/tmp/claude-0/raw/"   # vista previa JPEG extraida de cada .CR2 (sin girar)
 CARPETAS = {"inicio": "Fotos para el incio", "conciertos": "Conciertos", "eventos": "Eventos",
             "gastronomia": "Gastronomia", "moda": "Moda"}
 RETRATOS = "CG1_4569 CG1_4572 CG1_4575 CG1_4578 CG1_4579".split()  # Emma
@@ -17,9 +18,7 @@ def carpeta(nombre, filtro=lambda n: True):
     for f in sorted(os.listdir(SUBIR + nombre)):
         base, ext = os.path.splitext(f)
         if not filtro(base): continue
-        if ext.lower() == ".cr2":
-            out.append(("@cr2", SUBIR + nombre + "/" + f, RAW + nombre + "__" + base + ".jpg"))
-        elif ext.lower() in (".jpg", ".jpeg", ".png"):
+        if ext.lower() in (".jpg", ".jpeg", ".png", ".cr2"):
             out.append(("@", SUBIR + nombre + "/" + f))
     return out
 
@@ -32,7 +31,28 @@ FOTOS["book"] = carpeta("Book", lambda n: n not in RETRATOS)
 FOTOS["retratos"] = carpeta("Book", lambda n: n in RETRATOS)
 srgb = ImageCms.createProfile("sRGB")
 
+def vista_cr2(path):
+    """Los RAW de Canon (.CR2) traen adentro una copia JPEG en tamaño completo.
+    La buscamos (la más grande) y la giramos según la orientación guardada en el RAW."""
+    import io
+    datos = open(path, "rb").read()
+    mejor, pos = None, datos.find(b"\xff\xd8\xff")
+    while pos != -1:
+        try:
+            im = Image.open(io.BytesIO(datos[pos:])); im.load()
+            if not mejor or im.width * im.height > mejor.width * mejor.height:
+                mejor = im
+        except Exception:
+            pass
+        pos = datos.find(b"\xff\xd8\xff", pos + 3)
+    giro = Image.open(path).getexif().get(274, 1)
+    giros = {3: Image.ROTATE_180, 6: Image.ROTATE_270, 8: Image.ROTATE_90}
+    return mejor.transpose(giros[giro]) if giro in giros else mejor
+
+
 def abrir(path):
+    if path.lower().endswith(".cr2"):
+        return vista_cr2(path).convert("RGB")
     im = Image.open(path)
     im = ImageOps.exif_transpose(im)
     if im.mode == "CMYK":
@@ -63,15 +83,9 @@ if __name__ == "__main__":
     for cat, items in FOTOS.items():
         data[cat] = []
         for i, it in enumerate(items, 1):
-            folder, name = it[0], (it[1:] if it[0] == "@cr2" else it[1])
-            if folder == "@cr2":
-                cr2, prev = name
-                giro = Image.open(cr2).getexif().get(274, 1)
-                im = abrir(prev)
-                im = im.transpose({3: Image.ROTATE_180, 6: Image.ROTATE_270, 8: Image.ROTATE_90}[giro]) if giro in (3, 6, 8) else im
-            else:
-                p = name if folder == "@" else f"{F}{folder}/{name.replace('_(', ' (')}.jpg"
-                im = abrir(p)
+            folder, name = it
+            p = name if folder == "@" else f"{F}{folder}/{name.replace('_(', ' (')}.jpg"
+            im = abrir(p)
             slug = f"{cat}-{i:02d}"
             w, h = guardar(im, f"{REPO}/img/f/{slug}")
             data[cat].append([slug, w, h])
