@@ -39,26 +39,33 @@
   requestAnimationFrame(() => requestAnimationFrame(() => { document.body.classList.add('is-listo'); html.classList.add('listo'); }));
 
   /* ---------- Hero: fotos que se funden ---------- */
+  // Hay dos juegos de fotos: uno para celular (de a una) y otro para pantallas anchas (verticales agrupadas)
   const heroFotos = document.querySelector('[data-hero]');
   if (heroFotos) {
-    const diapos = [...heroFotos.querySelectorAll('.diapo')];
+    const sets = [...heroFotos.querySelectorAll('[data-hero-set]')];
     const cat = document.querySelector('[data-hero-cat]');
     const num = document.querySelector('[data-hero-num]');
+    const total = document.querySelector('[data-hero-total]');
     const barra = document.querySelector('[data-hero-barra]');
     const DUR = 6000;
-    let i = 0, timer = null;
+    let diapos = [], i = 0, timer = null, pedido = 0;
     const correrBarra = () => {
       if (!barra) return;
       barra.classList.remove('corre'); void barra.offsetWidth;
       barra.style.setProperty('--dur', DUR + 'ms'); barra.classList.add('corre');
     };
-    // carga una diapositiva y espera a que la foto este decodificada (asi nunca aparece a medio cargar)
-    const lista = (d) => Promise.all([...d.querySelectorAll('img')].map((im) => {
+    // carga una diapositiva y espera a que sus fotos esten decodificadas (nunca aparecen a medio cargar)
+    const lista = (d) => !d ? Promise.resolve() : Promise.all([...d.querySelectorAll('img')].map((im) => {
       if (im.loading === 'lazy') im.loading = 'eager';
       return (im.complete && im.naturalWidth ? Promise.resolve() : new Promise((ok) => { im.addEventListener('load', ok, { once: true }); im.addEventListener('error', ok, { once: true }); }))
         .then(() => (im.decode ? im.decode().catch(() => {}) : null));
     }));
-    let pedido = 0;
+    const pintar = () => {
+      const d = diapos[i];
+      if (cat) cat.textContent = d.dataset.cat;
+      if (num) num.textContent = String(i + 1).padStart(2, '0');
+      if (total) total.textContent = String(diapos.length).padStart(2, '0');
+    };
     const mostrar = (n) => {
       const destino = (n + diapos.length) % diapos.length;
       const yo = ++pedido;
@@ -66,23 +73,28 @@
         if (yo !== pedido) return;
         diapos[i].classList.remove('activa');
         i = destino;
-        const d = diapos[i];
-        d.classList.add('activa');
-        if (cat) cat.textContent = d.dataset.cat;
-        if (num) num.textContent = String(i + 1).padStart(2, '0');
-        correrBarra();
+        diapos[i].classList.add('activa');
+        pintar(); correrBarra();
         lista(diapos[(i + 1) % diapos.length]); // deja lista la siguiente
       });
     };
-    const iniciar = () => { clearInterval(timer); correrBarra(); timer = setInterval(() => mostrar(i + 1), DUR); };
-    if (diapos.length > 1 && !reduce) {
-      // precarga la segunda foto apenas termina la primera
+    const iniciar = () => { clearInterval(timer); if (reduce || diapos.length < 2) return; correrBarra(); timer = setInterval(() => mostrar(i + 1), DUR); };
+    const elegirSet = () => {
+      const set = sets.find((s) => getComputedStyle(s).display !== 'none') || sets[0];
+      const nuevas = [...set.querySelectorAll('.diapo')];
+      if (nuevas[0] === diapos[0]) return;
+      diapos.forEach((d) => d.classList.remove('activa'));
+      diapos = nuevas; i = 0; pedido++;
+      diapos[0].classList.add('activa');
+      pintar();
       lista(diapos[0]).then(() => lista(diapos[1]));
       iniciar();
-      document.addEventListener('visibilitychange', () => { if (document.hidden) clearInterval(timer); else iniciar(); });
-    }
+    };
+    elegirSet();
+    window.addEventListener('resize', () => { clearTimeout(elegirSet.t); elegirSet.t = setTimeout(elegirSet, 200); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) clearInterval(timer); else iniciar(); });
     // Flechas: pasan la foto y reinician el temporizador
-    const paso = (d) => { mostrar(i + d); if (!reduce) iniciar(); };
+    const paso = (d) => { mostrar(i + d); iniciar(); };
     const prev = document.querySelector('[data-hero-prev]');
     const next = document.querySelector('[data-hero-next]');
     prev && prev.addEventListener('click', () => paso(-1));

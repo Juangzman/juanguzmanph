@@ -144,16 +144,24 @@ html[data-menu-open] { overflow: hidden; }
 .hero { position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: var(--negro); isolation: isolate; }
 .hero__fotos { position: absolute; inset: 0; z-index: -2; }
 .diapo { position: absolute; inset: 0; opacity: 0; transition: opacity 1400ms var(--ease-in-out); }
-.diapo picture { position: absolute; inset: 0; }
-.diapo picture img { width: 100%; height: 100%; object-fit: cover; object-position: var(--foco, 50% 50%); transform: scale(1.035); transition: transform 7000ms linear; backface-visibility: hidden; }
-.diapo.activa { opacity: 1; }
-.diapo.activa picture img { transform: scale(1); }
-.diapo__fondo { display: none; }
-/* Fotos verticales en pantallas anchas: la foto entera, sin recortar ni agrandar, sobre una copia desenfocada */
-@media (min-aspect-ratio: 1 / 1) {
-  .diapo--v .diapo__fondo { display: block; position: absolute; inset: -6%; width: 112%; height: 112%; object-fit: cover; filter: blur(40px) brightness(0.45) saturate(1.15); }
-  .diapo--v picture img { object-fit: contain; object-position: 72% 50%; transform: none; transition: none; }
+.hero__set { position: absolute; inset: 0; }
+.hero__set--ancho { display: none; }
+/* Pantallas anchas: las verticales se agrupan de a 2 o 3, sin espacios vacios */
+@media (min-aspect-ratio: 1 / 1) and (min-width: 700px) {
+  .hero__set--movil { display: none; }
+  .hero__set--ancho { display: block; }
 }
+.diapo { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; }
+.diapo__col { position: relative; overflow: hidden; }
+.diapo picture { position: absolute; inset: 0; }
+.diapo img { width: 100%; height: 100%; object-fit: cover; object-position: var(--foco, 50% 50%); transform: scale(1.035); transition: transform 7000ms linear; backface-visibility: hidden; }
+.diapo.activa { opacity: 1; }
+.diapo.activa img { transform: scale(1); }
+/* las columnas entran escalonadas */
+.diapo__col { opacity: 0; transition: opacity 900ms var(--ease-in-out); }
+.diapo.activa .diapo__col { opacity: 1; }
+.diapo.activa .diapo__col:nth-child(2) { transition-delay: 140ms; }
+.diapo.activa .diapo__col:nth-child(3) { transition-delay: 280ms; }
 .hero__velo { position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: linear-gradient(to bottom, rgba(26, 26, 26, 0.55) 0%, rgba(26, 26, 26, 0) 22%, rgba(26, 26, 26, 0) 50%, rgba(26, 26, 26, 0.88) 100%); }
 .hero__pie { position: absolute; inset: auto 0 0 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding-bottom: calc(env(safe-area-inset-bottom) + clamp(24px, 4vw, 48px)); }

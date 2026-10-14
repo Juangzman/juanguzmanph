@@ -86,14 +86,14 @@ ORDEN_INICIO = list(NOMBRES)
 # Hero: fotos de la carpeta "Fotos para el incio", en el orden en que se muestran
 # (slug, categoria, descripcion)
 HERO = [
-    ("inicio-13", "Conciertos", "Público con las manos en alto frente al escenario, en blanco y negro", "55% 45%"),
+    ("inicio-13", "Conciertos", "Público con las manos en alto frente al escenario, en blanco y negro"),
     ("inicio-04", "Deportes", "Ciclista de mountain bike levantando polvo en una curva"),
-    ("inicio-01", "Moda", "Pareja de novios frente a un castillo", "30% 60%"),
+    ("inicio-01", "Moda", "Pareja de novios frente a un castillo"),
     ("inicio-12", "Conciertos", "Cantante con el público en un recital"),
-    ("inicio-09", "Eventos", "DJ con luces azules en Medusa", "50% 50%"),
-    ("inicio-07", "Gastronomía", "Manos espolvoreando harina sobre un bollo de masa", "62% 55%"),
+    ("inicio-09", "Eventos", "DJ con luces azules en Medusa"),
+    ("inicio-07", "Gastronomía", "Manos espolvoreando harina sobre un bollo de masa"),
     ("inicio-02", "Deportes", "Ciclista bajando entre raíces en el monte"),
-    ("inicio-03", "Moda", "Producción de trajes de baño en grupo", "50% 40%"),
+    ("inicio-03", "Moda", "Producción de trajes de baño en grupo"),
     ("inicio-14", "Conciertos", "Escenario iluminado frente a una multitud"),
     ("inicio-05", "Eventos", "Consola de sonido en primer plano durante un show"),
     ("inicio-10", "Deportes", "Ciclista de mountain bike en un descenso"),
@@ -260,23 +260,48 @@ def img_trabajo(ref, alt, sizes):
 HERO_DIM = {sl: (w, h, nombres, reales) for sl, w, h, nombres, reales in json.loads((RAIZ / "tools" / "hero.json").read_text())}
 
 
-def hero():
-    slides = ""
-    for i, (slug, cat, alt, *foco) in enumerate(HERO):
+# Portada en pantallas anchas: las horizontales solas y las verticales agrupadas de a 2 o 3
+# (categoria, [(slug, foco)], descripcion)
+HERO_ESCRITORIO = [
+    ("Conciertos", [("inicio-13", "55% 45%")], "Público con las manos en alto frente al escenario, en blanco y negro"),
+    ("Deportes", [("inicio-04", "50% 35%"), ("inicio-02", "50% 40%"), ("inicio-10", "50% 40%")], "Tres ciclistas de mountain bike en carrera"),
+    ("Moda", [("inicio-01", "30% 60%")], "Pareja de novios frente a un castillo"),
+    ("Conciertos", [("inicio-14", "50% 40%"), ("inicio-12", "75% 35%"), ("inicio-06", "50% 50%")], "Escenario, cantante y músico en vivo"),
+    ("Eventos", [("inicio-09", "50% 50%")], "DJ con luces azules en Medusa"),
+    ("Deportes", [("inicio-11", "50% 40%"), ("deportes-12", "50% 30%"), ("inicio-08", "50% 40%")], "Ciclistas bajando senderos de tierra"),
+    ("Gastronomía", [("inicio-07", "62% 55%")], "Manos espolvoreando harina sobre un bollo de masa"),
+    ("Eventos", [("eventos-17", "50% 40%"), ("inicio-05", "50% 50%"), ("eventos-23", "50% 35%")], "DJ, consola de sonido y público en una fiesta"),
+    ("Moda", [("inicio-03", "50% 40%")], "Producción de trajes de baño en grupo"),
+]
+
+
+def _hero_img(slug, alt, sizes, carga, foco=None):
+    st = f' style="object-position:{foco}"' if foco else ""
+    if slug in HERO_DIM:
         w, h, nombres, reales = HERO_DIM[slug]
-        vertical = h >= w * 0.95
-        carga = 'fetchpriority="high"' if i == 0 else 'loading="lazy"'
         src = lambda ext: ", ".join(f"/img/h/{slug}-{n}.{ext} {r}w" for n, r in zip(nombres, reales))
+        return (f'<picture><source type="image/webp" srcset="{src("webp")}" sizes="{sizes}">'
+                f'<img src="/img/h/{slug}-1600.jpg" srcset="{src("jpg")}" sizes="{sizes}" width="{w}" height="{h}" {carga} decoding="async" alt="{e(alt)}"{st}></picture>')
+    w, h = DIM[slug]
+    return (f'<picture><source type="image/webp" srcset="/img/f/{slug}-800.webp 800w, /img/f/{slug}-1600.webp 1600w" sizes="{sizes}">'
+            f'<img src="/img/f/{slug}-1600.jpg" srcset="/img/f/{slug}-800.jpg 800w, /img/f/{slug}-1600.jpg 1600w" sizes="{sizes}" width="{w}" height="{h}" {carga} decoding="async" alt="{e(alt)}"{st}></picture>')
+
+
+def hero():
+    movil = ""
+    for i, (slug, cat, alt, *foco) in enumerate(HERO):
+        carga = 'fetchpriority="high"' if i == 0 else 'loading="lazy"'
         f = f' style="--foco:{foco[0]}"' if foco else ""
-        # las verticales en pantallas anchas: foto entera sobre una copia desenfocada (sin recortar ni agrandar)
-        fondo = (f'<img class="diapo__fondo" src="/img/h/{slug}-960.jpg" width="{reales[0]}" height="{round(h * reales[0] / w)}" '
-                 f'{"loading=\"lazy\" " if i else ""}decoding="async" alt="">') if vertical else ""
-        slides += f"""    <div class="diapo{' diapo--v' if vertical else ''}{' activa' if i == 0 else ''}" data-cat="{cat}"{f}>
-      {fondo}<picture>
-        <source type="image/webp" srcset="{src('webp')}" sizes="100vw">
-        <img src="/img/h/{slug}-1600.jpg" srcset="{src('jpg')}" sizes="100vw" width="{w}" height="{h}" {carga} decoding="async" alt="{e(alt)}">
-      </picture>
-    </div>
+        movil += f"""    <div class="diapo{' activa' if i == 0 else ''}" data-cat="{cat}"{f}>{_hero_img(slug, alt, "100vw", carga)}</div>\n"""
+    ancho = ""
+    for i, (cat, fotos, alt) in enumerate(HERO_ESCRITORIO):
+        carga = 'fetchpriority="high"' if i == 0 else 'loading="lazy"'
+        n = len(fotos)
+        cols = "".join(f'<div class="diapo__col">{_hero_img(sl, alt if j == 0 else "", "100vw" if n == 1 else f"{100 // n}vw", carga, fo)}</div>'
+                       for j, (sl, fo) in enumerate(fotos))
+        ancho += f"""    <div class="diapo diapo--x{n}{' activa' if i == 0 else ''}" data-cat="{cat}">{cols}</div>\n"""
+    slides = f"""  <div class="hero__set hero__set--movil" data-hero-set>\n{movil}  </div>
+  <div class="hero__set hero__set--ancho" data-hero-set>\n{ancho}  </div>
 """
     return f"""<section class="hero" aria-labelledby="t-hero">
   <div class="hero__fotos" data-hero>
@@ -290,7 +315,7 @@ def hero():
     <div class="hero__estado" data-r style="--d:3">
       <span class="hero__cat" data-hero-cat aria-hidden="true">{HERO[0][1]}</span>
       <button class="hero__flecha" type="button" data-hero-prev aria-label="Foto anterior">{flecha("ph-arrow-left")}</button>
-      <span class="hero__num" aria-live="polite"><span data-hero-num>01</span> / {len(HERO):02d}</span>
+      <span class="hero__num" aria-live="polite"><span data-hero-num>01</span> / <span data-hero-total>{len(HERO):02d}</span></span>
       <button class="hero__flecha" type="button" data-hero-next aria-label="Foto siguiente">{flecha()}</button>
       <span class="hero__barra" aria-hidden="true"><span data-hero-barra></span></span>
     </div>
