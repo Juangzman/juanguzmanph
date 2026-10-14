@@ -114,5 +114,53 @@
  "fiat-titano": [
   1080,
   1920
+ ],
+ "suna-logo": [
+  600,
+  600
+ ],
+ "suna-logo-negro": [
+  600,
+  600
+ ],
+ "suna-iso": [
+  600,
+  601
+ ],
+ "suna-iso-negro": [
+  600,
+  601
+ ],
+ "vg-logo-claro": [
+  600,
+  600
+ ],
+ "vg-logo-azul": [
+  601,
+  600
+ ],
+ "vg-iso-verde": [
+  601,
+  601
+ ],
+ "vg-iso-negro": [
+  600,
+  601
+ ],
+ "vg-placa-venta": [
+  1200,
+  1200
+ ],
+ "vg-placa-hotsale": [
+  1200,
+  1200
+ ],
+ "vg-web-marcas": [
+  1600,
+  750
+ ],
+ "vg-web-contacto": [
+  1600,
+  750
  ]
 }

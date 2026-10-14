@@ -72,6 +72,22 @@
       iniciar();
       document.addEventListener('visibilitychange', () => { if (document.hidden) clearInterval(timer); else iniciar(); });
     }
+    // Flechas: pasan la foto y reinician el temporizador
+    const paso = (d) => { mostrar(i + d); if (!reduce) iniciar(); };
+    const prev = document.querySelector('[data-hero-prev]');
+    const next = document.querySelector('[data-hero-next]');
+    prev && prev.addEventListener('click', () => paso(-1));
+    next && next.addEventListener('click', () => paso(1));
+    // Deslizar con el dedo sobre la foto (celular)
+    const hero = heroFotos.closest('.hero');
+    let x0 = null, y0 = 0;
+    hero.addEventListener('touchstart', (e) => { if (e.target.closest('a, button')) return; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    hero.addEventListener('touchend', (e) => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) paso(dx < 0 ? 1 : -1);
+    }, { passive: true });
   }
 
   /* ---------- Entradas al hacer scroll ---------- */
@@ -189,6 +205,21 @@
     };
     escena.addEventListener('pointerup', fin);
     escena.addEventListener('pointercancel', fin);
+  }
+
+  /* ---------- Diseño: el indice marca el area que se esta viendo ---------- */
+  const espia = document.querySelector('[data-espia]');
+  if (espia && 'IntersectionObserver' in window) {
+    const links = [...espia.querySelectorAll('a')];
+    const marcar = (id) => links.forEach((a) => {
+      const on = a.getAttribute('href') === '#' + id;
+      a.classList.toggle('activa', on);
+      if (on) { a.setAttribute('aria-current', 'true'); espia.scrollTo({ left: a.offsetLeft - 16, behavior: reduce ? 'auto' : 'smooth' }); }
+      else a.removeAttribute('aria-current');
+    });
+    const so = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) marcar(e.target.id); }),
+      { rootMargin: '-35% 0px -60% 0px' });
+    document.querySelectorAll('.area[id]').forEach((s) => so.observe(s));
   }
 
   /* ---------- Anio en el pie ---------- */
