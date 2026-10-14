@@ -431,6 +431,51 @@ a.chip { display: inline-flex; align-items: center; }
 .sistema h3 { font-size: clamp(34px, 4vw, 48px); }
 img.arriba { object-position: 50% 0 !important; }
 
+
+/* ---------- Webs: ventana de navegador y celular con la captura adentro ---------- */
+.vitrina { display: grid; gap: 28px; padding-top: clamp(40px, 6vw, 72px); align-items: end; }
+@media (min-width: 900px) { .vitrina { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); gap: 32px; } }
+.navegador { margin: 0; border-radius: 12px; overflow: hidden; background: #111; border: 1px solid var(--linea-2); box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6); }
+.navegador__barra { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; background: #262626; border-bottom: 1px solid var(--linea); }
+.navegador__barra > i { width: 10px; height: 10px; border-radius: 50%; background: #3f3f3f; flex: none; }
+.navegador__url { display: flex; align-items: center; justify-content: center; gap: 6px; flex: 1; max-width: 360px; height: 22px; margin-inline: auto; padding: 0 10px; border-radius: 6px; background: #1a1a1a; font-size: 11.5px; color: var(--gris); white-space: nowrap; overflow: hidden; }
+.navegador__pantalla { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: #f4f7fb; }
+.navegador__pantalla.fija { aspect-ratio: auto; }
+.navegador__pantalla picture, .navegador__pantalla img, .telefono__pantalla picture, .telefono__pantalla img { display: block; width: 100%; height: auto; }
+.telefono { margin: 0; justify-self: center; width: min(100%, 300px); padding: 9px; border-radius: 46px; background: #0c0c0c; border: 1px solid #3a3a3a; box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7), inset 0 0 0 2px #1d1d1d; }
+.telefono__pantalla { position: relative; aspect-ratio: 390 / 844; overflow: hidden; border-radius: 37px; background: #f4f7fb; border-top: 34px solid #0c0c0c; }
+/* barra de estado negra con la isla, como un celular real */
+.telefono::before { content: ""; position: absolute; z-index: 2; top: 18px; left: 50%; width: 80px; height: 22px; border-radius: 20px; background: #000; box-shadow: 0 0 0 1px #262626; transform: translateX(-50%); }
+.telefono { position: relative; }
+.telefono__pantalla.fija img { height: 100%; object-fit: cover; object-position: top; }
+@media (min-width: 900px) { .vitrina .telefono { width: 100%; max-width: 300px; } }
+/* la pagina completa baja y sube sola mientras esta a la vista; con el mouse encima se frena */
+[data-desliza] img { will-change: transform; }
+[data-desliza].corre img { animation: desliza var(--dur, 60s) var(--ease-in-out) infinite; }
+@keyframes desliza { 0%, 6% { transform: translateY(0); } 46%, 54% { transform: translateY(var(--fin, 0)); } 94%, 100% { transform: translateY(0); } }
+@media (hover: hover) and (pointer: fine) { .navegador:hover [data-desliza] img, .telefono:hover [data-desliza] img { animation-play-state: paused; } }
+.mosaico .navegador { align-self: start; }
+
+/* Lo que hace la web */
+.logros { list-style: none; margin: clamp(48px, 7vw, 88px) 0 0; padding: 0; display: grid; gap: 0 32px; }
+.logros li { display: grid; grid-template-columns: 36px 1fr; gap: 4px 14px; padding: 22px 0; border-top: 1px solid var(--linea); }
+.logros i { grid-row: span 2; font-size: 26px; color: var(--terracota); padding-top: 2px; }
+.logros h3 { font-size: 26px; }
+.logros p { margin: 0; color: var(--texto-2); font-size: 15px; max-width: 46ch; }
+@media (min-width: 700px) { .logros { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1100px) { .logros { grid-template-columns: repeat(3, 1fr); } }
+.acciones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(32px, 5vw, 56px); }
+.portada.portada--web { aspect-ratio: auto; background: none; overflow: visible; margin-inline: 0; }
+.portada--web picture, .portada--web img { height: auto; }
+
+/* Inicio: proyecto destacado de diseño web */
+.destacado { display: grid; gap: 32px; align-items: center; margin-bottom: clamp(56px, 8vw, 104px); padding: clamp(20px, 3vw, 40px); background: var(--carbon-2); border: 1px solid var(--linea); border-radius: 16px; }
+.destacado__texto { display: grid; gap: 16px; align-content: center; }
+.destacado__texto .etiqueta { color: var(--terracota); }
+.destacado__texto h3 { font-size: clamp(36px, 4.4vw, 60px); line-height: 0.95; overflow-wrap: anywhere; }
+.destacado__texto .acciones { margin-top: 8px; }
+@media (min-width: 900px) { .destacado { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 48px; } }
+
 /* ---------- Entradas al hacer scroll ---------- */
 .js [data-r] { opacity: 0; transform: translateY(24px); transition: opacity 800ms var(--ease-out), transform 800ms var(--ease-out); transition-delay: calc(var(--d, 0) * 70ms); }
 .js [data-r].is-in { opacity: 1; transform: none; }
@@ -471,5 +516,6 @@ img.arriba { object-position: 50% 0 !important; }
   *, *::before, *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; transition-delay: 0ms !important; }
   .js [data-r], .js .lineas > span > span { transform: none; }
   .diapo img { transform: none !important; }
+  [data-desliza] { overflow-y: auto; }
   @view-transition { navigation: none; }
 }

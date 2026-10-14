@@ -22,8 +22,6 @@ D = {
  "vg-historia-trabajador": (V+"PublicacionesHISTORIASig/Diadeltrabajador.png", None),
  "vg-historia-corea": (V+"PublicacionesHISTORIASig/HistoriaCorea.png", None),
  "vg-historia-venta": (V+"PublicacionesHISTORIASig/lgt9010.png", None),
- "vg-web-hero": (V+"Web/HERO.jpg", None),
- "vg-web-banner": (V+"Web/banner1.png", None),
  "vg-cartel": (V+"Grafica/Cartel calle-01.jpg", None),
  "vg-flyer-qr": (V+"Grafica/Mesa de trabajo 1.jpg", None),
  "vg-flyer-whatsapp": (V+"Grafica/Mesa de trabajo 2.jpg", None),
@@ -44,8 +42,6 @@ D = {
  # Placas
  "vg-placa-venta": (V+"PublicacionesHISTORIASig/MARKETT9010.png", None),
  "vg-placa-hotsale": (V+"PublicacionesHISTORIASig/hotsaley9010.png", None),
- "vg-web-marcas": (V+"Web/Mesa de trabajo 1.jpg", None),
- "vg-web-contacto": (V+"Web/Mesa de trabajo 2.jpg", None),
 }
 RUTA = f"{REPO}/tools/diseno.json"
 data = json.load(open(RUTA)) if os.path.exists(RUTA) else {}

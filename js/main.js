@@ -243,6 +243,27 @@
     document.querySelectorAll('.area[id]').forEach((s) => so.observe(s));
   }
 
+  /* ---------- Webs: la captura de la pagina completa se recorre sola ---------- */
+  const deslizables = document.querySelectorAll('[data-desliza]');
+  if (deslizables.length && !reduce) {
+    const medir = (fr) => {
+      const img = fr.querySelector('img');
+      const fin = img.offsetHeight - fr.clientHeight;
+      if (fin <= 0) return;
+      fr.style.setProperty('--fin', -fin + 'px');
+      fr.style.setProperty('--dur', Math.max(12, fin / 70).toFixed(1) + 's');
+    };
+    deslizables.forEach((fr) => {
+      const img = fr.querySelector('img');
+      if (img.complete) medir(fr); else img.addEventListener('load', () => medir(fr), { once: true });
+    });
+    window.addEventListener('resize', () => deslizables.forEach(medir));
+    if ('IntersectionObserver' in window) {
+      const dio = new IntersectionObserver((entries) => entries.forEach((e) => e.target.classList.toggle('corre', e.isIntersecting)), { threshold: 0.3 });
+      deslizables.forEach((fr) => dio.observe(fr));
+    }
+  }
+
   /* ---------- Anio en el pie ---------- */
   document.querySelectorAll('[data-anio]').forEach((el) => { el.textContent = new Date().getFullYear(); });
 })();
