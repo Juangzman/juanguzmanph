@@ -4,7 +4,7 @@
   "endpoint": "",
   "nota_endpoint": "URL de la app web de Google Apps Script (termina en /exec). Vacío = el promedio colaborativo queda apagado. Ver tools/TARIFARIO.md.",
   "minimo_aportes": 5,
-  "nota": "Rangos para San Miguel de Tucumán, ajustados al mercado local (los sueldos en Tucumán rondan la mitad que en CABA). El mínimo es para quien recién arranca o trabaja con particulares; el máximo, para profesionales con trayectoria que trabajan con pymes y empresas. Para editar un precio, cambiá min y max acá y corré python3 tools/build.py.",
+  "nota": "Rangos de referencia para San Miguel de Tucumán. El mínimo apunta a emprendedores y particulares; el máximo, a pymes y empresas. Para editar un precio, cambiá min y max acá y corré python3 tools/build.py.",
   "categorias": [
     {
       "id": "fotografia",
@@ -19,8 +19,8 @@
               "nombre": "Sesión de retrato",
               "detalle": "Hasta 2 horas, un lugar, 20 a 30 fotos editadas.",
               "unidad": "sesión",
-              "min": 105000,
-              "max": 190000,
+              "min": 140000,
+              "max": 220000,
               "fuente": "lea"
             },
             {
@@ -28,8 +28,8 @@
               "nombre": "Book profesional",
               "detalle": "Actores, modelos, músicos o marca personal. 3 a 4 horas, cambios de vestuario, 40 a 60 fotos editadas.",
               "unidad": "sesión",
-              "min": 175000,
-              "max": 330000,
+              "min": 230000,
+              "max": 380000,
               "fuente": "lea"
             },
             {
@@ -37,8 +37,8 @@
               "nombre": "Book de 15",
               "detalle": "Exteriores o estudio, 2 a 3 horas, 30 a 50 fotos editadas.",
               "unidad": "sesión",
-              "min": 95000,
-              "max": 200000,
+              "min": 120000,
+              "max": 230000,
               "fuente": "lab"
             },
             {
@@ -46,8 +46,8 @@
               "nombre": "Sesión de pareja o familia",
               "detalle": "Hasta 2 horas en exteriores, 30 fotos editadas.",
               "unidad": "sesión",
-              "min": 95000,
-              "max": 180000,
+              "min": 130000,
+              "max": 210000,
               "fuente": "lea"
             }
           ],
@@ -61,8 +61,8 @@
               "nombre": "Foto de producto",
               "detalle": "Fondo blanco o liso, iluminación de estudio y recorte. Precio por producto (hasta 3 tomas).",
               "unidad": "producto",
-              "min": 21000,
-              "max": 48000,
+              "min": 30000,
+              "max": 60000,
               "fuente": "tar-foto"
             },
             {
@@ -70,8 +70,8 @@
               "nombre": "Pack e-commerce",
               "detalle": "10 productos en fondo blanco, 3 tomas cada uno, listos para tienda online.",
               "unidad": "pack",
-              "min": 160000,
-              "max": 350000,
+              "min": 220000,
+              "max": 420000,
               "fuente": "tar-foto"
             },
             {
@@ -79,8 +79,8 @@
               "nombre": "Producto ambientado",
               "detalle": "Escena armada con props para redes o catálogo. Precio por foto final.",
               "unidad": "foto",
-              "min": 32000,
-              "max": 70000,
+              "min": 45000,
+              "max": 85000,
               "fuente": "estimacion"
             },
             {
@@ -88,8 +88,8 @@
               "nombre": "Gastronomía",
               "detalle": "Sesión de menú o carta, hasta 12 platos y tomas del local.",
               "unidad": "sesión",
-              "min": 185000,
-              "max": 385000,
+              "min": 250000,
+              "max": 450000,
               "fuente": "lea"
             }
           ],
@@ -103,8 +103,8 @@
               "nombre": "Retrato corporativo",
               "detalle": "Foto de perfil profesional en la oficina, por persona (mínimo 3).",
               "unidad": "persona",
-              "min": 26000,
-              "max": 55000,
+              "min": 35000,
+              "max": 65000,
               "fuente": "estimacion"
             },
             {
@@ -112,8 +112,8 @@
               "nombre": "Institucional, media jornada",
               "detalle": "Hasta 4 horas: equipo, instalaciones y procesos. 40 a 60 fotos editadas.",
               "unidad": "jornada",
-              "min": 215000,
-              "max": 415000,
+              "min": 280000,
+              "max": 480000,
               "fuente": "lea"
             },
             {
@@ -121,8 +121,8 @@
               "nombre": "Institucional, jornada completa",
               "detalle": "Hasta 8 horas en una o más locaciones. 80 a 120 fotos editadas.",
               "unidad": "jornada",
-              "min": 365000,
-              "max": 650000,
+              "min": 480000,
+              "max": 750000,
               "fuente": "lea"
             }
           ],
@@ -136,8 +136,8 @@
               "nombre": "Cobertura de evento",
               "detalle": "Social o corporativo. Precio por hora, mínimo 2 horas.",
               "unidad": "hora",
-              "min": 45000,
-              "max": 85000,
+              "min": 60000,
+              "max": 100000,
               "fuente": "lab"
             },
             {
@@ -145,8 +145,8 @@
               "nombre": "Fiesta de 15, cobertura básica",
               "detalle": "4 horas de fiesta, entrega digital.",
               "unidad": "evento",
-              "min": 180000,
-              "max": 335000,
+              "min": 210000,
+              "max": 370000,
               "fuente": "lab"
             },
             {
@@ -154,8 +154,8 @@
               "nombre": "Show o recital",
               "detalle": "Cobertura completa de una banda o artista, 30 fotos editadas.",
               "unidad": "show",
-              "min": 85000,
-              "max": 190000,
+              "min": 120000,
+              "max": 230000,
               "fuente": "estimacion"
             }
           ],
@@ -169,8 +169,8 @@
               "nombre": "Retoque básico",
               "detalle": "Piel y limpieza general. Unos 15 minutos por foto.",
               "unidad": "foto",
-              "min": 9000,
-              "max": 18000,
+              "min": 13000,
+              "max": 20000,
               "fuente": "lea"
             },
             {
@@ -178,8 +178,8 @@
               "nombre": "Retoque avanzado",
               "detalle": "Fotomontaje, cambio de fondo o retoque de alta gama. Una hora por foto.",
               "unidad": "foto",
-              "min": 38000,
-              "max": 70000,
+              "min": 55000,
+              "max": 80000,
               "fuente": "lea"
             },
             {
@@ -187,8 +187,8 @@
               "nombre": "Reel",
               "detalle": "Video vertical de 30 a 60 segundos: filmación y edición.",
               "unidad": "reel",
-              "min": 90000,
-              "max": 220000,
+              "min": 120000,
+              "max": 260000,
               "fuente": "estimacion"
             }
           ],
@@ -211,8 +211,8 @@
               "nombre": "Logo",
               "detalle": "Logotipo o isologo con 3 propuestas, versiones en color, negativo y monocromo.",
               "unidad": "proyecto",
-              "min": 130000,
-              "max": 260000,
+              "min": 180000,
+              "max": 300000,
               "fuente": "tar-dis"
             },
             {
@@ -220,8 +220,8 @@
               "nombre": "Manual de marca",
               "detalle": "Para un logo que ya existe: construcción, colores, tipografías, usos correctos e incorrectos.",
               "unidad": "proyecto",
-              "min": 145000,
-              "max": 310000,
+              "min": 200000,
+              "max": 370000,
               "fuente": "ardg"
             },
             {
@@ -229,8 +229,8 @@
               "nombre": "Logo + manual básico",
               "detalle": "Logo nuevo con manual normativo: versiones, paleta, tipografías y usos.",
               "unidad": "proyecto",
-              "min": 225000,
-              "max": 415000,
+              "min": 300000,
+              "max": 480000,
               "fuente": "tar-dis"
             },
             {
@@ -238,8 +238,8 @@
               "nombre": "Identidad completa",
               "detalle": "Logo, manual completo y 5 aplicaciones (papelería, redes, uniforme o cartelería).",
               "unidad": "proyecto",
-              "min": 350000,
-              "max": 700000,
+              "min": 450000,
+              "max": 800000,
               "fuente": "tar-dis"
             },
             {
@@ -247,8 +247,8 @@
               "nombre": "Rediseño de marca",
               "detalle": "Actualización de una identidad existente con su manual.",
               "unidad": "proyecto",
-              "min": 290000,
-              "max": 675000,
+              "min": 380000,
+              "max": 800000,
               "fuente": "tar-dis"
             },
             {
@@ -256,8 +256,8 @@
               "nombre": "Pack de 5 aplicaciones",
               "detalle": "Sobre una marca existente: tarjetas, hoja membretada, firma de mail, perfil de redes, etc.",
               "unidad": "pack",
-              "min": 75000,
-              "max": 135000,
+              "min": 100000,
+              "max": 150000,
               "fuente": "tar-dis"
             },
             {
@@ -265,8 +265,8 @@
               "nombre": "Vectorizar un logo",
               "detalle": "Redibujar un logo a partir de una foto o un archivo de baja calidad.",
               "unidad": "logo",
-              "min": 12000,
-              "max": 30000,
+              "min": 15000,
+              "max": 35000,
               "fuente": "tar-dis"
             }
           ],
@@ -280,8 +280,8 @@
               "nombre": "Placa para redes",
               "detalle": "Pieza de venta o institucional, en formato post e historia.",
               "unidad": "pieza",
-              "min": 15000,
-              "max": 35000,
+              "min": 22000,
+              "max": 45000,
               "fuente": "estimacion"
             },
             {
@@ -289,8 +289,8 @@
               "nombre": "Sistema de plantillas",
               "detalle": "Plantillas editables para posts, carruseles e historias con la identidad de la marca.",
               "unidad": "sistema",
-              "min": 115000,
-              "max": 250000,
+              "min": 160000,
+              "max": 300000,
               "fuente": "estimacion"
             },
             {
@@ -298,8 +298,8 @@
               "nombre": "Folleto díptico",
               "detalle": "Diseño listo para imprenta.",
               "unidad": "pieza",
-              "min": 70000,
-              "max": 150000,
+              "min": 96000,
+              "max": 185000,
               "fuente": "tar-dis"
             },
             {
@@ -307,8 +307,8 @@
               "nombre": "Carta o menú",
               "detalle": "Hasta 6 páginas, impresa o digital con QR.",
               "unidad": "pieza",
-              "min": 180000,
-              "max": 410000,
+              "min": 260000,
+              "max": 520000,
               "fuente": "tar-org"
             },
             {
@@ -316,8 +316,8 @@
               "nombre": "Logo animado",
               "detalle": "Animación del logo en After Effects para videos y redes, hasta 5 segundos.",
               "unidad": "animación",
-              "min": 85000,
-              "max": 205000,
+              "min": 120000,
+              "max": 250000,
               "fuente": "estimacion"
             }
           ],
@@ -340,8 +340,8 @@
               "nombre": "Landing",
               "detalle": "Una página con secciones: presentación, servicios, galería y contacto.",
               "unidad": "proyecto",
-              "min": 200000,
-              "max": 400000,
+              "min": 250000,
+              "max": 450000,
               "fuente": "sodi"
             },
             {
@@ -349,8 +349,8 @@
               "nombre": "Landing con turnos",
               "detalle": "Landing con formulario para pedir turno que llega ordenado a tu WhatsApp.",
               "unidad": "proyecto",
-              "min": 300000,
-              "max": 565000,
+              "min": 380000,
+              "max": 650000,
               "fuente": "estimacion"
             },
             {
@@ -358,8 +358,8 @@
               "nombre": "Web institucional",
               "detalle": "Varias secciones o páginas, como la de Villguz: servicios, marcas, consejos, turnos y contacto.",
               "unidad": "proyecto",
-              "min": 400000,
-              "max": 800000,
+              "min": 500000,
+              "max": 900000,
               "fuente": "lafuerza"
             },
             {
@@ -367,8 +367,8 @@
               "nombre": "Sistema interno simple",
               "detalle": "Herramienta privada a medida: agenda de turnos, liquidaciones o control de pagos.",
               "unidad": "proyecto",
-              "min": 375000,
-              "max": 900000,
+              "min": 450000,
+              "max": 1000000,
               "fuente": "estimacion"
             }
           ],
@@ -382,8 +382,8 @@
               "nombre": "Sección o página extra",
               "detalle": "Una sección más sobre una web en marcha.",
               "unidad": "sección",
-              "min": 38000,
-              "max": 70000,
+              "min": 50000,
+              "max": 80000,
               "fuente": "estimacion"
             },
             {
@@ -391,8 +391,8 @@
               "nombre": "Puesta online",
               "detalle": "Conexión del dominio, certificado de seguridad y alta en Google.",
               "unidad": "única vez",
-              "min": 22000,
-              "max": 42000,
+              "min": 30000,
+              "max": 50000,
               "fuente": "estimacion"
             },
             {
@@ -400,8 +400,8 @@
               "nombre": "Mantenimiento",
               "detalle": "Cambios de textos y fotos, copias de seguridad y control de que todo funcione.",
               "unidad": "mes",
-              "min": 12000,
-              "max": 35000,
+              "min": 15000,
+              "max": 40000,
               "fuente": "faro"
             }
           ],
@@ -515,14 +515,6 @@
     "estimacion": {
       "nombre": "Estimación propia sobre valor hora de referencia",
       "url": ""
-    },
-    "sueldos": {
-      "nombre": "El Ancasti, sueldos promedio por provincia",
-      "url": "https://www.elancasti.com.ar/politica-y-economia/en-que-provincias-se-gana-mas-y-donde-menos-analisis-los-sueldos-promedio-argentina-n599464"
-    },
-    "mywed": {
-      "nombre": "MyWed, fotógrafos de San Miguel de Tucumán",
-      "url": "https://mywed.com/es/Argentina/San-Miguel-de-Tucuman-wedding-photographers/"
     }
   },
   "aviso": "Los precios son orientativos: se basan en tarifarios y referencias publicadas en internet. El precio final lo ponés vos, según tu trabajo, tu experiencia y tu trayectoria."
