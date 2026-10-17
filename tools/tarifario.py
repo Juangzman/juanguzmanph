@@ -57,43 +57,70 @@ def referencias(b):
 
 
 def herramienta(b):
-    """Catalogo de tarjetas a la izquierda y la hoja del presupuesto, en vivo, a la derecha."""
+    """Lista de servicios con su escala de precios a la izquierda; la hoja del presupuesto, en vivo, a la derecha."""
     e = b.e
     por_id = _items_por_id()
-    tabs, paneles = "", ""
-    secciones = [(c["id"], c["titulo"]) for c in DATOS["categorias"]] + [("combos", "Combos")]
-    for i, (k, t) in enumerate(secciones):
-        tabs += (f'<button class="tf-tab" type="button" role="tab" id="tab-{k}" aria-controls="panel-{k}" '
-                 f'aria-selected="{"true" if i == 0 else "false"}" data-tab="{k}">{e(t)}</button>')
-    for i, c in enumerate(DATOS["categorias"]):
-        grupos = ""
+    k_fmt = lambda n: f"${n // 1000:,}k".replace(",", ".") if n < 1000000 else f"${n / 1000000:.2f}".rstrip("0").rstrip(".").replace(".", ",") + "M"
+
+    def fila(attrs, nombre, det, mn, mx, unidad, buscar, extra=""):
+        medio = round((mn + mx) / 2 / 1000) * 1000
+        return f"""
+      <li class="tf-fila" {attrs} data-buscar="{e(buscar.lower())}">
+        <button class="tf-fila__btn" type="button" aria-pressed="false">
+          <span class="tf-fila__txt"><span class="tf-fila__nombre">{nombre}</span><span class="tf-fila__det">{e(det)}</span></span>
+          <span class="tf-fila__escala" aria-hidden="true"><span class="tf-escala"><i></i></span><span class="tf-escala__ext"><span>{k_fmt(mn)}</span><span>{k_fmt(mx)}</span></span></span>
+          <span class="tf-fila__precio"><strong data-sug>{pesos(medio)}</strong><small>{e(unidad)}</small></span>
+          <span class="tf-fila__mas" aria-hidden="true"><i class="ph-light ph-plus"></i></span>
+        </button>
+      </li>"""
+
+    bloques, chips = "", ['<button class="chip activa" type="button" data-filtro="todo" aria-pressed="true">Todo</button>']
+    for n, c in enumerate(DATOS["categorias"], 1):
+        cant = sum(len(g["items"]) for g in c["grupos"])
+        chips.append(f'<button class="chip" type="button" data-filtro="{c["id"]}" aria-pressed="false">{e(c["titulo"])} <sup>{cant}</sup></button>')
+        filas = ""
         for g in c["grupos"]:
-            cards = "".join(f"""
-        <button class="tf-card" type="button" data-add="{it['id']}" aria-pressed="false">
-          <span class="tf-card__nombre">{e(it['nombre'])}</span>
-          <span class="tf-card__det">{e(it['detalle'])}</span>
-          <span class="tf-card__precio">{pesos(it['min'])} – {pesos(it['max'])} <small>/ {e(it['unidad'])}</small></span>
-          <span class="tf-card__icono" aria-hidden="true"><i class="ph-light ph-plus"></i></span>
-        </button>""" for it in g["items"])
-            grupos += f'<h3 class="tf-grupo">{e(g["titulo"])}</h3><div class="tf-cards">{cards}</div>'
-        paneles += f'<div class="tf-panel" id="panel-{c["id"]}" role="tabpanel" aria-labelledby="tab-{c["id"]}" data-panel="{c["id"]}"{"" if i == 0 else " hidden"}>{grupos}</div>'
-    combos = ""
+            filas += f'<li class="tf-fila-grupo" data-grupo-de="{c["id"]}">{e(g["titulo"])}</li>'
+            filas += "".join(fila(f'data-add="{it["id"]}" data-min="{it["min"]}" data-max="{it["max"]}"', e(it["nombre"]), it["detalle"],
+                                  it["min"], it["max"], f'/ {it["unidad"]}', f'{it["nombre"]} {it["detalle"]} {g["titulo"]} {c["titulo"]}')
+                             for it in g["items"])
+        bloques += f"""
+    <section class="tf-rubro" data-rubro="{c["id"]}" aria-labelledby="r-{c["id"]}">
+      <h2 class="tf-rubro__titulo" id="r-{c["id"]}"><span class="etiqueta">{n:02d}</span>{e(c["titulo"])}</h2>
+      <ul class="tf-filas">{filas}
+      </ul>
+    </section>"""
+    filas = ""
     for co in DATOS["combos"]:
         its = [por_id[x] for x in co["items"]]
         f = 1 - co["descuento"] / 100
-        combos += f"""
-        <button class="tf-card tf-card--combo" type="button" data-combo="{co['id']}" aria-pressed="false">
-          <span class="tf-card__nombre">{e(co['nombre'])} <em>−{co['descuento']}%</em></span>
-          <span class="tf-card__det">{e(" + ".join(x["nombre"] for x in its))}</span>
-          <span class="tf-card__precio">desde {pesos(int(round(sum(x["min"] for x in its) * f, -3)))}</span>
-          <span class="tf-card__icono" aria-hidden="true"><i class="ph-light ph-plus"></i></span>
-        </button>"""
-    paneles += f'<div class="tf-panel" id="panel-combos" role="tabpanel" aria-labelledby="tab-combos" data-panel="combos" hidden><h3 class="tf-grupo">Servicios juntos, con descuento</h3><div class="tf-cards">{combos}</div></div>'
+        mn, mx = int(round(sum(x["min"] for x in its) * f, -3)), int(round(sum(x["max"] for x in its) * f, -3))
+        filas += fila(f'data-combo="{co["id"]}" data-min="{mn}" data-max="{mx}"', f'{e(co["nombre"])} <em>−{co["descuento"]}%</em>',
+                      " + ".join(x["nombre"] for x in its), mn, mx, "combo", f'{co["nombre"]} combo {" ".join(x["nombre"] for x in its)}')
+    n = len(DATOS["categorias"]) + 1
+    chips.append(f'<button class="chip" type="button" data-filtro="combos" aria-pressed="false">Combos <sup>{len(DATOS["combos"])}</sup></button>')
+    bloques += f"""
+    <section class="tf-rubro" data-rubro="combos" aria-labelledby="r-combos">
+      <h2 class="tf-rubro__titulo" id="r-combos"><span class="etiqueta">{n:02d}</span>Combos</h2>
+      <ul class="tf-filas">{filas}
+      </ul>
+    </section>"""
+    seg = lambda nombre, ops, sel: (f'<div class="tf-seg" role="radiogroup" aria-label="{nombre}" data-seg="{nombre.lower()}">'
+                                     + "".join(f'<button type="button" role="radio" aria-checked="{"true" if v == sel else "false"}" data-v="{v}">{t}</button>' for v, t in ops)
+                                     + '<span class="tf-seg__marca" aria-hidden="true"></span></div>')
     return f"""<section class="tf-app" id="cotizar" aria-label="Cotizador">
   <div class="tf-cat">
-    <div class="tf-tabs" role="tablist" aria-label="Rubros">{tabs}</div>
-    <p class="tf-ayuda meta">Tocá un servicio para sumarlo. El precio lo ajustás en el presupuesto.</p>
-    {paneles}
+    <div class="tf-control">
+      <label class="tf-buscar"><i class="ph-light ph-magnifying-glass" aria-hidden="true"></i><span class="sr-only">Buscar un servicio</span><input type="search" placeholder="Buscar: logo, book, landing…" data-buscar autocomplete="off"><kbd aria-hidden="true">/</kbd></label>
+      <div class="tf-control__fila">
+        <div class="tf-control__grupo"><span class="tf-control__etq">Cliente</span>{seg("Cliente", [("particular", "Particular"), ("pyme", "Pyme"), ("empresa", "Empresa")], "pyme")}</div>
+        <div class="tf-control__grupo"><span class="tf-control__etq">Tu experiencia</span>{seg("Experiencia", [("inicial", "Inicial"), ("media", "Media"), ("senior", "Senior")], "media")}</div>
+      </div>
+      <div class="tf-chips">{"".join(chips)}</div>
+    </div>
+    <div class="tf-lista" data-lista>{bloques}
+      <p class="tf-sin-resultados" data-sin-resultados hidden>No encontré ese servicio. Probá con otra palabra.</p>
+    </div>
   </div>
   <div class="tf-lado" data-lado>
     <div class="tf-lado__cab"><strong>Tu presupuesto</strong><button class="tf-icono" type="button" data-cerrar-lado aria-label="Cerrar"><i class="ph-light ph-x" aria-hidden="true"></i></button></div>
@@ -131,6 +158,8 @@ def herramienta(b):
       <label class="tf-campo"><span>Email</span><input type="text" inputmode="email" name="perfil_email" autocomplete="off"></label>
       <label class="tf-campo"><span>Instagram o web</span><input type="text" name="perfil_web" autocomplete="off"></label>
       <label class="tf-campo"><span>Ciudad</span><input type="text" name="perfil_ciudad" autocomplete="off"></label>
+      <label class="tf-campo"><span>CUIT (opcional)</span><input type="text" inputmode="numeric" name="perfil_cuit" autocomplete="off"></label>
+      <label class="tf-campo tf-campo--color"><span>Color del PDF</span><span class="tf-color"><input type="color" name="perfil_color" value="#c27a62"><span class="meta" data-color-txt>Se toma de tu logo</span></span></label>
     </div>
     <h3 class="tf-grupo">Este presupuesto</h3>
     <div class="tf-campos tf-campos--3">
@@ -141,6 +170,7 @@ def herramienta(b):
       <label class="tf-campo"><span>Validez (días)</span><input type="text" inputmode="numeric" name="validez" placeholder="15"></label>
       <label class="tf-campo"><span>Contacto del cliente</span><input type="text" name="cliente_contacto" autocomplete="off"></label>
     </div>
+    <label class="tf-check"><input type="checkbox" name="iva"><span>Sumar IVA 21% al total</span></label>
     <label class="tf-campo"><span>Condiciones</span><textarea name="notas" rows="4"></textarea></label>
     <label class="tf-aporte" data-aporte hidden><input type="checkbox" data-aportar><span>Sumar mis precios al promedio de Tucumán. Es anónimo: solo se envía el servicio y el precio.</span></label>
     <button class="btn btn--primario tf-dialogo__listo" value="listo">Listo</button>
@@ -217,7 +247,7 @@ def pagina_tarifario(b):
 <main id="contenido" class="tf" data-tarifario>
 <div class="wrap pag-cab tf-cab">
   <h1 class="lineas" style="font-size:clamp(64px,11vw,148px)"><span><span style="--i:0">Tarifario</span></span></h1>
-  <p class="lead" data-r style="--d:2">Elegí los servicios, ajustá tus precios y descargá el presupuesto en PDF. Con precios de referencia para Tucumán.</p>
+  <p class="lead" data-r style="--d:2">Elegí para quién es y tu experiencia: los precios de referencia se acomodan solos. Sumá servicios, ajustá lo que quieras y descargá el PDF con tu marca.</p>
   <div class="tf-estado" data-r style="--d:3">
     <span class="etiqueta">Actualizado · {b.e(DATOS['actualizado'])}</span>
     <span class="etiqueta" data-com-estado hidden></span>

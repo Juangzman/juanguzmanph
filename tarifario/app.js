@@ -75,8 +75,10 @@
     const a = p.ajustes;
     const dPct = decimal(a.descuento), uPct = decimal(a.urgencia), sPct = a.sena === '' ? 50 : decimal(a.sena);
     const desc = neto * dPct / 100, urg = neto * uPct / 100, viat = entero(a.viaticos);
-    const total = Math.max(0, neto - desc + urg + viat);
-    return { bruto, ahorro, neto, dPct, desc, uPct, urg, viat, total, sPct, sena: total * sPct / 100, validez: entero(a.validez) || 15 };
+    const antes = Math.max(0, neto - desc + urg + viat);
+    const iva = a.iva ? antes * 0.21 : 0;
+    const total = antes + iva;
+    return { bruto, ahorro, neto, dPct, desc, uPct, urg, viat, antes, iva, total, sPct, sena: total * sPct / 100, validez: entero(a.validez) || 15 };
   };
   const subtotalLinea = (l) => {
     if (l.tipo !== 'combo') return l.precio * l.cant;
@@ -85,44 +87,126 @@
   };
 
   /* =========================================================
-     Catalogo: pestañas y tarjetas
+     Catalogo: cliente + experiencia acomodan los precios sugeridos
      ========================================================= */
-  const tabs = $$('[data-tab]', raiz);
-  const paneles = $$('[data-panel]', raiz);
-  const elegirTab = (k, foco = false) => {
-    tabs.forEach((t) => { const on = t.dataset.tab === k; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; if (on && foco) t.focus(); });
-    paneles.forEach((p) => { p.hidden = p.dataset.panel !== k; });
-  };
-  tabs.forEach((t, i) => {
-    t.tabIndex = i === 0 ? 0 : -1;
-    t.addEventListener('click', () => elegirTab(t.dataset.tab));
-    t.addEventListener('keydown', (ev) => {
-      const d = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
-      if (d) { ev.preventDefault(); elegirTab(tabs[(i + d + tabs.length) % tabs.length].dataset.tab, true); }
+  // Donde cae el precio dentro del rango de referencia (0 = minimo, 1 = maximo)
+  const BASE = { particular: 0.15, pyme: 0.5, empresa: 0.85 };
+  const AJUSTE = { inicial: -0.15, media: 0, senior: 0.15 };
+  let nivel = Object.assign({ cliente: 'pyme', experiencia: 'media' }, guardado.get('tf-nivel', {}));
+  const posicion = () => Math.min(1, Math.max(0, BASE[nivel.cliente] + AJUSTE[nivel.experiencia]));
+  const sugerido = (mn, mx) => Math.round((mn + (mx - mn) * posicion()) / 1000) * 1000;
+  const sugeridoItem = (it) => sugerido(it.min, it.max);
+
+  const filas = $$('.tf-fila', raiz);
+  const pintarFilas = () => {
+    const pos = (posicion() * 100).toFixed(1) + '%';
+    filas.forEach((f) => {
+      f.style.setProperty('--p', pos);
+      const propio = f.dataset.add && precios[f.dataset.add];
+      $('[data-sug]', f).textContent = fmt(propio || sugerido(Number(f.dataset.min), Number(f.dataset.max)));
+      f.classList.toggle('propio', !!propio);
     });
+  };
+  // segmentados (Cliente / Tu experiencia)
+  $$('[data-seg]', raiz).forEach((seg) => {
+    const clave = seg.dataset.seg === 'cliente' ? 'cliente' : 'experiencia';
+    const botones = $$('button', seg);
+    const marcar = () => {
+      botones.forEach((b, i) => {
+        const on = b.dataset.v === nivel[clave];
+        b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1;
+        if (on) seg.style.setProperty('--i', i);
+      });
+    };
+    botones.forEach((b, i) => {
+      b.addEventListener('click', () => cambiarNivel(clave, b.dataset.v));
+      b.addEventListener('keydown', (ev) => {
+        const d = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const sig = botones[(i + d + botones.length) % botones.length];
+        cambiarNivel(clave, sig.dataset.v); sig.focus();
+      });
+    });
+    seg.marcar = marcar;
+    marcar();
+  });
+  function cambiarNivel(clave, v) {
+    nivel[clave] = v;
+    guardado.set('tf-nivel', nivel);
+    $$('[data-seg]', raiz).forEach((s) => s.marcar());
+    // los precios que siguen siendo de referencia se reacomodan
+    actual.lineas.forEach((l) => {
+      if (l.tipo === 'combo') l.items.forEach((x) => { if (x.ref) x.precio = sugeridoItem(ITEMS[x.id]); });
+      else if (l.ref) l.precio = sugeridoItem(ITEMS[l.id]);
+    });
+    persistir();
+    pintarFilas();
+    pintarPapel();
+  }
+
+  // filtro por rubro y buscador
+  const rubros = $$('[data-rubro]', raiz);
+  const chipsF = $$('[data-filtro]', raiz);
+  const buscador = $('[data-buscar]', raiz);
+  const sinRes = $('[data-sin-resultados]', raiz);
+  let filtro = 'todo';
+  const norm = (t) => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  function filtrar() {
+    const q = norm(buscador.value.trim());
+    const palabras = q.split(/\s+/).filter(Boolean);
+    let visibles = 0;
+    rubros.forEach((r) => {
+      let enRubro = 0;
+      $$('.tf-fila', r).forEach((f) => {
+        const ok = (filtro === 'todo' || filtro === r.dataset.rubro || q) && palabras.every((w) => norm(f.dataset.buscar).includes(w));
+        f.hidden = !ok; if (ok) enRubro++;
+      });
+      // los subtitulos de grupo se esconden si su grupo queda vacio
+      $$('.tf-fila-grupo', r).forEach((g) => {
+        let n = g.nextElementSibling, alguno = false;
+        while (n && !n.classList.contains('tf-fila-grupo')) { if (!n.hidden) alguno = true; n = n.nextElementSibling; }
+        g.hidden = !alguno || !!q;
+      });
+      r.hidden = enRubro === 0;
+      visibles += enRubro;
+    });
+    sinRes.hidden = visibles > 0;
+  }
+  chipsF.forEach((c) => c.addEventListener('click', () => {
+    filtro = c.dataset.filtro;
+    chipsF.forEach((x) => { const on = x === c; x.classList.toggle('activa', on); x.setAttribute('aria-pressed', String(on)); });
+    if (buscador.value) buscador.value = '';
+    filtrar();
+    const lista = $('[data-lista]', raiz);
+    if (lista.getBoundingClientRect().top < 0) lista.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+  }));
+  buscador.addEventListener('input', filtrar);
+  buscador.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { buscador.value = ''; filtrar(); buscador.blur(); } });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === '/' && !ev.target.closest('input, textarea, [contenteditable]') && !document.querySelector('dialog[open]')) { ev.preventDefault(); buscador.focus(); }
   });
 
-  const cards = $$('[data-add], [data-combo]', raiz);
-  const enPresu = (b) => (b.dataset.add
-    ? actual.lineas.some((l) => l.tipo !== 'combo' && l.id === b.dataset.add)
-    : actual.lineas.some((l) => l.tipo === 'combo' && l.id === b.dataset.combo));
-  const pintarCards = () => cards.forEach((b) => {
-    const on = enPresu(b);
-    b.setAttribute('aria-pressed', String(on));
-    $('.tf-card__icono i', b).className = 'ph-light ' + (on ? 'ph-check' : 'ph-plus');
+  const enPresu = (f) => (f.dataset.add
+    ? actual.lineas.some((l) => l.tipo !== 'combo' && l.id === f.dataset.add)
+    : actual.lineas.some((l) => l.tipo === 'combo' && l.id === f.dataset.combo));
+  const pintarCards = () => filas.forEach((f) => {
+    const on = enPresu(f);
+    $('.tf-fila__btn', f).setAttribute('aria-pressed', String(on));
+    $('.tf-fila__mas i', f).className = 'ph-light ' + (on ? 'ph-check' : 'ph-plus');
   });
   let resaltar = null;
-  cards.forEach((b) => b.addEventListener('click', () => {
-    if (enPresu(b)) {
-      actual.lineas = actual.lineas.filter((l) => (b.dataset.add ? !(l.tipo !== 'combo' && l.id === b.dataset.add) : !(l.tipo === 'combo' && l.id === b.dataset.combo)));
-    } else if (b.dataset.add) {
-      const it = ITEMS[b.dataset.add];
-      const l = { uid: uid(), tipo: 'item', id: it.id, nombre: it.nombre, unidad: it.unidad, cant: 1, precio: precios[it.id] || medio(it), ref: !precios[it.id] };
+  filas.forEach((f) => $('.tf-fila__btn', f).addEventListener('click', () => {
+    if (enPresu(f)) {
+      actual.lineas = actual.lineas.filter((l) => (f.dataset.add ? !(l.tipo !== 'combo' && l.id === f.dataset.add) : !(l.tipo === 'combo' && l.id === f.dataset.combo)));
+    } else if (f.dataset.add) {
+      const it = ITEMS[f.dataset.add];
+      const l = { uid: uid(), tipo: 'item', id: it.id, nombre: it.nombre, unidad: it.unidad, cant: 1, precio: precios[it.id] || sugeridoItem(it), ref: !precios[it.id] };
       actual.lineas.push(l); resaltar = l.uid;
     } else {
-      const co = COMBOS[b.dataset.combo];
+      const co = COMBOS[f.dataset.combo];
       const l = { uid: uid(), tipo: 'combo', id: co.id, nombre: co.nombre, descuento: co.descuento,
-        items: co.items.map((x) => ({ id: x, nombre: ITEMS[x].nombre, cant: 1, precio: precios[x] || medio(ITEMS[x]), ref: !precios[x] })) };
+        items: co.items.map((x) => ({ id: x, nombre: ITEMS[x].nombre, cant: 1, precio: precios[x] || sugeridoItem(ITEMS[x]), ref: !precios[x] })) };
       actual.lineas.push(l); resaltar = l.uid;
     }
     actual.aportado = false;
@@ -168,6 +252,7 @@
         </div>
       </li>`;
     }).join('');
+    papel.style.setProperty('--acento', perfil.color || '#c27a62');
     papel.innerHTML = `
       <header class="tp-cab">
         <button class="tp-logo${perfil.logo ? ' con' : ''}" type="button" data-abrir-ajustes aria-label="${perfil.logo ? 'Cambiar logo y datos' : 'Agregar tu logo'}">
@@ -190,11 +275,12 @@
     const fila = (dt, dd, cls = '') => `<div${cls ? ` class="${cls}"` : ''}><dt>${dt}</dt><dd>${dd}</dd></div>`;
     let h = '';
     if (actual.lineas.length) {
-      if (t.ahorro || t.desc || t.urg || t.viat) h += fila('Subtotal', fmt(t.bruto));
+      if (t.ahorro || t.desc || t.urg || t.viat || t.iva) h += fila('Subtotal', fmt(t.bruto));
       if (t.ahorro) h += fila('Ahorro por combos', '−' + fmt(t.ahorro), 'menos');
       if (t.desc) h += fila(`Descuento ${t.dPct}%`, '−' + fmt(t.desc), 'menos');
       if (t.urg) h += fila(`Urgencia ${t.uPct}%`, '+' + fmt(t.urg));
       if (t.viat) h += fila('Viáticos', '+' + fmt(t.viat));
+      if (t.iva) h += fila('IVA 21%', '+' + fmt(t.iva));
       h += fila('Total', fmt(t.total), 'total');
       h += fila(`Seña ${t.sPct}% · válido ${t.validez} días`, fmt(t.sena), 'sena');
     }
@@ -231,7 +317,7 @@
     const l = linea(el.dataset.l);
     const t = el.dataset.s != null ? l.items[Number(el.dataset.s)] : l;
     t.precio = entero(el.value); t.ref = false;
-    if (t.precio) { precios[t.id] = t.precio; guardado.set('tf-precios', precios); }
+    if (t.precio) { precios[t.id] = t.precio; guardado.set('tf-precios', precios); pintarFilas(); }
     actual.aportado = false; persistir();
     $(`[data-sub="${l.uid}"]`, papel).textContent = fmt(subtotalLinea(l));
     pintarTotales();
@@ -264,6 +350,32 @@
      Ajustes (dialogo)
      ========================================================= */
   const dlgAjustes = $('[data-ajustes]', raiz);
+  // El color mas presente y con caracter del logo (descarta blancos, negros, grises y transparencias)
+  function colorDominante(canvas) {
+    const k = 40, c = document.createElement('canvas');
+    c.width = k; c.height = Math.max(1, Math.round(k * canvas.height / canvas.width));
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(canvas, 0, 0, c.width, c.height);
+    const d = g.getImageData(0, 0, c.width, c.height).data;
+    const cubos = {};
+    for (let i = 0; i < d.length; i += 4) {
+      const [r, gg, b, a] = [d[i], d[i + 1], d[i + 2], d[i + 3]];
+      if (a < 160) continue;
+      const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b);
+      const sat = mx ? (mx - mn) / mx : 0;
+      if (sat < 0.28 || mx < 50 || mn > 225) continue;
+      const clave = [r >> 4, gg >> 4, b >> 4].join(',');
+      const cb = cubos[clave] || (cubos[clave] = { n: 0, r: 0, g: 0, b: 0, s: 0 });
+      cb.n++; cb.r += r; cb.g += gg; cb.b += b; cb.s += sat;
+    }
+    const mejor = Object.values(cubos).sort((a, b) => b.n * (0.6 + b.s / b.n) - a.n * (0.6 + a.s / a.n))[0];
+    if (!mejor || mejor.n < 6) return null;
+    let [r, gg, b] = [mejor.r, mejor.g, mejor.b].map((v) => Math.round(v / mejor.n));
+    // si es muy claro, se oscurece para que se lea sobre papel blanco
+    const lum = (0.299 * r + 0.587 * gg + 0.114 * b) / 255;
+    if (lum > 0.62) { const f = 0.62 / lum; [r, gg, b] = [r, gg, b].map((v) => Math.round(v * f)); }
+    return '#' + [r, gg, b].map((v) => v.toString(16).padStart(2, '0')).join('');
+  }
   const vistaLogo = () => {
     $('[data-logo-vista]', dlgAjustes).innerHTML = perfil.logo ? `<img src="${perfil.logo}" alt="Tu logo">` : '<i class="ph-light ph-image-square" aria-hidden="true"></i>';
     $('[data-logo-txt]', dlgAjustes).textContent = perfil.logo ? 'Cambiar logo' : 'Subir logo';
@@ -276,8 +388,12 @@
       else if (n.startsWith('cliente_')) el.value = actual.cliente[n.slice(8)] || '';
       else if (n === 'notas') el.value = actual.notas;
       else if (n === 'viaticos') el.value = miles(entero(actual.ajustes.viaticos));
+      else if (n === 'iva') el.checked = !!actual.ajustes.iva;
       else if (n in actual.ajustes) el.value = actual.ajustes[n];
     });
+    const col = $('[name="perfil_color"]', dlgAjustes);
+    col.value = perfil.color || '#c27a62';
+    $('[data-color-txt]', dlgAjustes).textContent = perfil.colorManual ? 'Elegido por vos' : perfil.logo ? 'Tomado de tu logo' : 'Se toma de tu logo al subirlo';
     const ap = $('[data-aportar]', dlgAjustes);
     if (ap) ap.checked = guardado.get('tf-aportar', true);
     vistaLogo();
@@ -289,16 +405,18 @@
     const n = el.name;
     if (el.matches('[data-aportar]')) { guardado.set('tf-aportar', el.checked); return; }
     if (!n) return;
+    if (n === 'perfil_color') { perfil.color = el.value; perfil.colorManual = true; guardado.set('tf-perfil', perfil); $('[data-color-txt]', dlgAjustes).textContent = 'Elegido por vos'; return; }
     if (n.startsWith('perfil_')) { perfil[n.slice(7)] = el.value; guardado.set('tf-perfil', perfil); return; }
     if (n.startsWith('cliente_')) actual.cliente[n.slice(8)] = el.value;
     else if (n === 'notas') actual.notas = el.value;
+    else if (n === 'iva') actual.ajustes.iva = el.checked;
     else if (n in actual.ajustes) actual.ajustes[n] = el.value;
     persistir();
   });
   dlgAjustes.addEventListener('focusout', (ev) => { if (ev.target.name === 'viaticos') ev.target.value = miles(entero(ev.target.value)); });
   dlgAjustes.addEventListener('close', () => pintarPapel());
   dlgAjustes.addEventListener('click', (ev) => { if (ev.target === dlgAjustes) dlgAjustes.close(); });
-  $('[data-quitar-logo]', dlgAjustes).addEventListener('click', () => { delete perfil.logo; guardado.set('tf-perfil', perfil); vistaLogo(); });
+  $('[data-quitar-logo]', dlgAjustes).addEventListener('click', () => { delete perfil.logo; if (!perfil.colorManual) delete perfil.color; guardado.set('tf-perfil', perfil); vistaLogo(); });
   $('[data-logo]', dlgAjustes).addEventListener('change', (ev) => {
     const f = ev.target.files[0];
     ev.target.value = '';
@@ -314,6 +432,10 @@
         c.height = Math.max(1, Math.round((img.naturalHeight || max) * k));
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
         perfil.logo = c.toDataURL('image/png');
+        if (!perfil.colorManual) {
+          const col = colorDominante(c);
+          if (col) { perfil.color = col; $('[name="perfil_color"]', dlgAjustes).value = col; $('[data-color-txt]', dlgAjustes).textContent = 'Tomado de tu logo'; }
+        }
         if (perfil.logo.length > 900000) perfil.logo = c.toDataURL('image/webp', 0.9);
         guardado.set('tf-perfil', perfil);
         vistaLogo();
@@ -424,7 +546,8 @@
   const hoja = $('#hoja');
   const armarHoja = () => {
     const t = totales();
-    const contacto = [perfil.whatsapp, perfil.email, perfil.web].filter(Boolean).map(esc).join(' · ');
+    const contacto = [perfil.whatsapp, perfil.email, perfil.web, perfil.cuit ? 'CUIT ' + perfil.cuit : ''].filter(Boolean).map(esc).join(' · ');
+    hoja.style.setProperty('--acento', perfil.color || '#c27a62');
     const filasT = actual.lineas.map((l) => {
       if (l.tipo === 'combo') {
         const s = l.items.reduce((a, x) => a + x.precio * x.cant, 0);
@@ -439,6 +562,7 @@
     if (t.desc) tot += fila(`Descuento ${t.dPct}%`, '−' + fmt(t.desc), 'menos');
     if (t.urg) tot += fila(`Recargo por urgencia ${t.uPct}%`, '+' + fmt(t.urg));
     if (t.viat) tot += fila('Viáticos', '+' + fmt(t.viat));
+    if (t.iva) tot += fila('IVA 21%', '+' + fmt(t.iva));
     tot += fila('Total', fmt(t.total), 'total') + fila(`Seña ${t.sPct}% para confirmar`, fmt(t.sena), 'sena');
     hoja.classList.toggle('margen', margenes);
     hoja.innerHTML = `
@@ -495,6 +619,7 @@
     if (t.desc) r.push(`Descuento ${t.dPct}%: −${fmt(t.desc)}`);
     if (t.urg) r.push(`Urgencia ${t.uPct}%: +${fmt(t.urg)}`);
     if (t.viat) r.push(`Viáticos: +${fmt(t.viat)}`);
+    if (t.iva) r.push(`IVA 21%: +${fmt(t.iva)}`);
     r.push(`*Total: ${fmt(t.total)}*`, `Seña ${t.sPct}%: ${fmt(t.sena)}`, `Válido hasta el ${fecha(actual.fecha, t.validez)}.`);
     window.open('https://wa.me/?text=' + encodeURIComponent(r.join('\n')), '_blank', 'noopener');
   }
@@ -582,6 +707,7 @@
 
   /* ---------- Arranque ---------- */
   if (ENDPOINT) $('[data-aporte]', raiz).hidden = false;
+  pintarFilas();
   pintarPapel();
   pintarHistorial();
 })();
