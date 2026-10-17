@@ -727,6 +727,7 @@
     if (t.urg) tot += fila(`Recargo por urgencia ${t.uPct}%`, '+' + fmt(t.urg));
     if (t.viat) tot += fila('Viáticos', '+' + fmt(t.viat));
     tot += fila('Total', fmt(t.total), 'total') + fila(`Seña ${t.sPct}% para confirmar`, fmt(t.sena), 'sena');
+    hoja.classList.toggle('margen', margenes);
     hoja.innerHTML = `
       <header class="hj-cab">
         <div class="hj-emisor">
@@ -747,6 +748,17 @@
       ${actual.notas.trim() ? `<div class="hj-notas"><div class="hj-etq">Condiciones</div>${esc(actual.notas.trim())}</div>` : ''}
       <footer class="hj-pie">${ISO}<span>Hecho con el tarifario de <strong>Juan Guzman</strong> · juanguzmanph.com/tarifario</span></footer>`;
   };
+  // Marca de agua: Chrome y Edge (131+) la imprimen en el margen inferior de TODAS las hojas.
+  // Safari y Firefox no lo soportan: ahi va al final del presupuesto.
+  const chrome = (navigator.userAgent.match(/(?:Chrome|Edg)\/(\d+)/) || [])[1];
+  const margenes = Number(chrome) >= 131;
+  if (margenes) {
+    const svg = ISO.replace(/currentColor/g, '#b5b5b5').replace(/ aria-hidden="true"| focusable="false"/g, '').replace('<svg', '<svg width="7" height="10"');
+    const icono = 'data:image/svg+xml,' + encodeURIComponent(svg.includes('xmlns') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
+    const st = document.createElement('style');
+    st.textContent = `@media print { @page { @bottom-center { content: url("${icono}") "   Hecho con el tarifario de Juan Guzman · juanguzmanph.com/tarifario"; font-family: Geist, Helvetica, Arial, sans-serif; font-size: 7pt; letter-spacing: 0.04em; color: #9a9a9a; vertical-align: middle; } } }`;
+    document.head.appendChild(st);
+  }
   let tituloOriginal = document.title;
   window.addEventListener('afterprint', () => { document.title = tituloOriginal; });
   function pdf() {

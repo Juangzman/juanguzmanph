@@ -276,7 +276,7 @@
 @media print {
   @page { size: A4; margin: 14mm 14mm 16mm; }
   :root { color-scheme: light !important; }
-  html, body { background: #fff !important; color: #1a1a1a !important; }
+  html, body { background: #fff !important; color: #1a1a1a !important; overflow: visible !important; }
   body > :not(.tf-hoja) { display: none !important; }
   .tf-hoja { display: block !important; font-family: var(--f-texto); font-size: 10.5pt; line-height: 1.5; color: #1a1a1a; }
   .tf-hoja * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -307,8 +307,10 @@
   .hj-totales .total span:last-child { font-family: var(--f-display); font-size: 24pt; line-height: 1; }
   .hj-totales .sena { color: #555; font-size: 9.5pt; }
   .hj-notas { margin-top: 22pt; padding-top: 12pt; border-top: 0.5pt solid #ccc; white-space: pre-line; font-size: 9.5pt; color: #333; break-inside: avoid; }
-  /* marca de agua al pie del presupuesto */
-  .hj-pie { margin-top: 32pt; padding-top: 10pt; border-top: 0.5pt solid #e5e5e5; display: flex; align-items: center; justify-content: center; gap: 6pt; font-size: 7.5pt; letter-spacing: 0.04em; color: #aaa; }
-  .hj-pie svg { width: 8pt; height: auto; color: #bbb; }
+  /* marca de agua al pie */
+  .hj-pie { margin-top: 32pt; padding-top: 10pt; border-top: 0.5pt solid #e5e5e5; text-align: center; font-size: 7.5pt; line-height: 14pt; letter-spacing: 0.04em; color: #aaa; break-inside: avoid; }
+  /* en Chrome y Edge la marca va en el margen inferior de cada hoja (ver app.js) */
+  .tf-hoja.margen .hj-pie { display: none; }
+  .hj-pie svg { display: inline-block; width: 7pt; height: 10pt; margin-right: 5pt; vertical-align: -2pt; color: #bbb; }
   .hj-pie strong { font-weight: 600; color: #888; }
 }
