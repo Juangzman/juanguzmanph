@@ -50,7 +50,8 @@
               "max": 210000,
               "fuente": "lea"
             }
-          ]
+          ],
+          "bajada": "Personas, books y sesiones de 15."
         },
         {
           "titulo": "Producto y gastronomía",
@@ -91,7 +92,8 @@
               "max": 450000,
               "fuente": "lea"
             }
-          ]
+          ],
+          "bajada": "Tiendas, catálogos y cartas."
         },
         {
           "titulo": "Institucional y corporativa",
@@ -123,7 +125,8 @@
               "max": 750000,
               "fuente": "lea"
             }
-          ]
+          ],
+          "bajada": "Equipos, oficinas y empresas."
         },
         {
           "titulo": "Eventos y shows",
@@ -155,7 +158,8 @@
               "max": 230000,
               "fuente": "estimacion"
             }
-          ]
+          ],
+          "bajada": "Fiestas, eventos y recitales."
         },
         {
           "titulo": "Edición y video",
@@ -187,9 +191,12 @@
               "max": 260000,
               "fuente": "estimacion"
             }
-          ]
+          ],
+          "bajada": "Retoque de fotos y reels."
         }
-      ]
+      ],
+      "pregunta": "¿Qué tipo de fotografía?",
+      "bajada": "Sesiones, books, producto, institucional y eventos."
     },
     {
       "id": "diseno",
@@ -262,7 +269,8 @@
               "max": 35000,
               "fuente": "tar-dis"
             }
-          ]
+          ],
+          "bajada": "Logos, manuales e identidad."
         },
         {
           "titulo": "Gráfica y redes",
@@ -312,9 +320,12 @@
               "max": 250000,
               "fuente": "estimacion"
             }
-          ]
+          ],
+          "bajada": "Placas, plantillas, folletos y motion."
         }
-      ]
+      ],
+      "pregunta": "¿Qué necesitás de diseño?",
+      "bajada": "Marcas, manuales y piezas gráficas."
     },
     {
       "id": "web",
@@ -360,7 +371,8 @@
               "max": 1000000,
               "fuente": "estimacion"
             }
-          ]
+          ],
+          "bajada": "Landing, turnos, institucional y sistemas."
         },
         {
           "titulo": "Extras y mantenimiento",
@@ -392,9 +404,12 @@
               "max": 40000,
               "fuente": "faro"
             }
-          ]
+          ],
+          "bajada": "Secciones, puesta online y abono mensual."
         }
-      ]
+      ],
+      "pregunta": "¿Qué tipo de web?",
+      "bajada": "Sitios a medida, rápidos y pensados para el celular."
     }
   ],
   "combos": [
@@ -501,5 +516,6 @@
       "nombre": "Estimación propia sobre valor hora de referencia",
       "url": ""
     }
-  }
+  },
+  "aviso": "Los precios son orientativos: se basan en tarifarios y referencias publicadas en internet. El precio final lo ponés vos, según tu trabajo, tu experiencia y tu trayectoria."
 }

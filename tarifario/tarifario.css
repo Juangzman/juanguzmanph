@@ -1,162 +1,245 @@
 /* =========================================================
-   Tarifario · precios de referencia + cotizador
+   Tarifario · asistente paso a paso
    Usa los tokens de /css/styles.css (misma linea visual)
    ========================================================= */
 
 .tf [hidden] { display: none !important; }
+.tf-cab { padding-bottom: clamp(32px, 5vw, 56px); }
 .tf-estado { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; }
 .tf-estado [data-com-estado] { color: var(--terracota); }
 .tf-estado .link { font-size: 14px; }
 
-/* ---------- Lista de servicios ---------- */
-.tf-grupo { padding-top: clamp(40px, 6vw, 64px); }
-.tf-grupo__titulo {
-  font-family: var(--f-texto); font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--terracota); line-height: 1.4; padding-bottom: 14px;
+/* ---------- Estructura: pasos + costado ---------- */
+.tf-asis { display: grid; gap: 32px; padding-block: clamp(24px, 4vw, 40px) var(--seccion); border-top: 1px solid var(--linea); scroll-margin-top: calc(var(--nav-h) + 16px); }
+@media (min-width: 1000px) {
+  .tf-asis { grid-template-columns: minmax(0, 7fr) minmax(320px, 4fr); gap: 64px; align-items: start; }
+  .tf-lado { position: sticky; top: calc(var(--nav-h) + env(safe-area-inset-top) + 24px); }
 }
-.tf-lista { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--linea); }
-.tf-item { display: grid; gap: 14px; padding: 22px 0; border-top: 1px solid var(--linea); scroll-margin-top: calc(var(--nav-h) + 80px); }
-.tf-item__info h4 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 30px; line-height: 0.95; letter-spacing: 0.005em; }
-.tf-item__info p { margin-top: 6px; color: var(--texto-2); font-size: 15px; max-width: 52ch; }
-.tf-item__ref { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
-.tf-item__rango { font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.tf-item__com { flex-basis: 100%; font-size: 13px; color: var(--terracota); font-variant-numeric: tabular-nums; }
-.tf-item__accion { display: flex; gap: 8px; }
-@media (min-width: 900px) {
-  .tf-item { grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 3.4fr); align-items: center; gap: 32px; padding: 24px 0; }
-  .tf-item__ref { flex-direction: column; gap: 2px; }
-  .tf-item__accion { justify-content: flex-end; }
-}
+.tf-asis__pasos { min-width: 0; }
+.tf-asis__barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; margin-bottom: clamp(24px, 4vw, 48px); }
+.tf-asis__barra .volver { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; font-size: 14px; }
 
-/* campo de precio con $ */
+/* progreso: rayitas con el nombre del paso actual */
+.tf-progreso { list-style: none; margin: 0 0 0 auto; padding: 0; display: flex; align-items: center; gap: 6px; }
+.tf-progreso li { width: 22px; height: 2px; background: var(--linea-2); border-radius: 2px; transition: background-color 300ms ease, width 400ms var(--ease-out); }
+.tf-progreso li span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tf-progreso li.hecho { background: var(--blanco); }
+.tf-progreso li.actual { width: auto; height: auto; background: none; }
+.tf-progreso li.actual span { position: static; width: auto; height: auto; clip: auto; font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--terracota); padding-inline: 4px; }
+
+/* ---------- Un paso (deslizable) ---------- */
+.tf-escena { position: relative; }
+.tf-paso { display: grid; gap: 20px; transition: opacity 260ms ease, transform 420ms var(--ease-out); }
+.tf-paso.entra { opacity: 0; transform: translateX(calc(var(--dir, 1) * 36px)); transition: none; }
+.tf-paso.sale { opacity: 0; transform: translateX(calc(var(--dir, 1) * -36px)); transition: opacity 180ms ease, transform 180ms ease; }
+.tf-paso__kicker { color: var(--terracota); }
+.tf-paso__titulo { font-size: clamp(44px, 7vw, 88px); line-height: 0.9; outline: none; overflow-wrap: anywhere; }
+.tf-paso > .texto { margin-top: -4px; }
+.tf-paso__pregunta { font-weight: 500; margin-top: 12px; }
+.tf-paso__acciones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+
+/* opciones grandes, una por fila, como el indice de la web */
+.tf-ops { display: grid; margin-top: 12px; border-top: 1px solid var(--linea); }
+.tf-op {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 20px; align-items: center;
+  width: 100%; padding: 22px 48px 22px 0; text-align: left; border-bottom: 1px solid var(--linea);
+  touch-action: manipulation; transition: padding 400ms var(--ease-out);
+}
+.tf-op__titulo { font-family: var(--f-display); font-size: clamp(32px, 4.2vw, 46px); line-height: 0.95; transition: color 250ms ease; }
+.tf-op__bajada { grid-column: 1; color: var(--texto-2); font-size: 15px; max-width: 54ch; }
+.tf-op__precio { grid-column: 1; font-size: 14px; font-weight: 500; color: var(--blanco); font-variant-numeric: tabular-nums; }
+.tf-op__precio small { font-size: 13px; font-weight: 400; color: var(--gris); }
+.tf-op > i { position: absolute; right: 4px; top: 50%; font-size: 22px; color: var(--gris); transform: translateY(-50%); transition: transform 400ms var(--ease-out), color 250ms ease; }
+.tf-op:active { opacity: 0.7; }
+@media (min-width: 700px) {
+  .tf-op__precio { grid-column: 2; grid-row: 1 / span 2; text-align: right; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .tf-op:hover { padding-left: 12px; }
+  .tf-op:hover .tf-op__titulo { color: var(--terracota); }
+  .tf-op:hover > i { color: var(--blanco); transform: translate(6px, -50%); }
+  .tf-ops:hover .tf-op:not(:hover) .tf-op__titulo { color: #6a6a6a; }
+}
+.tf-ops--grande .tf-op__titulo { font-size: clamp(40px, 6vw, 68px); }
+
+/* ---------- Deslizador de precio ---------- */
+.tf-desl { --v: 50%; display: grid; gap: 18px; margin-top: 8px; padding: clamp(20px, 3vw, 32px); background: var(--carbon-2); border: 1px solid var(--linea); }
+.tf-desl__valor { display: grid; gap: 8px; }
 .tf-precio {
-  display: flex; align-items: center; gap: 6px; flex: 1 1 auto; min-width: 0; height: 46px; padding: 0 16px;
-  border: 1px solid var(--linea-2); border-radius: var(--radio-pill); color: var(--gris);
-  transition: border-color 200ms ease;
+  display: flex; align-items: center; gap: 6px; min-width: 0; height: 46px; padding: 0 16px;
+  border: 1px solid var(--linea-2); border-radius: var(--radio-pill); color: var(--gris); transition: border-color 200ms ease;
 }
 .tf-precio:focus-within { border-color: var(--blanco); }
-.tf-precio input {
-  width: 100%; min-width: 0; border: 0; background: none; outline: none; padding: 0;
-  font: inherit; font-size: 16px; color: var(--blanco); font-variant-numeric: tabular-nums;
-}
-.tf-precio input::placeholder { color: rgba(250, 250, 250, 0.32); }
-@media (min-width: 900px) { .tf-precio { flex: 0 1 170px; } }
+.tf-precio input { width: 100%; min-width: 0; border: 0; background: none; outline: none; padding: 0; font: inherit; font-size: 16px; color: var(--blanco); font-variant-numeric: tabular-nums; }
+.tf-precio--grande { height: auto; padding: 0; border: 0; border-bottom: 1px solid var(--linea-2); border-radius: 0; gap: 10px; }
+.tf-precio--grande > span[aria-hidden] { font-family: var(--f-display); font-size: clamp(48px, 7vw, 80px); line-height: 1; color: var(--gris); }
+.tf-precio--grande input { font-family: var(--f-display); font-size: clamp(56px, 9vw, 104px); line-height: 1; padding-top: 6px; letter-spacing: 0.01em; }
+.tf-desl__estado { min-height: 1.4em; }
 
-.tf-sumar {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 0 0 auto;
-  height: 46px; padding: 0 18px; border-radius: var(--radio-pill); border: 1px solid var(--linea-2);
-  font-size: 14px; font-weight: 500; white-space: nowrap; touch-action: manipulation;
-  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, transform 160ms var(--ease-out);
-}
-.tf-sumar:active { transform: scale(0.96); }
-.tf-sumar i { font-size: 16px; }
-.tf-sumar[aria-pressed="true"] { background: var(--blanco); border-color: var(--blanco); color: var(--negro); }
-@media (hover: hover) and (pointer: fine) {
-  .tf-sumar[aria-pressed="false"]:hover { border-color: var(--blanco); }
-  .tf-sumar[aria-pressed="true"]:hover { background: var(--terracota); border-color: var(--terracota); color: var(--blanco); }
-}
-.tf-item.destella { animation: destella 900ms var(--ease-out); }
-@keyframes destella { from { background: rgba(194, 122, 98, 0.16); } to { background: transparent; } }
+.tf-desl__pista { position: relative; height: 44px; }
+.tf-desl__pista::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--linea-2); border-radius: 2px; }
+.tf-desl__zona { position: absolute; top: 50%; left: var(--a); width: calc(var(--b) - var(--a)); height: 8px; margin-top: -4px; border-radius: 8px; background: rgba(194, 122, 98, 0.35); pointer-events: none; }
+.tf-desl__com { position: absolute; top: 50%; left: var(--c); width: 2px; height: 22px; margin: -11px 0 0 -1px; background: var(--terracota); pointer-events: none; }
+.tf-desl input[type=range] { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; margin: 0; background: none; -webkit-appearance: none; appearance: none; cursor: pointer; touch-action: pan-y; }
+.tf-desl input[type=range]::-webkit-slider-runnable-track { height: 44px; background: none; }
+.tf-desl input[type=range]::-moz-range-track { height: 44px; background: none; }
+.tf-desl input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: 8px; border-radius: 50%; background: var(--blanco); border: 0; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); transition: transform 160ms var(--ease-out); }
+.tf-desl input[type=range]::-moz-range-thumb { width: 28px; height: 28px; border-radius: 50%; background: var(--blanco); border: 0; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+.tf-desl input[type=range]:active::-webkit-slider-thumb { transform: scale(1.12); }
+.tf-desl input[type=range]:focus-visible { outline: none; }
+.tf-desl input[type=range]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--terracota); outline-offset: 3px; }
 
-/* ---------- Combos ---------- */
-.tf-combos { grid-template-columns: 1fr; }
-.tf-combo { gap: 16px; }
-.tf-combo .etiqueta { color: var(--terracota); }
-.tf-combo .puntos { margin: 0; }
-.tf-combo__precio { display: grid; gap: 2px; padding-top: 8px; }
-.tf-combo__precio strong { font-family: var(--f-display); font-weight: 400; font-size: clamp(34px, 4vw, 44px); line-height: 1; font-variant-numeric: tabular-nums; }
-.tf-combo .btn { justify-self: start; }
-@media (min-width: 900px) { .tf-combos { grid-template-columns: repeat(12, 1fr); } }
-
-/* ---------- Presupuesto ---------- */
-.tf-presu { display: grid; gap: 40px; padding-top: clamp(40px, 6vw, 72px); }
-@media (min-width: 1000px) {
-  .tf-presu { grid-template-columns: minmax(0, 7fr) minmax(320px, 4fr); gap: 56px; align-items: start; }
-  .tf-presu__panel { position: sticky; top: calc(var(--nav-h) + env(safe-area-inset-top) + 88px); }
-  .tf-historial { grid-column: 1 / 2; }
+.tf-desl__marcas { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+.tf-desl__marcas button {
+  display: grid; gap: 2px; padding: 10px 12px; text-align: left; border: 1px solid var(--linea); border-radius: 12px;
+  font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; touch-action: manipulation;
+  transition: border-color 200ms ease, background-color 200ms ease, color 200ms ease, transform 160ms var(--ease-out);
 }
-.tf-presu__cuerpo { display: grid; gap: 40px; min-width: 0; }
-.tf-bloque { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 16px; }
-.tf-bloque legend { padding: 0; margin-bottom: 16px; }
-.tf-bloque h3, .tf-bloque__cab h3 { font-size: 34px; }
-.tf-bloque__cab { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.tf-desl__marcas button span { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gris); }
+.tf-desl__marcas button.com span { color: var(--terracota); }
+.tf-desl__marcas button:active { transform: scale(0.97); }
+.tf-desl__marcas button[aria-pressed="true"] { background: var(--blanco); color: var(--negro); border-color: var(--blanco); }
+.tf-desl__marcas button[aria-pressed="true"] span { color: #666; }
+@media (hover: hover) and (pointer: fine) { .tf-desl__marcas button:hover { border-color: var(--linea-2); } }
 
+.tf-desl__nota { font-size: 13px; line-height: 1.5; color: var(--gris); }
+.tf-cant-fila { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--linea); }
+.tf-cant-fila__txt small { display: block; }
+.tf-cant { display: inline-flex; align-items: center; height: 46px; border: 1px solid var(--linea-2); border-radius: var(--radio-pill); }
+.tf-cant button { width: 44px; height: 100%; display: grid; place-items: center; font-size: 18px; color: var(--texto-2); touch-action: manipulation; }
+.tf-cant button:active { color: var(--blanco); }
+.tf-cant input { width: 36px; text-align: center; border: 0; background: none; color: var(--blanco); font: inherit; font-size: 16px; font-variant-numeric: tabular-nums; outline: none; padding: 0; }
+
+/* combo: precio de cada parte */
+.tf-combo-items { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--linea); }
+.tf-combo-items li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 16px 0; border-bottom: 1px solid var(--linea); }
+.tf-combo-items li > span { display: grid; gap: 2px; font-weight: 500; }
+.tf-combo-items .tf-precio { flex: 0 1 200px; }
+.tf-combo-total { display: grid; gap: 4px; padding: 8px 0; font-variant-numeric: tabular-nums; }
+.tf-combo-total div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; color: var(--texto-2); }
+.tf-combo-total strong { font-family: var(--f-display); font-weight: 400; font-size: clamp(40px, 5vw, 56px); line-height: 1; color: var(--blanco); }
+
+/* ---------- Formularios ---------- */
 .tf-campos { display: grid; gap: 18px 24px; }
-@media (min-width: 700px) { .tf-campos { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 700px) { .tf-campos { grid-template-columns: 1fr 1fr; } .tf-campos--3 { grid-template-columns: repeat(3, 1fr); } }
 .tf-campo { display: grid; gap: 6px; min-width: 0; }
 .tf-campo > span { font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris); }
 .tf-campo input, .tf-campo textarea {
   width: 100%; min-width: 0; padding: 10px 0; border: 0; border-bottom: 1px solid var(--linea-2); border-radius: 0;
-  background: none; color: var(--blanco); font: inherit; font-size: 16px; outline: none;
-  transition: border-color 200ms ease;
+  background: none; color: var(--blanco); font: inherit; font-size: 16px; outline: none; transition: border-color 200ms ease;
 }
 .tf-campo textarea { resize: vertical; line-height: 1.55; padding: 12px 14px; border: 1px solid var(--linea-2); border-radius: 12px; color: var(--texto-2); }
 .tf-campo input:focus, .tf-campo textarea:focus { border-color: var(--blanco); }
 .tf-campo input::placeholder, .tf-campo textarea::placeholder { color: rgba(250, 250, 250, 0.32); }
+.tf-perfil { border-block: 1px solid var(--linea); }
+.tf-perfil summary, .tf-historial summary, .tf-ref summary { display: flex; align-items: center; gap: 16px; padding: 18px 0; cursor: pointer; list-style: none; font-weight: 500; }
+.tf-perfil summary::-webkit-details-marker, .tf-historial summary::-webkit-details-marker, .tf-ref summary::-webkit-details-marker { display: none; }
+.tf-perfil summary .meta, .tf-historial summary .meta, .tf-ref summary .meta { margin-left: auto; }
+.tf-perfil summary::after, .tf-historial summary::after, .tf-ref summary::after { content: "+"; font-size: 22px; font-weight: 300; line-height: 1; color: var(--gris); transition: transform 300ms var(--ease-out); }
+.tf-perfil[open] summary::after, .tf-historial[open] summary::after, .tf-ref[open] summary::after { transform: rotate(45deg); }
+.tf-perfil .tf-campos { padding-bottom: 24px; }
 
-/* lineas del presupuesto */
-.tf-lineas { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--linea); }
-.tf-lineas:empty { display: none; }
-.tf-linea { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 12px; padding: 18px 0; border-top: 1px solid var(--linea); }
-.tf-linea__nombre { font-weight: 500; }
-.tf-linea__nombre small { display: block; font-weight: 400; font-size: 13px; color: var(--gris); }
-.tf-linea__nombre small.ref { color: var(--terracota); }
-.tf-linea__quitar { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; color: var(--gris); font-size: 18px; transition: color 200ms ease, background-color 200ms ease; }
-@media (hover: hover) and (pointer: fine) { .tf-linea__quitar:hover { color: var(--blanco); background: rgba(250, 250, 250, 0.08); } }
-.tf-linea__fila { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.tf-linea__sub { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 500; white-space: nowrap; }
-.tf-linea .tf-precio { flex: 1 1 140px; height: 42px; max-width: 200px; }
-.tf-cant { display: inline-flex; align-items: center; height: 42px; border: 1px solid var(--linea-2); border-radius: var(--radio-pill); }
-.tf-cant button { width: 38px; height: 100%; display: grid; place-items: center; font-size: 15px; color: var(--texto-2); touch-action: manipulation; }
-.tf-cant button:active { color: var(--blanco); }
-.tf-cant input { width: 34px; text-align: center; border: 0; background: none; color: var(--blanco); font: inherit; font-size: 16px; font-variant-numeric: tabular-nums; outline: none; padding: 0; }
-.tf-linea--combo .tf-linea__nombre::before { content: "Combo · "; color: var(--terracota); }
-.tf-sublineas { grid-column: 1 / -1; list-style: none; margin: 0; padding: 0 0 0 16px; border-left: 1px solid var(--linea-2); display: grid; gap: 10px; }
-.tf-sublineas li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 15px; color: var(--texto-2); }
-.tf-sublineas li > span:first-child { flex: 1 1 160px; }
-.tf-sublineas .tf-precio { flex: 0 1 170px; height: 40px; }
-.tf-vacio { color: var(--gris); padding: 22px 0; border-block: 1px solid var(--linea); }
-
-/* panel lateral */
-.tf-presu__panel { display: grid; gap: 24px; padding: clamp(24px, 3vw, 32px); background: var(--carbon-2); border: 1px solid var(--linea); }
-.tf-ajustes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
-.tf-ajustes .tf-campo:last-child { grid-column: 1 / -1; }
-.tf-totales { margin: 0; display: grid; gap: 8px; font-variant-numeric: tabular-nums; }
-.tf-totales div { display: flex; justify-content: space-between; gap: 16px; font-size: 15px; }
-.tf-totales dt { color: var(--texto-2); }
-.tf-totales dd { margin: 0; text-align: right; }
-.tf-totales .menos dd { color: var(--terracota); }
-.tf-totales .total { align-items: baseline; padding-top: 14px; margin-top: 6px; border-top: 1px solid var(--linea-2); }
-.tf-totales .total dt { color: var(--blanco); font-weight: 500; }
-.tf-totales .total dd { font-family: var(--f-display); font-size: clamp(44px, 5vw, 56px); line-height: 0.9; }
-.tf-totales .sena { font-size: 13px; }
-.tf-totales .sena dt, .tf-totales .sena dd { color: var(--gris); }
-.tf-aporte { display: grid; grid-template-columns: auto 1fr; gap: 12px; font-size: 13px; line-height: 1.5; color: var(--texto-2); cursor: pointer; }
+/* ---------- Final ---------- */
+.tf-final { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.tf-aporte { display: grid; grid-template-columns: auto 1fr; gap: 12px; max-width: 60ch; font-size: 13px; line-height: 1.5; color: var(--texto-2); cursor: pointer; }
 .tf-aporte input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--terracota); }
-.tf-acciones { display: grid; gap: 10px; }
-.tf-acciones .btn { width: 100%; }
-.tf-acciones__fila { display: flex; justify-content: center; gap: 8px; }
+.tf-final__mas { display: flex; flex-wrap: wrap; gap: 4px; margin-left: -14px; }
 .tf-boton {
   display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: var(--radio-pill);
   font-size: 14px; color: var(--texto-2); cursor: pointer; touch-action: manipulation; transition: color 200ms ease, background-color 200ms ease;
 }
 @media (hover: hover) and (pointer: fine) { .tf-boton:hover { color: var(--blanco); background: rgba(250, 250, 250, 0.06); } }
-.tf-aviso { min-height: 1.5em; font-size: 13px; color: var(--terracota); text-align: center; }
+.tf-aviso { font-size: 13px; color: var(--terracota); }
 .tf-aviso:empty { display: none; }
-
-/* historial */
-.tf-historial { border-top: 1px solid var(--linea); border-bottom: 1px solid var(--linea); }
-.tf-historial summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 0; cursor: pointer; list-style: none; font-weight: 500; }
-.tf-historial summary::-webkit-details-marker { display: none; }
-.tf-historial summary::after { content: "+"; font-size: 22px; font-weight: 300; color: var(--gris); transition: transform 300ms var(--ease-out); }
-.tf-historial[open] summary::after { transform: rotate(45deg); }
-.tf-historial summary .meta { margin-left: auto; }
+.tf-historial { margin-top: 16px; border-block: 1px solid var(--linea); }
 .tf-historial__lista { list-style: none; margin: 0; padding: 0; }
-.tf-historial__lista li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 14px 0; border-top: 1px solid var(--linea); font-size: 15px; }
+.tf-historial__lista li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 12px 0; border-top: 1px solid var(--linea); font-size: 15px; }
 .tf-historial__lista li > span:first-child { flex: 1 1 220px; }
 .tf-historial__lista .meta { display: block; }
-.tf-historial__pie { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0; border-top: 1px solid var(--linea); }
-.tf-historial > .meta { padding-bottom: 20px; }
+.tf-historial__pie { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px 0; margin-left: -14px; }
+.tf-historial > .meta { padding-bottom: 18px; }
+
+/* ---------- Costado: sugerencia y resumen ---------- */
+.tf-lado { display: grid; gap: 16px; min-width: 0; }
+.tf-sug { display: grid; gap: 12px; padding: clamp(22px, 3vw, 30px); background: var(--carbon-2); border: 1px solid var(--linea); }
+.tf-sug .etiqueta { color: var(--terracota); }
+.tf-sug h3 { font-size: clamp(32px, 3.4vw, 40px); }
+.tf-sug p { color: var(--texto-2); font-size: 15px; }
+.tf-sug__rango { display: grid; gap: 2px; }
+.tf-sug__rango strong { font-family: var(--f-display); font-weight: 400; font-size: clamp(34px, 3.6vw, 44px); line-height: 1; font-variant-numeric: tabular-nums; }
+.tf-sug__lista { list-style: none; margin: 0; padding: 0; display: grid; font-size: 14px; }
+.tf-sug__lista li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 9px 0; border-top: 1px solid var(--linea); font-variant-numeric: tabular-nums; }
+.tf-sug__lista li > span:first-child { color: var(--texto-2); }
+.tf-sug__lista li > span:last-child { white-space: nowrap; font-weight: 500; }
+.tf-sug__lista li.com > span { color: var(--terracota); }
+.tf-sug__tips { list-style: none; margin: 0; padding: 0; display: grid; font-size: 14px; color: var(--texto-2); }
+.tf-sug__tips li { padding: 9px 0 9px 22px; border-top: 1px solid var(--linea); position: relative; }
+.tf-sug__tips li::before { content: ""; position: absolute; left: 0; top: 20px; width: 10px; height: 1px; background: var(--terracota); }
+
+.tf-resu { display: grid; gap: 14px; padding: clamp(22px, 3vw, 30px); border: 1px solid var(--linea); scroll-margin-top: calc(var(--nav-h) + 16px); }
+.tf-resu__cab { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.tf-resu__cab h3 { font-size: 30px; }
+.tf-resu__lista { list-style: none; margin: 0; padding: 0; }
+.tf-resu__lista:empty { display: none; }
+.tf-resu__lista li { display: flex; align-items: center; gap: 4px; border-top: 1px solid var(--linea); }
+.tf-resu__linea { flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0; text-align: left; }
+.tf-resu__nombre { min-width: 0; font-size: 15px; font-weight: 500; }
+.tf-resu__nombre em { font-style: normal; color: var(--terracota); }
+.tf-resu__nombre small { display: block; font-size: 12.5px; font-weight: 400; color: var(--gris); }
+.tf-resu__nombre small.ref { color: var(--terracota); }
+.tf-resu__precio { white-space: nowrap; font-size: 15px; font-variant-numeric: tabular-nums; }
+.tf-resu__quitar { flex: none; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; color: var(--gris); font-size: 16px; transition: color 200ms ease, background-color 200ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  .tf-resu__linea:hover .tf-resu__nombre { color: var(--terracota); }
+  .tf-resu__quitar:hover { color: var(--blanco); background: rgba(250, 250, 250, 0.08); }
+}
+.tf-resu__vacio { padding: 4px 0; }
+.tf-resu .btn { width: 100%; }
+.tf-totales { margin: 0; display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.tf-totales:empty { display: none; }
+.tf-totales div { display: flex; justify-content: space-between; gap: 16px; font-size: 14px; }
+.tf-totales dt { color: var(--texto-2); }
+.tf-totales dd { margin: 0; text-align: right; }
+.tf-totales .menos dd { color: var(--terracota); }
+.tf-totales .total { align-items: baseline; padding-top: 12px; margin-top: 4px; border-top: 1px solid var(--linea-2); }
+.tf-totales .total dt { color: var(--blanco); font-weight: 500; }
+.tf-totales .total dd { font-family: var(--f-display); font-size: clamp(40px, 4.4vw, 52px); line-height: 0.9; }
+.tf-totales .sena { font-size: 13px; }
+.tf-totales .sena dt, .tf-totales .sena dd { color: var(--gris); }
+.tf-aviso-precios { display: grid; grid-template-columns: auto 1fr; gap: 10px; font-size: 13px; line-height: 1.5; color: var(--gris); }
+.tf-aviso-precios i { font-size: 17px; color: var(--terracota); padding-top: 1px; }
+
+/* ---------- Todos los precios ---------- */
+.tf-seccion { padding-top: var(--seccion); border-top: 1px solid var(--linea); scroll-margin-top: calc(var(--nav-h) + 16px); }
+.tf-seccion__cab { display: grid; gap: 16px; margin-bottom: clamp(32px, 5vw, 56px); }
+.tf-seccion__cab h2 { font-size: clamp(56px, 9vw, 120px); }
+@media (min-width: 900px) { .tf-seccion__cab { grid-template-columns: 5fr 7fr; align-items: end; column-gap: 48px; } }
+.tf-refs { border-top: 1px solid var(--linea); }
+.tf-ref { border-bottom: 1px solid var(--linea); }
+.tf-ref summary { padding: 22px 0; }
+.tf-ref summary > span:first-child { font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 5vw, 56px); line-height: 0.95; }
+.tf-tabla { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-variant-numeric: tabular-nums; }
+.tf-tabla th, .tf-tabla td { text-align: left; font-weight: 400; vertical-align: top; padding: 12px 16px 12px 0; border-top: 1px solid var(--linea); font-size: 15px; }
+.tf-tabla th small { display: block; color: var(--gris); font-size: 13px; max-width: 60ch; }
+.tf-tabla td { white-space: nowrap; }
+.tf-tabla td.meta { padding-right: 0; }
+.tf-tabla__grupo th { padding-top: 22px; font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--terracota); border-top: 0; }
+@media (max-width: 699px) {
+  .tf-tabla tr:not(.tf-tabla__grupo) { display: grid; grid-template-columns: 1fr auto; border-top: 1px solid var(--linea); padding: 12px 0; }
+  .tf-tabla tr:not(.tf-tabla__grupo) > * { border: 0; padding: 0; }
+  .tf-tabla tr:not(.tf-tabla__grupo) th { grid-column: 1 / -1; padding-bottom: 6px; }
+  .tf-tabla td.meta { text-align: right; }
+}
+.tf-areas { padding-bottom: var(--seccion); }
+
+/* ---------- Mensajes ---------- */
+.tf-tostada {
+  position: fixed; z-index: 60; left: 50%; top: calc(var(--nav-h) + env(safe-area-inset-top) + 12px);
+  max-width: min(92vw, 440px); padding: 12px 18px; border-radius: 14px; background: var(--blanco); color: var(--negro);
+  font-size: 14px; line-height: 1.45; box-shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.7);
+  transform: translate(-50%, -8px); opacity: 0; pointer-events: none; transition: opacity 260ms ease, transform 360ms var(--ease-out);
+}
+.tf-tostada.visible { opacity: 1; transform: translate(-50%, 0); }
 
 /* ---------- Como se arma ---------- */
 .tf-metodo { display: grid; gap: 40px; padding-top: clamp(40px, 6vw, 72px); }

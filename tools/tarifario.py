@@ -18,139 +18,66 @@ def _items_por_id():
     return {it["id"]: it for c in DATOS["categorias"] for g in c["grupos"] for it in g["items"]}
 
 
-def item_html(b, it):
+def referencias(b):
+    """Lista completa de precios, plegada: para consultar de un vistazo y para que Google la lea."""
     e = b.e
-    medio = round((it["min"] + it["max"]) / 2 / 1000) * 1000
-    return f"""<li class="tf-item" data-id="{it['id']}">
-        <div class="tf-item__info">
-          <h4>{e(it['nombre'])}</h4>
-          <p>{e(it['detalle'])}</p>
-        </div>
-        <div class="tf-item__ref">
-          <span class="tf-item__rango">{pesos(it['min'])} – {pesos(it['max'])}</span>
-          <span class="meta">por {e(it['unidad'])}</span>
-          <span class="tf-item__com" data-com hidden></span>
-        </div>
-        <div class="tf-item__accion">
-          <label class="tf-precio"><span class="sr-only">Tu precio para {e(it['nombre'])}</span><span aria-hidden="true">$</span><input type="text" inputmode="numeric" autocomplete="off" placeholder="{f'{medio:,}'.replace(',', '.')}" data-precio></label>
-          <button class="tf-sumar" type="button" data-sumar aria-pressed="false"><i class="ph-light ph-plus" aria-hidden="true"></i><span>Sumar</span></button>
-        </div>
-      </li>"""
-
-
-def categoria(b, n, c):
-    grupos = ""
-    for g in c["grupos"]:
-        items = "\n      ".join(item_html(b, it) for it in g["items"])
-        grupos += f"""
-  <div class="tf-grupo">
-    <h3 class="tf-grupo__titulo">{b.e(g['titulo'])}</h3>
-    <ul class="tf-lista">
-      {items}
-    </ul>
-  </div>"""
-    return b.area(c["id"], n, c["titulo"], b.e(c["texto"]), grupos)
-
-
-def combos(b, n):
+    bloques = ""
+    for c in DATOS["categorias"]:
+        filas = ""
+        for g in c["grupos"]:
+            filas += f'<tr class="tf-tabla__grupo"><th colspan="3" scope="colgroup">{e(g["titulo"])}</th></tr>'
+            for it in g["items"]:
+                filas += (f'<tr><th scope="row">{e(it["nombre"])}<small>{e(it["detalle"])}</small></th>'
+                          f'<td>{pesos(it["min"])} – {pesos(it["max"])}</td><td class="meta">por {e(it["unidad"])}</td></tr>')
+        bloques += f"""
+    <details class="tf-ref">
+      <summary><span>{e(c["titulo"])}</span><span class="meta">{sum(len(g["items"]) for g in c["grupos"])} servicios</span></summary>
+      <table class="tf-tabla"><tbody>{filas}</tbody></table>
+    </details>"""
     por_id = _items_por_id()
-    tarjetas = ""
-    for i, co in enumerate(DATOS["combos"]):
+    filas = ""
+    for co in DATOS["combos"]:
         its = [por_id[x] for x in co["items"]]
-        smin, smax = sum(x["min"] for x in its), sum(x["max"] for x in its)
         f = 1 - co["descuento"] / 100
-        puntos = "".join(f"<li>{b.e(x['nombre'])}</li>" for x in its)
-        tarjetas += f"""
-    <article class="sistema tf-combo c6" data-combo="{co['id']}" data-r style="--d:{i % 2}">
-      <span class="etiqueta">Combo · {co['descuento']}% menos</span>
-      <h3>{b.e(co['nombre'])}</h3>
-      <p class="texto">{b.e(co['para'])}</p>
-      <ul class="puntos">{puntos}</ul>
-      <div class="tf-combo__precio">
-        <s class="meta" data-combo-suelto>{pesos(smin)} – {pesos(smax)}</s>
-        <strong data-combo-total>{pesos(round(smin * f, -3))} – {pesos(round(smax * f, -3))}</strong>
-        <span class="meta" data-combo-nota>Con los precios de referencia</span>
-      </div>
-      <button class="btn btn--secundario" type="button" data-sumar-combo><i class="ph-light ph-plus" aria-hidden="true"></i> Sumar combo</button>
-    </article>"""
-    return b.area("combos", n, "Combos",
-                  "Servicios que se piden juntos, con un descuento por contratarlos de una vez. El precio se calcula con tus propios valores: cargalos arriba y el combo se actualiza solo.",
-                  f'<div class="mosaico tf-combos">{tarjetas}\n  </div>')
+        filas += (f'<tr><th scope="row">{e(co["nombre"])}<small>{e(" + ".join(x["nombre"] for x in its))} · {co["descuento"]}% menos</small></th>'
+                  f'<td>{pesos(round(sum(x["min"] for x in its) * f, -3))} – {pesos(round(sum(x["max"] for x in its) * f, -3))}</td><td class="meta">combo</td></tr>')
+    bloques += f"""
+    <details class="tf-ref">
+      <summary><span>Combos</span><span class="meta">{len(DATOS["combos"])} combos</span></summary>
+      <table class="tf-tabla"><tbody>{filas}</tbody></table>
+    </details>"""
+    return f"""<section class="tf-seccion" id="precios" aria-labelledby="t-precios">
+  <div class="tf-seccion__cab">
+    <h2 id="t-precios" data-r>Todos los precios</h2>
+    <p class="texto" data-r style="--d:1">La lista completa de referencias, por si querés verla de un vistazo. {e(DATOS["aviso"])}</p>
+  </div>
+  <div class="tf-refs">{bloques}
+  </div>
+</section>"""
 
 
-def presupuesto(b, n):
-    contenido = """<div class="tf-presu" data-presu>
-    <div class="tf-presu__cuerpo">
-      <div class="tf-bloque">
-        <div class="tf-bloque__cab"><h3>Servicios</h3><span class="meta" data-numero></span></div>
-        <ol class="tf-lineas" data-lineas></ol>
-        <p class="tf-vacio" data-vacio>Todavía no sumaste servicios. Elegilos de la lista de arriba, con tu precio o el de referencia, y aparecen acá.</p>
-      </div>
-
-      <fieldset class="tf-bloque">
-        <legend><h3>Cliente</h3></legend>
-        <div class="tf-campos">
-          <label class="tf-campo"><span>Nombre o empresa</span><input type="text" name="cliente_nombre" autocomplete="off"></label>
-          <label class="tf-campo"><span>Contacto</span><input type="text" name="cliente_contacto" autocomplete="off" placeholder="WhatsApp o email"></label>
-        </div>
-      </fieldset>
-
-      <fieldset class="tf-bloque">
-        <legend><h3>Tus datos</h3></legend>
-        <p class="meta">Salen en el encabezado del PDF. Quedan guardados en este dispositivo.</p>
-        <div class="tf-campos">
-          <label class="tf-campo"><span>Tu nombre o marca</span><input type="text" name="perfil_nombre" autocomplete="name"></label>
-          <label class="tf-campo"><span>Qué hacés</span><input type="text" name="perfil_rubro" placeholder="Fotografía y diseño"></label>
-          <label class="tf-campo"><span>WhatsApp</span><input type="tel" name="perfil_whatsapp" autocomplete="tel"></label>
-          <label class="tf-campo"><span>Email</span><input type="email" name="perfil_email" autocomplete="email"></label>
-          <label class="tf-campo"><span>Instagram o web</span><input type="text" name="perfil_web" autocomplete="off"></label>
-          <label class="tf-campo"><span>Ciudad</span><input type="text" name="perfil_ciudad" value="San Miguel de Tucumán"></label>
-        </div>
-      </fieldset>
-
-      <fieldset class="tf-bloque">
-        <legend><h3>Condiciones</h3></legend>
-        <label class="tf-campo"><span class="sr-only">Condiciones del presupuesto</span><textarea name="notas" rows="5"></textarea></label>
-      </fieldset>
+def asistente(b):
+    e = b.e
+    return f"""<section class="tf-asis" id="cotizar" aria-label="Asistente para armar el presupuesto">
+  <div class="tf-asis__pasos">
+    <div class="tf-asis__barra">
+      <button class="volver" type="button" data-atras hidden>{b.flecha("ph-arrow-left")} Volver</button>
+      <ol class="tf-progreso" data-progreso aria-label="Progreso"></ol>
     </div>
-
-    <aside class="tf-presu__panel" aria-label="Totales">
-      <div class="tf-ajustes">
-        <label class="tf-campo"><span>Descuento %</span><input type="text" inputmode="decimal" name="descuento" placeholder="0"></label>
-        <label class="tf-campo"><span>Urgencia %</span><input type="text" inputmode="decimal" name="urgencia" placeholder="0"></label>
-        <label class="tf-campo"><span>Viáticos $</span><input type="text" inputmode="numeric" name="viaticos" placeholder="0"></label>
-        <label class="tf-campo"><span>Seña %</span><input type="text" inputmode="decimal" name="sena" placeholder="50"></label>
-        <label class="tf-campo"><span>Validez (días)</span><input type="text" inputmode="numeric" name="validez" placeholder="15"></label>
-      </div>
+    <div class="tf-escena" data-escena></div>
+  </div>
+  <aside class="tf-lado" aria-label="Sugerencia de precio y presupuesto">
+    <div class="tf-sug" data-sugerencia aria-live="polite"></div>
+    <div class="tf-resu" id="resumen">
+      <div class="tf-resu__cab"><h3>Tu presupuesto</h3><span class="meta" data-numero></span></div>
+      <ol class="tf-resu__lista" data-resumen></ol>
+      <p class="tf-resu__vacio meta" data-vacio>Todavía está vacío. Respondé las preguntas y los servicios aparecen acá.</p>
       <dl class="tf-totales" data-totales></dl>
-      <label class="tf-aporte" data-aporte hidden>
-        <input type="checkbox" name="aportar" checked>
-        <span>Sumar mis precios al promedio de Tucumán. Es anónimo: solo se envía el servicio y el precio, nunca tus datos ni los del cliente.</span>
-      </label>
-      <div class="tf-acciones">
-        <button class="btn btn--primario" type="button" data-pdf><i class="ph-light ph-file-pdf" aria-hidden="true"></i> Descargar PDF</button>
-        <button class="btn btn--secundario" type="button" data-whatsapp><i class="ph-light ph-whatsapp-logo" aria-hidden="true"></i> Enviar por WhatsApp</button>
-        <div class="tf-acciones__fila">
-          <button class="tf-boton" type="button" data-guardar><i class="ph-light ph-floppy-disk" aria-hidden="true"></i> Guardar</button>
-          <button class="tf-boton" type="button" data-nuevo><i class="ph-light ph-file-plus" aria-hidden="true"></i> Nuevo</button>
-        </div>
-      </div>
-      <p class="tf-aviso" data-aviso role="status" aria-live="polite"></p>
-    </aside>
-
-    <details class="tf-historial" data-historial>
-      <summary><span>Presupuestos guardados</span> <span class="meta" data-historial-n>0</span></summary>
-      <ul class="tf-historial__lista" data-historial-lista></ul>
-      <div class="tf-historial__pie">
-        <button class="tf-boton" type="button" data-exportar><i class="ph-light ph-download-simple" aria-hidden="true"></i> Exportar copia</button>
-        <label class="tf-boton"><i class="ph-light ph-upload-simple" aria-hidden="true"></i> Importar copia<input type="file" accept="application/json,.json" data-importar hidden></label>
-      </div>
-      <p class="meta">Tus presupuestos y precios se guardan solo en este dispositivo. Con la copia los pasás de la compu al celular.</p>
-    </details>
-  </div>"""
-    return b.area("presupuesto", n, "Presupuesto",
-                  "Ajustá cantidades y precios, sumá descuento, urgencia o viáticos, y descargalo en PDF con tus datos. Funciona sin internet.",
-                  contenido)
+      <button class="btn btn--primario" type="button" data-armar hidden>Armar el presupuesto {b.flecha()}</button>
+    </div>
+    <p class="tf-aviso-precios"><i class="ph-light ph-info" aria-hidden="true"></i><span>{e(DATOS["aviso"])}</span></p>
+  </aside>
+</section>"""
 
 
 def metodo(b, n):
@@ -199,12 +126,6 @@ def metodo(b, n):
 
 
 def pagina_tarifario(b):
-    secciones = [categoria(b, i + 1, c) for i, c in enumerate(DATOS["categorias"])]
-    n = len(secciones)
-    secciones += [combos(b, n + 1), presupuesto(b, n + 2), metodo(b, n + 3)]
-    chips = [(c["id"], c["titulo"]) for c in DATOS["categorias"]] + [
-        ("combos", "Combos"), ("presupuesto", "Presupuesto"), ("metodo", "Cómo se arma")]
-    chips_html = "".join(f'<a class="chip" href="#{k}">{t}</a>' for k, t in chips)
     datos_js = json.dumps(DATOS, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     extra = (f'<link rel="stylesheet" href="/tarifario/tarifario.css?v={b._ver("tarifario/tarifario.css")}">\n'
              '<link rel="manifest" href="/tarifario/manifest.webmanifest">\n'
@@ -214,23 +135,26 @@ def pagina_tarifario(b):
              f'<script defer src="/tarifario/app.js?v={b._ver("tarifario/app.js")}"></script>\n')
     cuerpo = f"""{b.navegacion("tarifario")}
 <main id="contenido" class="tf" data-tarifario>
-<div class="wrap pag-cab">
+<div class="wrap pag-cab tf-cab">
   <h1 class="lineas" style="font-size:clamp(64px,15vw,184px)"><span><span style="--i:0">Tarifario</span></span></h1>
-  <p class="lead" data-r style="--d:2">Precios de referencia para fotografía, diseño y web en Tucumán. Armá tu presupuesto con tus propios valores y descargalo en PDF.</p>
+  <p class="lead" data-r style="--d:2">Armá un presupuesto de fotografía, diseño o web respondiendo unas preguntas simples. Te sugerimos precios de referencia para Tucumán; el valor final lo ponés vos.</p>
   <div class="tf-estado" data-r style="--d:3">
     <span class="etiqueta">Actualizado · {b.e(DATOS['actualizado'])}</span>
     <span class="etiqueta" data-com-estado hidden></span>
     <button class="link" type="button" data-instalar hidden>Instalar y usar sin internet {b.flecha("ph-download-simple")}</button>
   </div>
 </div>
-<nav class="filtros" aria-label="Secciones del tarifario"><div class="wrap filtros__in" data-espia>{chips_html}</div></nav>
-<div class="wrap areas">
-{"".join(secciones)}</div>
+<div class="wrap">
+{asistente(b)}
+{referencias(b)}
+<div class="areas tf-areas">
+{metodo(b, 1)}</div>
+</div>
 </main>
-<a class="tf-barra" href="#presupuesto" data-barra hidden><span class="nw">Presupuesto · <span data-barra-n>0</span></span><strong data-barra-total>$0</strong><i class="ph-light ph-arrow-down" aria-hidden="true"></i></a>
+<a class="tf-barra" href="#resumen" data-barra hidden><span class="nw">Presupuesto · <span data-barra-n>0</span></span><strong data-barra-total>$0</strong><i class="ph-light ph-arrow-down" aria-hidden="true"></i></a>
 <div class="tf-hoja" id="hoja" aria-hidden="true"></div>
 <script type="application/json" id="tf-datos">{datos_js}</script>
 {b.contacto()}"""
     return (b.cabeza("Tarifario 2026 · Precios de fotografía, diseño y web en Tucumán",
-                     f"Precios de referencia actualizados ({DATOS['actualizado']}) para fotografía, books, foto de producto, logos, manuales de marca y páginas web en Tucumán. Con cotizador gratis y PDF.",
+                     f"Cotizador gratis con precios de referencia ({DATOS['actualizado']}) para fotografía, books, foto de producto, logos, manuales de marca y páginas web en Tucumán. Armá tu presupuesto y descargalo en PDF.",
                      "/tarifario/", f"{b.SITIO}/img/w/vg-web-hero-1600.jpg", extra) + cuerpo + b.cierre())
