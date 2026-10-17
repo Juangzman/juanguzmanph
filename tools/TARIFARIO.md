@@ -9,7 +9,7 @@ cualquiera puede usar con sus propios precios, y un promedio colaborativo que se
 | --- | --- |
 | `tools/tarifario.json` | **Los precios.** Servicios, rangos (`min` / `max`), combos, fuentes y la URL del promedio (`endpoint`). |
 | `tools/tarifario.py` | Arma el HTML de la página (lo llama `tools/build.py`). |
-| `tarifario/app.js` | El asistente paso a paso (qué → tipo → servicio → precio → cliente → ajustes → PDF), la sugerencia de precios del costado, guardado y aportes. |
+| `tarifario/app.js` | El cotizador: tarjetas de servicios por rubro, la hoja del presupuesto en vivo (precios, cantidades, cliente), ajustes, guardados, PDF, WhatsApp y aportes. |
 | `tarifario/tarifario.css` | Estilos propios del tarifario (usa los colores y tipografías de `css/styles.css`). |
 | `tarifario/sw.js` + `manifest.webmanifest` | Modo sin internet e instalación como app. |
 | `tools/tarifario-apps-script.gs` | El código que va en Google Sheets para el promedio colaborativo. |

@@ -40,7 +40,7 @@ def referencias(b):
         its = [por_id[x] for x in co["items"]]
         f = 1 - co["descuento"] / 100
         filas += (f'<tr><th scope="row">{e(co["nombre"])}<small>{e(" + ".join(x["nombre"] for x in its))} · {co["descuento"]}% menos</small></th>'
-                  f'<td>{pesos(round(sum(x["min"] for x in its) * f, -3))} – {pesos(round(sum(x["max"] for x in its) * f, -3))}</td><td class="meta">combo</td></tr>')
+                  f'<td>{pesos(int(round(sum(x["min"] for x in its) * f, -3)))} – {pesos(int(round(sum(x["max"] for x in its) * f, -3)))}</td><td class="meta">combo</td></tr>')
     bloques += f"""
     <details class="tf-ref">
       <summary><span>Combos</span><span class="meta">{len(DATOS["combos"])} combos</span></summary>
@@ -56,28 +56,108 @@ def referencias(b):
 </section>"""
 
 
-def asistente(b):
+def herramienta(b):
+    """Catalogo de tarjetas a la izquierda y la hoja del presupuesto, en vivo, a la derecha."""
     e = b.e
-    return f"""<section class="tf-asis" id="cotizar" aria-label="Asistente para armar el presupuesto">
-  <div class="tf-asis__pasos">
-    <div class="tf-asis__barra">
-      <button class="volver" type="button" data-atras hidden>{b.flecha("ph-arrow-left")} Volver</button>
-      <ol class="tf-progreso" data-progreso aria-label="Progreso"></ol>
-    </div>
-    <div class="tf-escena" data-escena></div>
+    por_id = _items_por_id()
+    tabs, paneles = "", ""
+    secciones = [(c["id"], c["titulo"]) for c in DATOS["categorias"]] + [("combos", "Combos")]
+    for i, (k, t) in enumerate(secciones):
+        tabs += (f'<button class="tf-tab" type="button" role="tab" id="tab-{k}" aria-controls="panel-{k}" '
+                 f'aria-selected="{"true" if i == 0 else "false"}" data-tab="{k}">{e(t)}</button>')
+    for i, c in enumerate(DATOS["categorias"]):
+        grupos = ""
+        for g in c["grupos"]:
+            cards = "".join(f"""
+        <button class="tf-card" type="button" data-add="{it['id']}" aria-pressed="false">
+          <span class="tf-card__nombre">{e(it['nombre'])}</span>
+          <span class="tf-card__det">{e(it['detalle'])}</span>
+          <span class="tf-card__precio">{pesos(it['min'])} – {pesos(it['max'])} <small>/ {e(it['unidad'])}</small></span>
+          <span class="tf-card__icono" aria-hidden="true"><i class="ph-light ph-plus"></i></span>
+        </button>""" for it in g["items"])
+            grupos += f'<h3 class="tf-grupo">{e(g["titulo"])}</h3><div class="tf-cards">{cards}</div>'
+        paneles += f'<div class="tf-panel" id="panel-{c["id"]}" role="tabpanel" aria-labelledby="tab-{c["id"]}" data-panel="{c["id"]}"{"" if i == 0 else " hidden"}>{grupos}</div>'
+    combos = ""
+    for co in DATOS["combos"]:
+        its = [por_id[x] for x in co["items"]]
+        f = 1 - co["descuento"] / 100
+        combos += f"""
+        <button class="tf-card tf-card--combo" type="button" data-combo="{co['id']}" aria-pressed="false">
+          <span class="tf-card__nombre">{e(co['nombre'])} <em>−{co['descuento']}%</em></span>
+          <span class="tf-card__det">{e(" + ".join(x["nombre"] for x in its))}</span>
+          <span class="tf-card__precio">desde {pesos(int(round(sum(x["min"] for x in its) * f, -3)))}</span>
+          <span class="tf-card__icono" aria-hidden="true"><i class="ph-light ph-plus"></i></span>
+        </button>"""
+    paneles += f'<div class="tf-panel" id="panel-combos" role="tabpanel" aria-labelledby="tab-combos" data-panel="combos" hidden><h3 class="tf-grupo">Servicios juntos, con descuento</h3><div class="tf-cards">{combos}</div></div>'
+    return f"""<section class="tf-app" id="cotizar" aria-label="Cotizador">
+  <div class="tf-cat">
+    <div class="tf-tabs" role="tablist" aria-label="Rubros">{tabs}</div>
+    <p class="tf-ayuda meta">Tocá un servicio para sumarlo. El precio lo ajustás en el presupuesto.</p>
+    {paneles}
   </div>
-  <aside class="tf-lado" aria-label="Sugerencia de precio y presupuesto">
-    <div class="tf-sug" data-sugerencia aria-live="polite"></div>
-    <div class="tf-resu" id="resumen">
-      <div class="tf-resu__cab"><h3>Tu presupuesto</h3><span class="meta" data-numero></span></div>
-      <ol class="tf-resu__lista" data-resumen></ol>
-      <p class="tf-resu__vacio meta" data-vacio>Todavía está vacío. Respondé las preguntas y los servicios aparecen acá.</p>
-      <dl class="tf-totales" data-totales></dl>
-      <button class="btn btn--primario" type="button" data-armar hidden>Armar el presupuesto {b.flecha()}</button>
+  <div class="tf-lado" data-lado>
+    <div class="tf-lado__cab"><strong>Tu presupuesto</strong><button class="tf-icono" type="button" data-cerrar-lado aria-label="Cerrar"><i class="ph-light ph-x" aria-hidden="true"></i></button></div>
+    <article class="tf-papel" data-papel aria-label="Vista previa del presupuesto"></article>
+    <div class="tf-acc">
+      <button class="btn btn--primario" type="button" data-pdf><i class="ph-light ph-file-pdf" aria-hidden="true"></i> Descargar PDF</button>
+      <button class="btn btn--secundario" type="button" data-whatsapp><i class="ph-light ph-whatsapp-logo" aria-hidden="true"></i> WhatsApp</button>
+    </div>
+    <div class="tf-acc__mas">
+      <button class="tf-boton" type="button" data-abrir-ajustes><i class="ph-light ph-sliders-horizontal" aria-hidden="true"></i> Ajustes</button>
+      <button class="tf-boton" type="button" data-abrir-guardados><i class="ph-light ph-folder-simple" aria-hidden="true"></i> Guardados <span data-historial-n></span></button>
+      <button class="tf-boton" type="button" data-nuevo><i class="ph-light ph-file-plus" aria-hidden="true"></i> Nuevo</button>
     </div>
     <p class="tf-aviso-precios"><i class="ph-light ph-info" aria-hidden="true"></i><span>{e(DATOS["aviso"])}</span></p>
-  </aside>
-</section>"""
+  </div>
+</section>
+<dialog class="tf-dialogo" data-ajustes aria-labelledby="t-ajustes">
+  <form method="dialog" class="tf-dialogo__in">
+    <div class="tf-dialogo__cab"><h2 id="t-ajustes">Ajustes</h2><button class="tf-icono" value="cerrar" aria-label="Cerrar"><i class="ph-light ph-x" aria-hidden="true"></i></button></div>
+    <h3 class="tf-grupo">Tu marca</h3>
+    <div class="tf-logo">
+      <div class="tf-logo__vista" data-logo-vista></div>
+      <div class="tf-logo__txt">
+        <span class="meta">Tu logo sale arriba del PDF. Mejor PNG con fondo transparente.</span>
+        <div class="tf-logo__botones">
+          <label class="tf-boton"><i class="ph-light ph-upload-simple" aria-hidden="true"></i> <span data-logo-txt>Subir logo</span><input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" data-logo hidden></label>
+          <button class="tf-boton" type="button" data-quitar-logo hidden><i class="ph-light ph-trash" aria-hidden="true"></i> Quitar</button>
+        </div>
+      </div>
+    </div>
+    <div class="tf-campos">
+      <label class="tf-campo"><span>Nombre o marca</span><input type="text" name="perfil_nombre" autocomplete="off"></label>
+      <label class="tf-campo"><span>Qué hacés</span><input type="text" name="perfil_rubro" autocomplete="off" placeholder="Fotografía y diseño"></label>
+      <label class="tf-campo"><span>WhatsApp</span><input type="text" inputmode="tel" name="perfil_whatsapp" autocomplete="off"></label>
+      <label class="tf-campo"><span>Email</span><input type="text" inputmode="email" name="perfil_email" autocomplete="off"></label>
+      <label class="tf-campo"><span>Instagram o web</span><input type="text" name="perfil_web" autocomplete="off"></label>
+      <label class="tf-campo"><span>Ciudad</span><input type="text" name="perfil_ciudad" autocomplete="off"></label>
+    </div>
+    <h3 class="tf-grupo">Este presupuesto</h3>
+    <div class="tf-campos tf-campos--3">
+      <label class="tf-campo"><span>Descuento %</span><input type="text" inputmode="decimal" name="descuento" placeholder="0"></label>
+      <label class="tf-campo"><span>Urgencia %</span><input type="text" inputmode="decimal" name="urgencia" placeholder="0"></label>
+      <label class="tf-campo"><span>Viáticos $</span><input type="text" inputmode="numeric" name="viaticos" placeholder="0"></label>
+      <label class="tf-campo"><span>Seña %</span><input type="text" inputmode="decimal" name="sena" placeholder="50"></label>
+      <label class="tf-campo"><span>Validez (días)</span><input type="text" inputmode="numeric" name="validez" placeholder="15"></label>
+      <label class="tf-campo"><span>Contacto del cliente</span><input type="text" name="cliente_contacto" autocomplete="off"></label>
+    </div>
+    <label class="tf-campo"><span>Condiciones</span><textarea name="notas" rows="4"></textarea></label>
+    <label class="tf-aporte" data-aporte hidden><input type="checkbox" data-aportar><span>Sumar mis precios al promedio de Tucumán. Es anónimo: solo se envía el servicio y el precio.</span></label>
+    <button class="btn btn--primario tf-dialogo__listo" value="listo">Listo</button>
+  </form>
+</dialog>
+<dialog class="tf-dialogo" data-guardados aria-labelledby="t-guardados">
+  <div class="tf-dialogo__in">
+    <div class="tf-dialogo__cab"><h2 id="t-guardados">Guardados</h2><button class="tf-icono" type="button" data-cerrar-dialogo aria-label="Cerrar"><i class="ph-light ph-x" aria-hidden="true"></i></button></div>
+    <ul class="tf-historial__lista" data-historial-lista></ul>
+    <p class="meta" data-historial-vacio>Todavía no guardaste presupuestos. Se guardan solos cuando descargás el PDF o lo mandás por WhatsApp.</p>
+    <div class="tf-historial__pie">
+      <button class="tf-boton" type="button" data-exportar><i class="ph-light ph-download-simple" aria-hidden="true"></i> Exportar copia</button>
+      <label class="tf-boton"><i class="ph-light ph-upload-simple" aria-hidden="true"></i> Importar copia<input type="file" accept="application/json,.json" data-importar hidden></label>
+    </div>
+    <p class="meta">Todo se guarda solo en este dispositivo. Con la copia lo pasás de la compu al celular.</p>
+  </div>
+</dialog>"""
 
 
 def metodo(b, n):
@@ -136,8 +216,8 @@ def pagina_tarifario(b):
     cuerpo = f"""{b.navegacion("tarifario")}
 <main id="contenido" class="tf" data-tarifario>
 <div class="wrap pag-cab tf-cab">
-  <h1 class="lineas" style="font-size:clamp(64px,15vw,184px)"><span><span style="--i:0">Tarifario</span></span></h1>
-  <p class="lead" data-r style="--d:2">Armá un presupuesto de fotografía, diseño o web respondiendo unas preguntas simples. Te sugerimos precios de referencia para Tucumán; el valor final lo ponés vos.</p>
+  <h1 class="lineas" style="font-size:clamp(64px,11vw,148px)"><span><span style="--i:0">Tarifario</span></span></h1>
+  <p class="lead" data-r style="--d:2">Elegí los servicios, ajustá tus precios y descargá el presupuesto en PDF. Con precios de referencia para Tucumán.</p>
   <div class="tf-estado" data-r style="--d:3">
     <span class="etiqueta">Actualizado · {b.e(DATOS['actualizado'])}</span>
     <span class="etiqueta" data-com-estado hidden></span>
@@ -145,13 +225,13 @@ def pagina_tarifario(b):
   </div>
 </div>
 <div class="wrap">
-{asistente(b)}
+{herramienta(b)}
 {referencias(b)}
 <div class="areas tf-areas">
 {metodo(b, 1)}</div>
 </div>
 </main>
-<a class="tf-barra" href="#resumen" data-barra hidden><span class="nw">Presupuesto · <span data-barra-n>0</span></span><strong data-barra-total>$0</strong><i class="ph-light ph-arrow-down" aria-hidden="true"></i></a>
+<button class="tf-barra" type="button" data-barra hidden><span class="nw">Presupuesto · <span data-barra-n>0</span></span><strong data-barra-total>$0</strong><i class="ph-light ph-caret-up" aria-hidden="true"></i></button>
 <div class="tf-hoja" id="hoja" aria-hidden="true"></div>
 <script type="application/json" id="tf-datos">{datos_js}</script>
 {b.contacto()}"""
