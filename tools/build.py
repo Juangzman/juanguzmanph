@@ -39,11 +39,12 @@ def remota(f, w, h, alt, sizes="100vw", lazy=True, cls=""):
             f'{carga}decoding="async" alt="{e(alt)}">')
 
 
-def local(nombre, w, h, alt, sizes="100vw", lazy=True, cls=""):
-    """Imagen guardada en /img con versiones 800 y 1600 en webp y jpg."""
+def local(nombre, w, h, alt, sizes="100vw", lazy=True, cls="", webp=True):
+    """Imagen guardada en /img con versiones 800 y 1600 en webp y jpg (webp=False: solo jpg)."""
     carga = 'loading="lazy" ' if lazy else 'fetchpriority="high" '
     c = f' class="{cls}"' if cls else ""
-    return (f'<picture{c}><source type="image/webp" srcset="/img/{nombre}-800.webp 800w, /img/{nombre}-1600.webp 1600w" sizes="{sizes}">'
+    fuente = f'<source type="image/webp" srcset="/img/{nombre}-800.webp 800w, /img/{nombre}-1600.webp 1600w" sizes="{sizes}">' if webp else ""
+    return (f'<picture{c}>{fuente}'
             f'<img src="/img/{nombre}-1600.jpg" srcset="/img/{nombre}-800.jpg 800w, /img/{nombre}-1600.jpg 1600w" sizes="{sizes}" '
             f'width="{w}" height="{h}" {carga}decoding="async" alt="{e(alt)}"></picture>')
 
@@ -53,23 +54,25 @@ def full(f, w, h):
 
 
 # ----------------------------------------------------------------------------
-# Datos: fotografia (generados por tools/procesar.py desde el SSD)
+# Datos: fotografia
+# La galeria sale de data/galeria.json, que se edita desde el Estudio (pagina privada)
+# o se arma de cero con tools/galeria_desde_fotos.py.
 # ----------------------------------------------------------------------------
 import json
 _FOTOS = json.loads((RAIZ / "tools" / "fotos.json").read_text())
 _DIS = json.loads((RAIZ / "tools" / "diseno.json").read_text())
-NOMBRES = {"conciertos": "Conciertos", "eventos": "Eventos", "deportes": "Deportes", "gastronomia": "Gastronomía",
-           "moda": "Moda", "book": "Book", "retratos": "Retratos"}
-# Las carpetas del SSD que se suman a otra categoria de la galeria
-UNIR = {}
-CATEGORIAS = [(k, NOMBRES[k], [(s, w, h) for c in [k] + UNIR.get(k, []) for s, w, h in _FOTOS[c]]) for k in NOMBRES]
+_GAL = json.loads((RAIZ / "data" / "galeria.json").read_text())["categorias"]
+NOMBRES = {c["id"]: c["nombre"] for c in _GAL}
+CATEGORIAS = [(c["id"], c["nombre"], [(f["slug"], f["w"], f["h"]) for f in c["fotos"]]) for c in _GAL]
 DIM = {s: (w, h) for k in _FOTOS for s, w, h in _FOTOS[k]}
+DIM.update({f["slug"]: (f["w"], f["h"]) for c in _GAL for f in c["fotos"]})
+SIN_WEBP = {f["slug"] for c in _GAL for f in c["fotos"] if f.get("webp") is False}
 
 
 def foto(slug, alt, sizes="100vw", lazy=True, cls=""):
     """Foto propia optimizada en /img/f (800 y 1600 px, webp + jpg)."""
     w, h = DIM[slug]
-    return local("f/" + slug, w, h, alt, sizes, lazy, cls)
+    return local("f/" + slug, w, h, alt, sizes, lazy, cls, webp=slug not in SIN_WEBP)
 
 
 def pieza(slug, alt, sizes="100vw", lazy=True):
@@ -109,9 +112,7 @@ def telefono(slug, alt, desliza=True, cls=""):
             f'{captura(slug, alt, "300px")}</div></figure>')
 
 
-PORTADAS = {k: f"{k}-01" for k in NOMBRES}
-PORTADAS.update(conciertos="conciertos-34", eventos="eventos-17", deportes="deportes-02",
-                gastronomia="gastronomia-25", moda="moda-05", book="book-02")
+PORTADAS = {c["id"]: c.get("portada") or (c["fotos"][0]["slug"] if c["fotos"] else None) for c in _GAL}
 ORDEN_INICIO = list(NOMBRES)
 
 # Hero: fotos de la carpeta "Fotos para el incio", en el orden en que se muestran
@@ -367,7 +368,7 @@ def pagina_inicio():
 """
     conteo = {k: len(f) for k, _, f in CATEGORIAS}
     cats = ""
-    for i, k in enumerate(ORDEN_INICIO):
+    for i, k in enumerate([k for k in ORDEN_INICIO if PORTADAS.get(k)]):
         cats += f"""<a class="cat" href="/fotografia.html#{k}" data-r style="--d:{i}">
       <div class="cat__img img-carga">{foto(PORTADAS[k], f"Fotografía de {NOMBRES[k].lower()}", "(min-width: 1100px) 25vw, 72vw")}</div>
       <div class="cat__pie"><h3>{NOMBRES[k]}</h3><span class="meta">{conteo[k]:02d}</span></div>
@@ -491,7 +492,7 @@ def pagina_fotografia():
         alt = f"Fotografía de {n.lower()} {cuenta[k]}"
         sizes = "(min-width: 1200px) 25vw, (min-width: 700px) 33vw, 50vw"
         img = foto(slug, alt, sizes, lazy=i > 5)
-        figs += f'<figure data-cat="{k}" data-nombre="{n}" data-full="/img/f/{slug}-1600.webp"><button type="button" class="img-carga" aria-label="Ampliar {e(alt)}">{img}</button></figure>\n'
+        figs += f'<figure data-cat="{k}" data-nombre="{n}" data-full="/img/f/{slug}-1600.{'jpg' if slug in SIN_WEBP else 'webp'}"><button type="button" class="img-carga" aria-label="Ampliar {e(alt)}">{img}</button></figure>\n'
     total = len(orden)
     chips = f'<button class="chip" type="button" data-filtro="todo" aria-pressed="true">Todo<sup>{total}</sup></button>'
     chips += "".join(f'<button class="chip" type="button" data-filtro="{k}" aria-pressed="false">{n}<sup>{len(f)}</sup></button>'

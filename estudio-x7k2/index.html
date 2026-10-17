@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#1a1a1a">
+<meta name="color-scheme" content="dark">
+<title>Estudio</title>
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@300..600&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="estudio.css">
+</head>
+<body class="estudio">
+
+<!-- Ingreso: solo con tu clave de GitHub se puede ver y cambiar algo -->
+<section class="ingreso" id="ingreso">
+  <form class="ingreso__card" id="formIngreso" autocomplete="on">
+    <span class="etiqueta">Juan Guzman</span>
+    <h1>Estudio</h1>
+    <p class="texto">Tu espacio privado para elegir y ordenar las fotos de la web.</p>
+    <label class="campo">
+      <span>Clave de acceso</span>
+      <input type="password" id="clave" name="password" autocomplete="current-password" required spellcheck="false" placeholder="github_pat_…">
+    </label>
+    <label class="check"><input type="checkbox" id="recordar" checked> Recordar en este dispositivo</label>
+    <button class="btn btn--primario" type="submit" id="btnEntrar">Entrar <i class="ph-light ph-arrow-right" aria-hidden="true"></i></button>
+    <p class="error" id="errorIngreso" role="alert" hidden></p>
+    <details class="ayuda">
+      <summary>¿Cómo consigo mi clave?</summary>
+      <ol>
+        <li>En github.com tocá tu foto → <b>Settings</b> → <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b>.</li>
+        <li>Nombre: <i>Estudio web</i>. Vencimiento: el más largo que te deje.</li>
+        <li>Repository access: <b>Only select repositories</b> → <i>juanguzmanph</i>.</li>
+        <li>Permissions → Repository permissions → <b>Contents: Read and write</b>.</li>
+        <li><b>Generate token</b>, copiala (empieza con <i>github_pat_</i>) y pegala acá.</li>
+      </ol>
+      <p>La clave queda guardada solo en este dispositivo. Sin ella nadie puede cambiar nada.</p>
+    </details>
+  </form>
+</section>
+
+<div class="app" id="app" hidden>
+  <header class="app__barra">
+    <div class="app__marca"><span>Estudio</span><small id="estado">Galería de fotografía</small></div>
+    <div class="app__acciones">
+      <div class="segmento" role="group" aria-label="Modo">
+        <button type="button" class="segmento__btn" data-vista="editar" aria-pressed="true"><i class="ph-light ph-squares-four" aria-hidden="true"></i><span>Editar</span></button>
+        <button type="button" class="segmento__btn" data-vista="previa" aria-pressed="false"><i class="ph-light ph-eye" aria-hidden="true"></i><span>Así se ve</span></button>
+      </div>
+      <button type="button" class="btn btn--primario" id="btnPublicar" disabled><i class="ph-light ph-cloud-arrow-up" aria-hidden="true"></i> Publicar <b id="cuentaCambios" hidden></b></button>
+      <button type="button" class="icono" id="btnSalir" title="Salir" aria-label="Salir"><i class="ph-light ph-sign-out" aria-hidden="true"></i></button>
+    </div>
+  </header>
+
+  <nav class="filtros" aria-label="Categorías"><div class="wrap filtros__in" id="chips"></div></nav>
+
+  <main class="wrap app__main">
+    <div class="app__cab">
+      <div>
+        <h2 id="tituloCat">Categoría</h2>
+        <p class="meta" id="infoCat"></p>
+      </div>
+      <a class="link" id="verEnWeb" href="../fotografia.html" target="_blank" rel="noopener">Ver en la web <i class="ph-light ph-arrow-up-right" aria-hidden="true"></i></a>
+    </div>
+
+    <section id="vistaEditar">
+      <label class="subir" id="zonaSubir">
+        <input type="file" id="archivos" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+        <i class="ph-light ph-image-square" aria-hidden="true"></i>
+        <span class="subir__titulo">Subí fotos a <b id="subirA">esta categoría</b></span>
+        <span class="meta">Arrastralas acá o tocá para elegir. Se achican y optimizan solas antes de subir.</span>
+      </label>
+      <p class="pista">Arrastrá para ordenar · <i class="ph-light ph-star" aria-hidden="true"></i> portada de la categoría en el inicio · <i class="ph-light ph-folder-simple" aria-hidden="true"></i> mover a otra categoría · <i class="ph-light ph-trash" aria-hidden="true"></i> sacar de la web</p>
+      <div class="grilla" id="grilla"></div>
+    </section>
+
+    <section id="vistaPrevia" hidden>
+      <p class="pista">Así queda la categoría en la página de Fotografía. La primera foto es la que se ve arriba a la izquierda.</p>
+      <div class="previa-portada" id="previaPortada"></div>
+      <div class="galeria" id="previa"></div>
+    </section>
+  </main>
+</div>
+
+<div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
+
+<script src="estudio.js"></script>
+</body>
+</html>

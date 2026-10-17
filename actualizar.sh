@@ -3,6 +3,8 @@
 # Uso (desde la carpeta del repo):  ./actualizar.sh "qué cambié"
 set -e
 cd "$(dirname "$0")"
+# trae lo que se haya publicado desde el Estudio antes de generar
+git pull --rebase --autostash -q origin main
 python3 tools/build.py
 git add -A
 git commit -m "${1:-Actualiza la web}"
