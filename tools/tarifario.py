@@ -203,6 +203,7 @@ def metodo(b, n):
             for it in g["items"]:
                 if it["fuente"] not in usadas:
                     usadas.append(it["fuente"])
+    usadas += [k for k in ("sueldos", "mywed") if k not in usadas]
     fuentes = ""
     for k in usadas:
         f = DATOS["fuentes"][k]
@@ -214,8 +215,8 @@ def metodo(b, n):
     <div class="tf-metodo__col">
       <h3>Los rangos</h3>
       <ul class="puntos">
-        <li>El mínimo apunta a emprendedores y particulares; el máximo, a pymes y empresas.</li>
-        <li>Parten de tarifarios nacionales actualizados y se ajustan al mercado de Tucumán, que suele ubicarse en la franja media o baja.</li>
+        <li>El mínimo es para quien recién arranca o trabaja con particulares; el máximo, para profesionales con trayectoria que trabajan con pymes y empresas.</li>
+        <li>Parten de tarifarios nacionales (armados sobre todo con precios de Buenos Aires y Rosario) y se bajan al mercado de Tucumán, donde los sueldos rondan la mitad que en CABA y el consumo viene ajustado.</li>
         <li>Son una guía, no una regla: tu experiencia, el alcance del trabajo y el cliente definen el precio final.</li>
         <li>Con la inflación, conviene presupuestar con validez corta y pedir seña.</li>
       </ul>
