@@ -47,7 +47,7 @@
   };
 
   /* ---------- Estado ---------- */
-  const NOTAS = 'Para confirmar el trabajo se abona la seña indicada; el saldo, contra entrega.\nIncluye dos rondas de cambios. Los cambios extra se cotizan aparte.\nPrecios en pesos argentinos.';
+  const NOTAS = 'Para confirmar el trabajo se abona la seña indicada; el saldo, contra entrega.\nTodo lo que exceda lo detallado (horas, fotos, piezas o cambios extra) se cobra aparte. Consultar.\nPrecios en pesos argentinos.';
   const nuevo = () => ({
     id: uid(), numero: 0, fecha: hoyISO(), lineas: [],
     cliente: { nombre: '', contacto: '' },
@@ -253,7 +253,7 @@
       actual.lineas = actual.lineas.filter((l) => (f.dataset.add ? !(l.tipo !== 'combo' && l.id === f.dataset.add) : !(l.tipo === 'combo' && l.id === f.dataset.combo)));
     } else if (f.dataset.add) {
       const it = ITEMS[f.dataset.add];
-      const l = { uid: uid(), tipo: 'item', id: it.id, nombre: it.nombre, unidad: it.unidad, cant: 1, precio: precios[it.id] || sugeridoItem(it), ref: !precios[it.id] };
+      const l = { uid: uid(), tipo: 'item', id: it.id, nombre: it.nombre, unidad: it.unidad, cant: 1, precio: precios[it.id] || sugeridoItem(it), ref: !precios[it.id], incluye: it.detalle };
       actual.lineas.push(l); resaltar = l.uid;
     } else {
       const co = COMBOS[f.dataset.combo];
@@ -296,6 +296,7 @@
           <span class="tp-linea__nombre">${esc(l.nombre)}<small>Ref. ${fmt(it.min)} – ${fmt(it.max)} / ${esc(it.unidad)}</small></span>
           <button class="tp-quitar" type="button" data-quitar="${l.uid}" aria-label="Quitar ${esc(l.nombre)}"><i class="ph-light ph-x" aria-hidden="true"></i></button>
         </div>
+        <label class="tp-incluye"><span>Incluye</span><textarea rows="2" data-incluye="${l.uid}" aria-label="Qué incluye ${esc(l.nombre)}">${esc(incluyeDe(l))}</textarea></label>
         <div class="tp-linea__fila tp-linea__edicion">
           <span class="tp-cant"><button type="button" data-menos="${l.uid}" aria-label="Uno menos">−</button><span data-cant-txt="${l.uid}">${l.cant}</span><button type="button" data-mas="${l.uid}" aria-label="Uno más">+</button></span>
           <span class="tp-x" aria-hidden="true">×</span>
@@ -318,6 +319,7 @@
       <dl class="tp-tot" data-tot></dl>
       <footer class="tp-pie">${ISO}<span>Hecho con el tarifario de Juan Guzman</span></footer>`;
     resaltar = null;
+    $$('[data-incluye]', papel).forEach(crecer);
     pintarTotales();
     pintarCards();
   }
@@ -345,6 +347,8 @@
   }
 
   const linea = (u) => actual.lineas.find((l) => l.uid === u);
+  const incluyeDe = (l) => (l.incluye != null ? l.incluye : (ITEMS[l.id] ? ITEMS[l.id].detalle : ''));
+  const crecer = (t) => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; };
   papel.addEventListener('click', (ev) => {
     const b = ev.target.closest('button');
     if (!b) return;
@@ -365,6 +369,7 @@
     const el = ev.target;
     if (el.dataset.perfil) { perfil[el.dataset.perfil] = el.value; guardado.set('tf-perfil', perfil); return; }
     if (el.dataset.cliente) { actual.cliente[el.dataset.cliente] = el.value; persistir(); return; }
+    if (el.dataset.incluye) { const l = linea(el.dataset.incluye); if (l) { l.incluye = el.value; persistir(); } crecer(el); return; }
     if (!el.dataset.l) return;
     const l = linea(el.dataset.l);
     const t = el.dataset.s != null ? l.items[Number(el.dataset.s)] : l;
@@ -607,6 +612,15 @@
      PDF y WhatsApp
      ========================================================= */
   const hoja = $('#hoja');
+  // "Qué incluye": el detalle de cada servicio y qué se cobra aparte
+  const incluyeHTML = () => {
+    const bloque = (nombre, txt, extra) => (txt || extra) ? `<div class="hj-inc__item"><strong>${esc(nombre)}</strong>${txt ? `<p>${esc(txt)}</p>` : ''}${extra ? `<p class="hj-inc__extra">${esc(extra)}</p>` : ''}</div>` : '';
+    const items = actual.lineas.map((l) => {
+      if (l.tipo === 'combo') return l.items.map((x) => bloque(x.nombre, ITEMS[x.id].detalle, ITEMS[x.id].extra)).join('');
+      return bloque(l.nombre, incluyeDe(l).trim(), (ITEMS[l.id] || {}).extra);
+    }).join('');
+    return items ? `<section class="hj-inc"><div class="hj-etq">Qué incluye</div><div class="hj-inc__lista">${items}</div></section>` : '';
+  };
   const armarHoja = () => {
     const t = totales();
     const contacto = [perfil.whatsapp, perfil.email, perfil.web, perfil.cuit ? 'CUIT ' + perfil.cuit : ''].filter(Boolean).map(esc).join(' · ');
@@ -645,6 +659,7 @@
         <tbody>${filasT}</tbody>
       </table>
       <div class="hj-totales">${tot}</div>
+      ${incluyeHTML()}
       ${actual.notas.trim() ? `<div class="hj-notas"><div class="hj-etq">Condiciones</div>${esc(actual.notas.trim())}</div>` : ''}
       <footer class="hj-pie">${ISO}<span>Hecho con el tarifario de <strong>Juan Guzman</strong> · juanguzmanph.com/tarifario</span></footer>`;
   };
@@ -676,7 +691,7 @@
     r.push('');
     actual.lineas.forEach((l) => {
       if (l.tipo === 'combo') r.push(`• Combo ${l.nombre} (${l.items.map((x) => x.nombre).join(' + ')}), ${l.descuento}% menos: ${fmt(subtotalLinea(l))}`);
-      else r.push(`• ${l.nombre}${l.cant > 1 ? ' x' + l.cant : ''}: ${fmt(l.precio * l.cant)}`);
+      else { r.push(`• ${l.nombre}${l.cant > 1 ? ' x' + l.cant : ''}: ${fmt(l.precio * l.cant)}`); if (incluyeDe(l).trim()) r.push(`  _${incluyeDe(l).trim()}_`); }
     });
     r.push('');
     if (t.desc) r.push(`Descuento ${t.dPct}%: −${fmt(t.desc)}`);
@@ -684,6 +699,7 @@
     if (t.viat) r.push(`Viáticos: +${fmt(t.viat)}`);
     if (t.iva) r.push(`IVA 21%: +${fmt(t.iva)}`);
     r.push(`*Total: ${fmt(t.total)}*`, `Seña ${t.sPct}%: ${fmt(t.sena)}`, `Válido hasta el ${fecha(actual.fecha, t.validez)}.`);
+    r.push('', 'Lo que exceda lo detallado (horas, fotos, piezas o cambios extra) se cobra aparte.');
     window.open('https://wa.me/?text=' + encodeURIComponent(r.join('\n')), '_blank', 'noopener');
   }
 

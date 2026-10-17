@@ -145,6 +145,11 @@ html.tf-sin-scroll { overflow: hidden; }
 .tp-linea__sub { margin-left: auto; font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tp-quitar { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: #b0aca6; font-size: 14px; transition: color 200ms ease, background-color 200ms ease; }
 @media (hover: hover) and (pointer: fine) { .tp-quitar:hover { color: var(--tinta); background: #efece8; } }
+.tp-incluye { display: grid; gap: 2px; }
+.tp-incluye span { font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris-p); }
+.tp-incluye textarea { width: 100%; resize: none; overflow: hidden; padding: 4px 6px; margin: 0 -6px; border: 1px dashed transparent; border-radius: 6px; background: none; font: inherit; font-size: 13px; line-height: 1.45; color: #555; outline: none; transition: border-color 200ms ease, background-color 200ms ease; }
+.tp-incluye textarea:hover { border-color: var(--linea-p); }
+.tp-incluye textarea:focus { border-color: var(--tinta); background: #fff; color: var(--tinta); }
 .tp-cant { display: inline-flex; align-items: center; height: 34px; border: 1px solid var(--linea-p); border-radius: var(--radio-pill); font-size: 14px; font-variant-numeric: tabular-nums; }
 .tp-cant button { width: 30px; height: 100%; display: grid; place-items: center; color: var(--gris-p); font-size: 16px; touch-action: manipulation; }
 .tp-cant button:active { color: var(--tinta); }
@@ -333,6 +338,12 @@ html.tf-sin-scroll { overflow: hidden; }
   .hj-totales .total { margin-top: 6pt; padding-top: 8pt; border-top: 1.5pt solid var(--acento, #1a1a1a); align-items: baseline; }
   .hj-totales .total span:last-child { font-family: var(--f-display); font-size: 24pt; line-height: 1; }
   .hj-totales .sena { color: #555; font-size: 9.5pt; }
+  .hj-inc { margin-top: 20pt; padding-top: 12pt; border-top: 0.5pt solid #ccc; }
+  .hj-inc__lista { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt 22pt; margin-top: 4pt; }
+  .hj-inc__item { break-inside: avoid; font-size: 9.5pt; line-height: 1.45; }
+  .hj-inc__item strong { display: block; font-size: 9.5pt; }
+  .hj-inc__item p { margin: 1pt 0 0; color: #444; }
+  .hj-inc__item .hj-inc__extra { color: #888; font-style: italic; }
   .hj-notas { margin-top: 22pt; padding-top: 12pt; border-top: 0.5pt solid #ccc; white-space: pre-line; font-size: 9.5pt; color: #333; break-inside: avoid; }
   /* marca de agua al pie */
   .hj-pie { margin-top: 32pt; padding-top: 10pt; border-top: 0.5pt solid #e5e5e5; text-align: center; font-size: 7.5pt; line-height: 14pt; letter-spacing: 0.04em; color: #aaa; break-inside: avoid; }

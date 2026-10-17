@@ -21,7 +21,8 @@
               "unidad": "sesión",
               "min": 140000,
               "max": 220000,
-              "fuente": "lea"
+              "fuente": "lea",
+              "extra": "Las horas extra y las fotos adicionales a las incluidas se cobran aparte (consultar)."
             },
             {
               "id": "foto-book",
@@ -30,7 +31,8 @@
               "unidad": "sesión",
               "min": 230000,
               "max": 380000,
-              "fuente": "lea"
+              "fuente": "lea",
+              "extra": "Las horas extra y las fotos adicionales a las incluidas se cobran aparte (consultar)."
             },
             {
               "id": "foto-book-15",
@@ -39,7 +41,8 @@
               "unidad": "sesión",
               "min": 120000,
               "max": 230000,
-              "fuente": "lab"
+              "fuente": "lab",
+              "extra": "Las horas extra y las fotos adicionales a las incluidas se cobran aparte (consultar)."
             },
             {
               "id": "foto-pareja",
@@ -48,7 +51,8 @@
               "unidad": "sesión",
               "min": 130000,
               "max": 210000,
-              "fuente": "lea"
+              "fuente": "lea",
+              "extra": "Las horas extra y las fotos adicionales a las incluidas se cobran aparte (consultar)."
             }
           ],
           "bajada": "Personas, books y sesiones de 15."
@@ -63,7 +67,8 @@
               "unidad": "producto",
               "min": 30000,
               "max": 60000,
-              "fuente": "tar-foto"
+              "fuente": "tar-foto",
+              "extra": "Productos, tomas o fotos adicionales a las incluidas se cobran aparte (consultar)."
             },
             {
               "id": "foto-producto-pack",
@@ -72,7 +77,8 @@
               "unidad": "pack",
               "min": 220000,
               "max": 420000,
-              "fuente": "tar-foto"
+              "fuente": "tar-foto",
+              "extra": "Productos, tomas o fotos adicionales a las incluidas se cobran aparte (consultar)."
             },
             {
               "id": "foto-producto-ambientada",
@@ -81,7 +87,8 @@
               "unidad": "foto",
               "min": 45000,
               "max": 85000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Productos, tomas o fotos adicionales a las incluidas se cobran aparte (consultar)."
             },
             {
               "id": "foto-gastronomia",
@@ -90,7 +97,8 @@
               "unidad": "sesión",
               "min": 250000,
               "max": 450000,
-              "fuente": "lea"
+              "fuente": "lea",
+              "extra": "Las horas extra y las fotos adicionales a las incluidas se cobran aparte (consultar)."
             }
           ],
           "bajada": "Tiendas, catálogos y cartas."
@@ -105,7 +113,8 @@
               "unidad": "persona",
               "min": 35000,
               "max": 65000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Personas o fotos adicionales se cobran aparte (consultar)."
             },
             {
               "id": "foto-institucional-media",
@@ -114,7 +123,8 @@
               "unidad": "jornada",
               "min": 280000,
               "max": 480000,
-              "fuente": "lea"
+              "fuente": "lea",
+              "extra": "Las horas extra y las fotos adicionales a las incluidas se cobran aparte (consultar)."
             },
             {
               "id": "foto-institucional-completa",
@@ -123,7 +133,8 @@
               "unidad": "jornada",
               "min": 480000,
               "max": 750000,
-              "fuente": "lea"
+              "fuente": "lea",
+              "extra": "Las horas extra y las fotos adicionales a las incluidas se cobran aparte (consultar)."
             }
           ],
           "bajada": "Equipos, oficinas y empresas."
@@ -138,7 +149,8 @@
               "unidad": "hora",
               "min": 60000,
               "max": 100000,
-              "fuente": "lab"
+              "fuente": "lab",
+              "extra": "Cada hora adicional a las contratadas se cobra aparte (consultar)."
             },
             {
               "id": "foto-15-cobertura",
@@ -147,7 +159,8 @@
               "unidad": "evento",
               "min": 210000,
               "max": 370000,
-              "fuente": "lab"
+              "fuente": "lab",
+              "extra": "Las horas extra y las fotos adicionales a las incluidas se cobran aparte (consultar)."
             },
             {
               "id": "foto-show",
@@ -156,7 +169,8 @@
               "unidad": "show",
               "min": 120000,
               "max": 230000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Las horas extra y las fotos adicionales a las incluidas se cobran aparte (consultar)."
             }
           ],
           "bajada": "Fiestas, eventos y recitales."
@@ -171,7 +185,8 @@
               "unidad": "foto",
               "min": 13000,
               "max": 20000,
-              "fuente": "lea"
+              "fuente": "lea",
+              "extra": "Cada foto adicional se cobra aparte."
             },
             {
               "id": "foto-retoque-avanzado",
@@ -180,7 +195,8 @@
               "unidad": "foto",
               "min": 55000,
               "max": 80000,
-              "fuente": "lea"
+              "fuente": "lea",
+              "extra": "Cada foto adicional se cobra aparte."
             },
             {
               "id": "video-reel",
@@ -189,7 +205,8 @@
               "unidad": "reel",
               "min": 120000,
               "max": 260000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Horas de filmación, segundos o cambios extra se cobran aparte (consultar)."
             }
           ],
           "bajada": "Retoque de fotos y reels."
@@ -213,7 +230,8 @@
               "unidad": "proyecto",
               "min": 180000,
               "max": 300000,
-              "fuente": "tar-dis"
+              "fuente": "tar-dis",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             },
             {
               "id": "dis-manual",
@@ -222,7 +240,8 @@
               "unidad": "proyecto",
               "min": 200000,
               "max": 370000,
-              "fuente": "ardg"
+              "fuente": "ardg",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             },
             {
               "id": "dis-logo-manual",
@@ -231,7 +250,8 @@
               "unidad": "proyecto",
               "min": 300000,
               "max": 480000,
-              "fuente": "tar-dis"
+              "fuente": "tar-dis",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             },
             {
               "id": "dis-identidad",
@@ -240,7 +260,8 @@
               "unidad": "proyecto",
               "min": 450000,
               "max": 800000,
-              "fuente": "tar-dis"
+              "fuente": "tar-dis",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             },
             {
               "id": "dis-rediseno",
@@ -249,7 +270,8 @@
               "unidad": "proyecto",
               "min": 380000,
               "max": 800000,
-              "fuente": "tar-dis"
+              "fuente": "tar-dis",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             },
             {
               "id": "dis-aplicaciones",
@@ -258,7 +280,8 @@
               "unidad": "pack",
               "min": 100000,
               "max": 150000,
-              "fuente": "tar-dis"
+              "fuente": "tar-dis",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             },
             {
               "id": "dis-vectorizar",
@@ -267,7 +290,8 @@
               "unidad": "logo",
               "min": 15000,
               "max": 35000,
-              "fuente": "tar-dis"
+              "fuente": "tar-dis",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             }
           ],
           "bajada": "Logos, manuales e identidad."
@@ -282,7 +306,8 @@
               "unidad": "pieza",
               "min": 22000,
               "max": 45000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             },
             {
               "id": "dis-plantillas",
@@ -291,7 +316,8 @@
               "unidad": "sistema",
               "min": 160000,
               "max": 300000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             },
             {
               "id": "dis-folleto",
@@ -300,7 +326,8 @@
               "unidad": "pieza",
               "min": 96000,
               "max": 185000,
-              "fuente": "tar-dis"
+              "fuente": "tar-dis",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             },
             {
               "id": "dis-menu",
@@ -309,7 +336,8 @@
               "unidad": "pieza",
               "min": 260000,
               "max": 520000,
-              "fuente": "tar-org"
+              "fuente": "tar-org",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             },
             {
               "id": "dis-logo-animado",
@@ -318,7 +346,8 @@
               "unidad": "animación",
               "min": 120000,
               "max": 250000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Incluye dos rondas de cambios. Los cambios o piezas adicionales se cobran aparte (consultar)."
             }
           ],
           "bajada": "Placas, plantillas, folletos y motion."
@@ -342,7 +371,8 @@
               "unidad": "proyecto",
               "min": 250000,
               "max": 450000,
-              "fuente": "sodi"
+              "fuente": "sodi",
+              "extra": "Secciones, funciones o cambios fuera de lo acordado se cotizan aparte (consultar)."
             },
             {
               "id": "web-landing-turnos",
@@ -351,7 +381,8 @@
               "unidad": "proyecto",
               "min": 380000,
               "max": 650000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Secciones, funciones o cambios fuera de lo acordado se cotizan aparte (consultar)."
             },
             {
               "id": "web-institucional",
@@ -360,7 +391,8 @@
               "unidad": "proyecto",
               "min": 500000,
               "max": 900000,
-              "fuente": "lafuerza"
+              "fuente": "lafuerza",
+              "extra": "Secciones, funciones o cambios fuera de lo acordado se cotizan aparte (consultar)."
             },
             {
               "id": "web-sistema",
@@ -369,7 +401,8 @@
               "unidad": "proyecto",
               "min": 450000,
               "max": 1000000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Secciones, funciones o cambios fuera de lo acordado se cotizan aparte (consultar)."
             }
           ],
           "bajada": "Landing, turnos, institucional y sistemas."
@@ -384,7 +417,8 @@
               "unidad": "sección",
               "min": 50000,
               "max": 80000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Secciones, funciones o cambios fuera de lo acordado se cotizan aparte (consultar)."
             },
             {
               "id": "web-puesta",
@@ -393,7 +427,8 @@
               "unidad": "única vez",
               "min": 30000,
               "max": 50000,
-              "fuente": "estimacion"
+              "fuente": "estimacion",
+              "extra": "Secciones, funciones o cambios fuera de lo acordado se cotizan aparte (consultar)."
             },
             {
               "id": "web-mantenimiento",
@@ -402,7 +437,8 @@
               "unidad": "mes",
               "min": 15000,
               "max": 40000,
-              "fuente": "faro"
+              "fuente": "faro",
+              "extra": "Trabajos fuera del abono mensual se cotizan aparte (consultar)."
             }
           ],
           "bajada": "Secciones, puesta online y abono mensual."

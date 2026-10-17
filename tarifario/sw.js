@@ -2,7 +2,7 @@
    - La pagina: primero internet (para tener siempre la ultima version), si no hay, la copia guardada.
    - Estilos, scripts, fuentes e iconos: se sirven de la copia y se actualizan en segundo plano.
    - El promedio de la comunidad (Google) nunca pasa por aca: lo guarda la propia pagina. */
-const CACHE = 'tarifario-v9';
+const CACHE = 'tarifario-v10';
 const BASE = [
   './', 'tarifario.css', 'app.js', 'manifest.webmanifest', 'icono-192.png',
   '../css/styles.css', '../js/main.js', '../img/favicon.svg',
