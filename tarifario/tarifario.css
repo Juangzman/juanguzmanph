@@ -138,6 +138,12 @@
 .tf-perfil summary::after, .tf-historial summary::after, .tf-ref summary::after { content: "+"; font-size: 22px; font-weight: 300; line-height: 1; color: var(--gris); transition: transform 300ms var(--ease-out); }
 .tf-perfil[open] summary::after, .tf-historial[open] summary::after, .tf-ref[open] summary::after { transform: rotate(45deg); }
 .tf-perfil .tf-campos { padding-bottom: 24px; }
+.tf-logo { display: flex; align-items: center; gap: 18px; padding: 4px 0 24px; }
+.tf-logo__vista { flex: none; width: 96px; height: 96px; display: grid; place-items: center; border: 1px dashed var(--linea-2); border-radius: 14px; background: #fafafa; overflow: hidden; }
+.tf-logo__vista img { max-width: 84%; max-height: 84%; object-fit: contain; }
+.tf-logo__vista i { font-size: 30px; color: #9a9a9a; }
+.tf-logo__txt { display: grid; gap: 4px; }
+.tf-logo__botones { display: flex; flex-wrap: wrap; margin-left: -14px; }
 
 /* ---------- Final ---------- */
 .tf-final { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
@@ -275,7 +281,10 @@
   .tf-hoja { display: block !important; font-family: var(--f-texto); font-size: 10.5pt; line-height: 1.5; color: #1a1a1a; }
   .tf-hoja * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .hj-cab { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; padding-bottom: 14pt; border-bottom: 1.5pt solid #1a1a1a; }
+  .hj-emisor { display: grid; gap: 4pt; justify-items: start; }
+  .hj-logo { display: block; max-height: 52pt; max-width: 180pt; width: auto; height: auto; object-fit: contain; margin-bottom: 4pt; }
   .hj-marca { font-family: var(--f-display); font-size: 30pt; line-height: 0.9; letter-spacing: 0.01em; }
+  .hj-marca.chica { font-size: 16pt; }
   .hj-rubro { font-size: 9.5pt; color: #555; margin-top: 4pt; }
   .hj-doc { text-align: right; }
   .hj-doc h1 { font-family: var(--f-display); font-weight: 400; font-size: 26pt; line-height: 1; margin: 0; color: #c27a62; }
@@ -298,5 +307,8 @@
   .hj-totales .total span:last-child { font-family: var(--f-display); font-size: 24pt; line-height: 1; }
   .hj-totales .sena { color: #555; font-size: 9.5pt; }
   .hj-notas { margin-top: 22pt; padding-top: 12pt; border-top: 0.5pt solid #ccc; white-space: pre-line; font-size: 9.5pt; color: #333; break-inside: avoid; }
-  .hj-pie { margin-top: 24pt; display: flex; justify-content: space-between; gap: 16pt; font-size: 8pt; color: #999; }
+  /* marca de agua al pie del presupuesto */
+  .hj-pie { margin-top: 32pt; padding-top: 10pt; border-top: 0.5pt solid #e5e5e5; display: flex; align-items: center; justify-content: center; gap: 6pt; font-size: 7.5pt; letter-spacing: 0.04em; color: #aaa; }
+  .hj-pie svg { width: 8pt; height: auto; color: #bbb; }
+  .hj-pie strong { font-weight: 600; color: #888; }
 }

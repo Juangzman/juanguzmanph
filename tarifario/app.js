@@ -198,7 +198,7 @@
     },
     cliente() {
       const p = perfil;
-      const conPerfil = !!p.nombre;
+      const conPerfil = !!(p.nombre || p.logo);
       const campo = (name, label, valor, extra = '') => `<label class="tf-campo"><span>${label}</span><input type="text" name="${name}" value="${esc(valor || '')}" ${extra}></label>`;
       return cabeza('Datos', '¿Para quién es el presupuesto?')
         + `<div class="tf-campos">
@@ -206,12 +206,23 @@
             ${campo('cliente_contacto', 'Contacto', actual.cliente.contacto, 'autocomplete="off" placeholder="WhatsApp o email"')}
           </div>
           <details class="tf-perfil"${conPerfil ? '' : ' open'}>
-            <summary><span>Tus datos para el encabezado del PDF</span><span class="meta">${conPerfil ? esc(p.nombre) : 'Se guardan en este dispositivo'}</span></summary>
+            <summary><span>Tu marca en el PDF</span><span class="meta">${conPerfil ? esc(p.nombre || 'Con logo') : 'Se guarda en este dispositivo'}</span></summary>
+            <div class="tf-logo" data-logo-caja>
+              <div class="tf-logo__vista" data-logo-vista>${p.logo ? `<img src="${p.logo}" alt="Tu logo">` : '<i class="ph-light ph-image-square" aria-hidden="true"></i>'}</div>
+              <div class="tf-logo__txt">
+                <strong>Tu logo</strong>
+                <span class="meta">PNG o JPG, idealmente con fondo transparente. Sale arriba a la izquierda del PDF.</span>
+                <div class="tf-logo__botones">
+                  <label class="tf-boton">${flecha('ph-upload-simple')} ${p.logo ? 'Cambiar logo' : 'Subir logo'}<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" data-logo hidden></label>
+                  ${p.logo ? `<button class="tf-boton" type="button" data-quitar-logo>${flecha('ph-trash')} Quitar</button>` : ''}
+                </div>
+              </div>
+            </div>
             <div class="tf-campos">
-              ${campo('perfil_nombre', 'Tu nombre o marca', p.nombre, 'autocomplete="name"')}
+              ${campo('perfil_nombre', 'Tu nombre o marca', p.nombre, 'autocomplete="off"')}
               ${campo('perfil_rubro', 'Qué hacés', p.rubro, 'placeholder="Fotografía y diseño"')}
-              ${campo('perfil_whatsapp', 'WhatsApp', p.whatsapp, 'inputmode="tel" autocomplete="tel"')}
-              ${campo('perfil_email', 'Email', p.email, 'inputmode="email" autocomplete="email"')}
+              ${campo('perfil_whatsapp', 'WhatsApp', p.whatsapp, 'inputmode="tel" autocomplete="off"')}
+              ${campo('perfil_email', 'Email', p.email, 'inputmode="email" autocomplete="off"')}
               ${campo('perfil_web', 'Instagram o web', p.web, 'autocomplete="off"')}
               ${campo('perfil_ciudad', 'Ciudad', p.ciudad)}
             </div>
@@ -401,6 +412,7 @@
         tostada('Presupuesto nuevo. El anterior quedó guardado.');
       }
       else if (ds.abrir || ds.duplicar || ds.borrar) accionHistorial(b);
+      else if (ds.quitarLogo != null) { delete perfil.logo; guardado.set('tf-perfil', perfil); refrescarPaso(); }
       else if (ds.exportar != null) exportar();
     });
     // la sugerencia del costado sigue a la opcion que se mira
@@ -429,6 +441,8 @@
     });
     const imp = $('[data-importar]', el);
     imp && imp.addEventListener('change', importar);
+    const logo = $('[data-logo]', el);
+    logo && logo.addEventListener('change', subirLogo);
     if (paso.tipo === 'precio') sincronizar(el);
     if (paso.tipo === 'combo') totalCombo(el);
   }
@@ -483,6 +497,42 @@
     if (editado) { tostada('Cambios guardados.'); pila = []; ir({ tipo: 'final' }); return; }
     pila = [];
     ir({ tipo: 'otro', nombre });
+  }
+
+  // vuelve a dibujar el paso actual sin animacion (por ejemplo, al subir el logo)
+  function refrescarPaso() {
+    const abierto = $('.tf-perfil', escena) && $('.tf-perfil', escena).open;
+    escena.innerHTML = `<div class="tf-paso" data-paso="${paso.tipo}">${PASOS[paso.tipo](paso)}</div>`;
+    conectarPaso(escena.firstElementChild);
+    const d = $('.tf-perfil', escena);
+    if (d && abierto) d.open = true;
+  }
+
+  // El logo se achica en el navegador (max. 800 px) y se guarda en este dispositivo
+  function subirLogo(ev) {
+    const f = ev.target.files[0];
+    ev.target.value = '';
+    if (!f) return;
+    if (f.size > 8 * 1024 * 1024) { tostada('Ese archivo es muy pesado. Probá con uno de menos de 8 MB.'); return; }
+    const lector = new FileReader();
+    lector.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 800, k = Math.min(1, max / Math.max(img.naturalWidth || max, img.naturalHeight || max));
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round((img.naturalWidth || max) * k));
+        c.height = Math.max(1, Math.round((img.naturalHeight || max) * k));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        perfil.logo = c.toDataURL('image/png');
+        if (perfil.logo.length > 900000) perfil.logo = c.toDataURL('image/webp', 0.9);
+        guardado.set('tf-perfil', perfil);
+        refrescarPaso();
+        tostada('Logo guardado. Va a salir en el encabezado del PDF.');
+      };
+      img.onerror = () => tostada('No pude leer esa imagen. Probá con un PNG o JPG.');
+      img.src = lector.result;
+    };
+    lector.readAsDataURL(f);
   }
 
   function campo(t) {
@@ -657,6 +707,8 @@
      PDF y WhatsApp
      ========================================================= */
   const hoja = $('#hoja');
+  const isoNav = $('.marca svg');
+  const ISO = isoNav ? isoNav.outerHTML : '';
   const armarHoja = () => {
     const t = totales();
     const contacto = [perfil.whatsapp, perfil.email, perfil.web].filter(Boolean).map(esc).join(' · ');
@@ -677,7 +729,9 @@
     tot += fila('Total', fmt(t.total), 'total') + fila(`Seña ${t.sPct}% para confirmar`, fmt(t.sena), 'sena');
     hoja.innerHTML = `
       <header class="hj-cab">
-        <div><div class="hj-marca">${esc(perfil.nombre || 'Presupuesto')}</div>
+        <div class="hj-emisor">
+          ${perfil.logo ? `<img class="hj-logo" src="${perfil.logo}" alt="">` : ''}
+          ${perfil.nombre ? `<div class="hj-marca${perfil.logo ? ' chica' : ''}">${esc(perfil.nombre)}</div>` : ''}
           <div class="hj-rubro">${[perfil.rubro, perfil.ciudad].filter(Boolean).map(esc).join(' · ')}${contacto ? '<br>' + contacto : ''}</div></div>
         <div class="hj-doc"><h1>Presupuesto</h1><p>N° ${nro(actual.numero)} · ${fecha(actual.fecha)}<br>Válido hasta el ${fecha(actual.fecha, t.validez)}</p></div>
       </header>
@@ -691,7 +745,7 @@
       </table>
       <div class="hj-totales">${tot}</div>
       ${actual.notas.trim() ? `<div class="hj-notas"><div class="hj-etq">Condiciones</div>${esc(actual.notas.trim())}</div>` : ''}
-      <footer class="hj-pie"><span>Hecho con el tarifario gratuito de juanguzmanph.com/tarifario</span><span>N° ${nro(actual.numero)}</span></footer>`;
+      <footer class="hj-pie">${ISO}<span>Hecho con el tarifario de <strong>Juan Guzman</strong> · juanguzmanph.com/tarifario</span></footer>`;
   };
   let tituloOriginal = document.title;
   window.addEventListener('afterprint', () => { document.title = tituloOriginal; });
