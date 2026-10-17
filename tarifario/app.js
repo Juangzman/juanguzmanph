@@ -91,10 +91,10 @@
      ========================================================= */
   // Donde cae el precio dentro del rango de referencia (0 = minimo, 1 = maximo)
   const BASE = { particular: 0.15, pyme: 0.5, empresa: 0.85 };
-  const AJUSTE = { inicial: -0.15, media: 0, senior: 0.15 };
+  // La experiencia multiplica el precio: un senior cobra el doble que alguien que recien arranca
+  const MULT = { inicial: 0.7, media: 1, senior: 1.4 };
   let nivel = Object.assign({ cliente: 'pyme', experiencia: 'media' }, guardado.get('tf-nivel', {}));
-  const posicion = () => Math.min(1, Math.max(0, BASE[nivel.cliente] + AJUSTE[nivel.experiencia]));
-  const sugerido = (mn, mx) => Math.round((mn + (mx - mn) * posicion()) / 1000) * 1000;
+  const sugerido = (mn, mx) => Math.round((mn + (mx - mn) * BASE[nivel.cliente]) * MULT[nivel.experiencia] / 1000) * 1000;
   const sugeridoItem = (it) => sugerido(it.min, it.max);
 
   const filas = $$('.tf-fila', raiz);
