@@ -62,16 +62,20 @@ def herramienta(b):
     por_id = _items_por_id()
     k_fmt = lambda n: f"${n // 1000:,}k".replace(",", ".") if n < 1000000 else f"${n / 1000000:.2f}".rstrip("0").rstrip(".").replace(".", ",") + "M"
 
-    def fila(attrs, nombre, det, mn, mx, unidad, buscar, extra=""):
+    def fila(attrs, nombre, det, mn, mx, unidad, buscar, editable=True, nombre_txt=""):
         medio = round((mn + mx) / 2 / 1000) * 1000
+        if editable:
+            precio = (f'<label class="tf-fila__precio"><span class="sr-only">Tu precio para {e(nombre_txt)}</span>'
+                      f'<span class="tf-fila__signo" aria-hidden="true">$</span><input type="text" inputmode="numeric" autocomplete="off" '
+                      f'value="{f"{medio:,}".replace(",", ".")}" data-sug><small>{e(unidad)}</small></label>')
+        else:
+            precio = f'<span class="tf-fila__precio tf-fila__precio--fijo"><strong data-sug>{pesos(medio)}</strong><small>{e(unidad)}</small></span>'
         return f"""
       <li class="tf-fila" {attrs} data-buscar="{e(buscar.lower())}">
-        <button class="tf-fila__btn" type="button" aria-pressed="false">
-          <span class="tf-fila__txt"><span class="tf-fila__nombre">{nombre}</span><span class="tf-fila__det">{e(det)}</span></span>
-          <span class="tf-fila__escala" aria-hidden="true"><span class="tf-escala"><i></i></span><span class="tf-escala__ext"><span>{k_fmt(mn)}</span><span>{k_fmt(mx)}</span></span></span>
-          <span class="tf-fila__precio"><strong data-sug>{pesos(medio)}</strong><small>{e(unidad)}</small></span>
-          <span class="tf-fila__mas" aria-hidden="true"><i class="ph-light ph-plus"></i></span>
-        </button>
+        <div class="tf-fila__txt"><span class="tf-fila__nombre">{nombre}</span><span class="tf-fila__det">{e(det)}</span><span class="tf-fila__com" data-com hidden></span></div>
+        <div class="tf-fila__escala" aria-hidden="true"><span class="tf-escala"><i></i></span><span class="tf-escala__ext"><span>{k_fmt(mn)}</span><span>{k_fmt(mx)}</span></span></div>
+        {precio}
+        <button class="tf-fila__mas" type="button" aria-pressed="false" aria-label="Sumar {e(nombre_txt)} al presupuesto"><i class="ph-light ph-plus" aria-hidden="true"></i></button>
       </li>"""
 
     bloques, chips = "", ['<button class="chip activa" type="button" data-filtro="todo" aria-pressed="true">Todo</button>']
@@ -82,7 +86,7 @@ def herramienta(b):
         for g in c["grupos"]:
             filas += f'<li class="tf-fila-grupo" data-grupo-de="{c["id"]}">{e(g["titulo"])}</li>'
             filas += "".join(fila(f'data-add="{it["id"]}" data-min="{it["min"]}" data-max="{it["max"]}"', e(it["nombre"]), it["detalle"],
-                                  it["min"], it["max"], f'/ {it["unidad"]}', f'{it["nombre"]} {it["detalle"]} {g["titulo"]} {c["titulo"]}')
+                                  it["min"], it["max"], f'/ {it["unidad"]}', f'{it["nombre"]} {it["detalle"]} {g["titulo"]} {c["titulo"]}', True, it["nombre"])
                              for it in g["items"])
         bloques += f"""
     <section class="tf-rubro" data-rubro="{c["id"]}" aria-labelledby="r-{c["id"]}">
@@ -96,7 +100,7 @@ def herramienta(b):
         f = 1 - co["descuento"] / 100
         mn, mx = int(round(sum(x["min"] for x in its) * f, -3)), int(round(sum(x["max"] for x in its) * f, -3))
         filas += fila(f'data-combo="{co["id"]}" data-min="{mn}" data-max="{mx}"', f'{e(co["nombre"])} <em>−{co["descuento"]}%</em>',
-                      " + ".join(x["nombre"] for x in its), mn, mx, "combo", f'{co["nombre"]} combo {" ".join(x["nombre"] for x in its)}')
+                      " + ".join(x["nombre"] for x in its), mn, mx, "combo", f'{co["nombre"]} combo {" ".join(x["nombre"] for x in its)}', False, "el combo " + co["nombre"])
     n = len(DATOS["categorias"]) + 1
     chips.append(f'<button class="chip" type="button" data-filtro="combos" aria-pressed="false">Combos <sup>{len(DATOS["combos"])}</sup></button>')
     bloques += f"""
@@ -118,6 +122,7 @@ def herramienta(b):
       </div>
       <div class="tf-chips">{"".join(chips)}</div>
     </div>
+    <p class="tf-pista"><i class="ph-light ph-pencil-simple-line" aria-hidden="true"></i><span>Cada precio es editable: tocalo y poné el tuyo. Queda guardado y se usa en tus presupuestos.<span data-pista-com hidden> También suma, de forma anónima, al promedio de Tucumán.</span></span></p>
     <div class="tf-lista" data-lista>{bloques}
       <p class="tf-sin-resultados" data-sin-resultados hidden>No encontré ese servicio. Probá con otra palabra.</p>
     </div>

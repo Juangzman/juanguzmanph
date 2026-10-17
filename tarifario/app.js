@@ -98,15 +98,63 @@
   const sugeridoItem = (it) => sugerido(it.min, it.max);
 
   const filas = $$('.tf-fila', raiz);
-  const pintarFilas = () => {
-    const pos = (posicion() * 100).toFixed(1) + '%';
-    filas.forEach((f) => {
-      f.style.setProperty('--p', pos);
-      const propio = f.dataset.add && precios[f.dataset.add];
-      $('[data-sug]', f).textContent = fmt(propio || sugerido(Number(f.dataset.min), Number(f.dataset.max)));
-      f.classList.toggle('propio', !!propio);
-    });
+  // Pinta el precio de una fila: el tuyo si lo pusiste, si no el sugerido. El punto de la escala va a ese precio.
+  const pintarFila = (f) => {
+    const mn = Number(f.dataset.min), mx = Number(f.dataset.max);
+    const propio = f.dataset.add && precios[f.dataset.add];
+    const v = propio || sugerido(mn, mx);
+    const pos = Math.min(1, Math.max(0, (v - mn) / ((mx - mn) || 1)));
+    f.style.setProperty('--p', (pos * 100).toFixed(1) + '%');
+    f.classList.toggle('propio', !!propio);
+    f.classList.toggle('fuera', !!propio && (v < mn || v > mx));
+    const el = $('[data-sug]', f);
+    if (el.tagName === 'INPUT') { if (document.activeElement !== el) el.value = miles(v); anchoPrecio(el); }
+    else el.textContent = fmt(v);
+    const com = f.dataset.add && promedioCom(f.dataset.add);
+    const ce = $('[data-com]', f);
+    if (com) { ce.textContent = `Promedio en Tucumán ${fmt(com.promedio)} · ${com.n} aportes`; ce.hidden = false; } else ce.hidden = true;
   };
+  const pintarFilas = () => filas.forEach(pintarFila);
+  // el campo de precio crece con el numero (Bebas es angosta: ~0.5em por cifra)
+  function anchoPrecio(el) { el.style.width = (Math.max(3, el.value.length) * 0.52 + 0.4).toFixed(2) + 'em'; }
+  const promedioCom = (id) => {
+    const x = comunidad && comunidad.servicios && comunidad.servicios[id];
+    return x && x.n >= (D.minimo_aportes || 5) ? x : null;
+  };
+  // Precio propio desde la lista
+  function ponerPrecio(id, v) {
+    if (v) precios[id] = v; else delete precios[id];
+    guardado.set('tf-precios', precios);
+    const it = ITEMS[id];
+    let cambio = false;
+    actual.lineas.forEach((l) => {
+      if (l.tipo === 'combo') l.items.forEach((x) => { if (x.id === id) { x.precio = v || sugeridoItem(it); x.ref = !v; cambio = true; } });
+      else if (l.id === id) { l.precio = v || sugeridoItem(it); l.ref = !v; cambio = true; }
+    });
+    if (cambio) { actual.aportado = false; persistir(); pintarPapel(); }
+  }
+  filas.forEach((f) => {
+    const input = $('input[data-sug]', f);
+    if (!input) return;
+    const id = f.dataset.add;
+    let inicial = 0;
+    input.addEventListener('focus', () => { inicial = entero(input.value); requestAnimationFrame(() => input.select()); });
+    input.addEventListener('input', () => {
+      anchoPrecio(input);
+      const v = entero(input.value);
+      ponerPrecio(id, v);
+      pintarFila(f);
+    });
+    input.addEventListener('blur', () => {
+      const v = entero(input.value);
+      pintarFila(f);
+      if (v && v !== inicial) aportarPrecio(id, v);
+    });
+    input.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
+      if (ev.key === 'Escape') { ev.preventDefault(); ponerPrecio(id, 0); pintarFila(f); input.blur(); }
+    });
+  });
   // segmentados (Cliente / Tu experiencia)
   $$('[data-seg]', raiz).forEach((seg) => {
     const clave = seg.dataset.seg === 'cliente' ? 'cliente' : 'experiencia';
@@ -192,11 +240,15 @@
     : actual.lineas.some((l) => l.tipo === 'combo' && l.id === f.dataset.combo));
   const pintarCards = () => filas.forEach((f) => {
     const on = enPresu(f);
-    $('.tf-fila__btn', f).setAttribute('aria-pressed', String(on));
-    $('.tf-fila__mas i', f).className = 'ph-light ' + (on ? 'ph-check' : 'ph-plus');
+    const b = $('.tf-fila__mas', f);
+    b.setAttribute('aria-pressed', String(on));
+    f.classList.toggle('sumado', on);
+    $('i', b).className = 'ph-light ' + (on ? 'ph-check' : 'ph-plus');
   });
   let resaltar = null;
-  filas.forEach((f) => $('.tf-fila__btn', f).addEventListener('click', () => {
+  // tocar la fila (menos el precio) tambien suma o quita
+  filas.forEach((f) => f.addEventListener('click', (ev) => {
+    if (ev.target.closest('.tf-fila__precio') && !ev.target.closest('.tf-fila__precio--fijo')) return;
     if (enPresu(f)) {
       actual.lineas = actual.lineas.filter((l) => (f.dataset.add ? !(l.tipo !== 'combo' && l.id === f.dataset.add) : !(l.tipo === 'combo' && l.id === f.dataset.combo)));
     } else if (f.dataset.add) {
@@ -322,7 +374,18 @@
     $(`[data-sub="${l.uid}"]`, papel).textContent = fmt(subtotalLinea(l));
     pintarTotales();
   });
-  papel.addEventListener('focusout', (ev) => { if (ev.target.dataset.l) ev.target.value = miles(entero(ev.target.value)); });
+  papel.addEventListener('focusin', (ev) => { if (ev.target.dataset.l) ev.target.dataset.antes = entero(ev.target.value); });
+  papel.addEventListener('focusout', (ev) => {
+    const el = ev.target;
+    if (!el.dataset.l) return;
+    const v = entero(el.value);
+    el.value = miles(v);
+    if (v && String(v) !== el.dataset.antes) {
+      const l = linea(el.dataset.l);
+      const t = l && (el.dataset.s != null ? l.items[Number(el.dataset.s)] : l);
+      if (t) aportarPrecio(t.id, v);
+    }
+  });
   papel.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && ev.target.matches('input')) ev.target.blur(); });
 
   /* ---------- Celular: la hoja se abre desde la barra de abajo ---------- */
@@ -648,6 +711,18 @@
     guardado.set('tf-pendientes', cola.slice(-30));
     enviarPendientes();
   }
+  // Cada precio propio que se guarda en la lista suma al promedio (anonimo; el servidor
+  // cuenta un aporte por servicio y dispositivo cada 30 dias)
+  function aportarPrecio(id, precio) {
+    if (!ENDPOINT || !guardado.get('tf-aportar', true)) return;
+    const it = ITEMS[id];
+    if (!it || precio < it.min * 0.25 || precio > it.max * 4) return;
+    const cola = guardado.get('tf-pendientes', []);
+    cola.push({ v: D.version, ciudad: 'tucuman', dispositivo, items: [{ id, precio }], web: '' });
+    guardado.set('tf-pendientes', cola.slice(-60));
+    clearTimeout(aportarPrecio.t);
+    aportarPrecio.t = setTimeout(enviarPendientes, 1500);
+  }
   let enviando = false;
   function enviarPendientes() {
     if (!ENDPOINT || enviando || !navigator.onLine) return;
@@ -669,7 +744,7 @@
     if (navigator.onLine) {
       fetch(ENDPOINT + (ENDPOINT.includes('?') ? '&' : '?') + 'accion=promedios', { cache: 'no-store' })
         .then((r) => r.json())
-        .then((c) => { if (c && c.servicios) { comunidad = c; guardado.set('tf-comunidad', c); pintarEstadoCom(); pintarPapel(); } })
+        .then((c) => { if (c && c.servicios) { comunidad = c; guardado.set('tf-comunidad', c); pintarEstadoCom(); pintarFilas(); pintarPapel(); } })
         .catch(() => {});
     }
     enviarPendientes();
@@ -706,7 +781,7 @@
 
 
   /* ---------- Arranque ---------- */
-  if (ENDPOINT) $('[data-aporte]', raiz).hidden = false;
+  if (ENDPOINT) { $('[data-aporte]', raiz).hidden = false; $('[data-pista-com]', raiz).hidden = false; }
   pintarFilas();
   pintarPapel();
   pintarHistorial();
