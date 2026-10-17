@@ -1,0 +1,505 @@
+{
+  "actualizado": "Octubre 2026",
+  "version": "2026-10",
+  "endpoint": "",
+  "nota_endpoint": "URL de la app web de Google Apps Script (termina en /exec). Vacío = el promedio colaborativo queda apagado. Ver tools/TARIFARIO.md.",
+  "minimo_aportes": 5,
+  "nota": "Rangos de referencia para San Miguel de Tucumán. El mínimo apunta a emprendedores y particulares; el máximo, a pymes y empresas. Para editar un precio, cambiá min y max acá y corré python3 tools/build.py.",
+  "categorias": [
+    {
+      "id": "fotografia",
+      "titulo": "Fotografía",
+      "texto": "Sesiones, books, producto, institucional y eventos. Incluyen edición de color de todas las fotos entregadas; el retoque de piel o de objetos se cobra aparte.",
+      "grupos": [
+        {
+          "titulo": "Retratos y books",
+          "items": [
+            {
+              "id": "foto-retrato",
+              "nombre": "Sesión de retrato",
+              "detalle": "Hasta 2 horas, un lugar, 20 a 30 fotos editadas.",
+              "unidad": "sesión",
+              "min": 140000,
+              "max": 220000,
+              "fuente": "lea"
+            },
+            {
+              "id": "foto-book",
+              "nombre": "Book profesional",
+              "detalle": "Actores, modelos, músicos o marca personal. 3 a 4 horas, cambios de vestuario, 40 a 60 fotos editadas.",
+              "unidad": "sesión",
+              "min": 230000,
+              "max": 380000,
+              "fuente": "lea"
+            },
+            {
+              "id": "foto-book-15",
+              "nombre": "Book de 15",
+              "detalle": "Exteriores o estudio, 2 a 3 horas, 30 a 50 fotos editadas.",
+              "unidad": "sesión",
+              "min": 120000,
+              "max": 230000,
+              "fuente": "lab"
+            },
+            {
+              "id": "foto-pareja",
+              "nombre": "Sesión de pareja o familia",
+              "detalle": "Hasta 2 horas en exteriores, 30 fotos editadas.",
+              "unidad": "sesión",
+              "min": 130000,
+              "max": 210000,
+              "fuente": "lea"
+            }
+          ]
+        },
+        {
+          "titulo": "Producto y gastronomía",
+          "items": [
+            {
+              "id": "foto-producto",
+              "nombre": "Foto de producto",
+              "detalle": "Fondo blanco o liso, iluminación de estudio y recorte. Precio por producto (hasta 3 tomas).",
+              "unidad": "producto",
+              "min": 30000,
+              "max": 60000,
+              "fuente": "tar-foto"
+            },
+            {
+              "id": "foto-producto-pack",
+              "nombre": "Pack e-commerce",
+              "detalle": "10 productos en fondo blanco, 3 tomas cada uno, listos para tienda online.",
+              "unidad": "pack",
+              "min": 220000,
+              "max": 420000,
+              "fuente": "tar-foto"
+            },
+            {
+              "id": "foto-producto-ambientada",
+              "nombre": "Producto ambientado",
+              "detalle": "Escena armada con props para redes o catálogo. Precio por foto final.",
+              "unidad": "foto",
+              "min": 45000,
+              "max": 85000,
+              "fuente": "estimacion"
+            },
+            {
+              "id": "foto-gastronomia",
+              "nombre": "Gastronomía",
+              "detalle": "Sesión de menú o carta, hasta 12 platos y tomas del local.",
+              "unidad": "sesión",
+              "min": 250000,
+              "max": 450000,
+              "fuente": "lea"
+            }
+          ]
+        },
+        {
+          "titulo": "Institucional y corporativa",
+          "items": [
+            {
+              "id": "foto-corporativo-persona",
+              "nombre": "Retrato corporativo",
+              "detalle": "Foto de perfil profesional en la oficina, por persona (mínimo 3).",
+              "unidad": "persona",
+              "min": 35000,
+              "max": 65000,
+              "fuente": "estimacion"
+            },
+            {
+              "id": "foto-institucional-media",
+              "nombre": "Institucional, media jornada",
+              "detalle": "Hasta 4 horas: equipo, instalaciones y procesos. 40 a 60 fotos editadas.",
+              "unidad": "jornada",
+              "min": 280000,
+              "max": 480000,
+              "fuente": "lea"
+            },
+            {
+              "id": "foto-institucional-completa",
+              "nombre": "Institucional, jornada completa",
+              "detalle": "Hasta 8 horas en una o más locaciones. 80 a 120 fotos editadas.",
+              "unidad": "jornada",
+              "min": 480000,
+              "max": 750000,
+              "fuente": "lea"
+            }
+          ]
+        },
+        {
+          "titulo": "Eventos y shows",
+          "items": [
+            {
+              "id": "foto-evento-hora",
+              "nombre": "Cobertura de evento",
+              "detalle": "Social o corporativo. Precio por hora, mínimo 2 horas.",
+              "unidad": "hora",
+              "min": 60000,
+              "max": 100000,
+              "fuente": "lab"
+            },
+            {
+              "id": "foto-15-cobertura",
+              "nombre": "Fiesta de 15, cobertura básica",
+              "detalle": "4 horas de fiesta, entrega digital.",
+              "unidad": "evento",
+              "min": 210000,
+              "max": 370000,
+              "fuente": "lab"
+            },
+            {
+              "id": "foto-show",
+              "nombre": "Show o recital",
+              "detalle": "Cobertura completa de una banda o artista, 30 fotos editadas.",
+              "unidad": "show",
+              "min": 120000,
+              "max": 230000,
+              "fuente": "estimacion"
+            }
+          ]
+        },
+        {
+          "titulo": "Edición y video",
+          "items": [
+            {
+              "id": "foto-retoque-basico",
+              "nombre": "Retoque básico",
+              "detalle": "Piel y limpieza general. Unos 15 minutos por foto.",
+              "unidad": "foto",
+              "min": 13000,
+              "max": 20000,
+              "fuente": "lea"
+            },
+            {
+              "id": "foto-retoque-avanzado",
+              "nombre": "Retoque avanzado",
+              "detalle": "Fotomontaje, cambio de fondo o retoque de alta gama. Una hora por foto.",
+              "unidad": "foto",
+              "min": 55000,
+              "max": 80000,
+              "fuente": "lea"
+            },
+            {
+              "id": "video-reel",
+              "nombre": "Reel",
+              "detalle": "Video vertical de 30 a 60 segundos: filmación y edición.",
+              "unidad": "reel",
+              "min": 120000,
+              "max": 260000,
+              "fuente": "estimacion"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "diseno",
+      "titulo": "Diseño",
+      "texto": "Marcas, manuales y piezas gráficas. Incluyen dos rondas de cambios y la entrega de los archivos finales en vector y para redes.",
+      "grupos": [
+        {
+          "titulo": "Marca",
+          "items": [
+            {
+              "id": "dis-logo",
+              "nombre": "Logo",
+              "detalle": "Logotipo o isologo con 3 propuestas, versiones en color, negativo y monocromo.",
+              "unidad": "proyecto",
+              "min": 180000,
+              "max": 300000,
+              "fuente": "tar-dis"
+            },
+            {
+              "id": "dis-manual",
+              "nombre": "Manual de marca",
+              "detalle": "Para un logo que ya existe: construcción, colores, tipografías, usos correctos e incorrectos.",
+              "unidad": "proyecto",
+              "min": 200000,
+              "max": 370000,
+              "fuente": "ardg"
+            },
+            {
+              "id": "dis-logo-manual",
+              "nombre": "Logo + manual básico",
+              "detalle": "Logo nuevo con manual normativo: versiones, paleta, tipografías y usos.",
+              "unidad": "proyecto",
+              "min": 300000,
+              "max": 480000,
+              "fuente": "tar-dis"
+            },
+            {
+              "id": "dis-identidad",
+              "nombre": "Identidad completa",
+              "detalle": "Logo, manual completo y 5 aplicaciones (papelería, redes, uniforme o cartelería).",
+              "unidad": "proyecto",
+              "min": 450000,
+              "max": 800000,
+              "fuente": "tar-dis"
+            },
+            {
+              "id": "dis-rediseno",
+              "nombre": "Rediseño de marca",
+              "detalle": "Actualización de una identidad existente con su manual.",
+              "unidad": "proyecto",
+              "min": 380000,
+              "max": 800000,
+              "fuente": "tar-dis"
+            },
+            {
+              "id": "dis-aplicaciones",
+              "nombre": "Pack de 5 aplicaciones",
+              "detalle": "Sobre una marca existente: tarjetas, hoja membretada, firma de mail, perfil de redes, etc.",
+              "unidad": "pack",
+              "min": 100000,
+              "max": 150000,
+              "fuente": "tar-dis"
+            },
+            {
+              "id": "dis-vectorizar",
+              "nombre": "Vectorizar un logo",
+              "detalle": "Redibujar un logo a partir de una foto o un archivo de baja calidad.",
+              "unidad": "logo",
+              "min": 15000,
+              "max": 35000,
+              "fuente": "tar-dis"
+            }
+          ]
+        },
+        {
+          "titulo": "Gráfica y redes",
+          "items": [
+            {
+              "id": "dis-placa",
+              "nombre": "Placa para redes",
+              "detalle": "Pieza de venta o institucional, en formato post e historia.",
+              "unidad": "pieza",
+              "min": 22000,
+              "max": 45000,
+              "fuente": "estimacion"
+            },
+            {
+              "id": "dis-plantillas",
+              "nombre": "Sistema de plantillas",
+              "detalle": "Plantillas editables para posts, carruseles e historias con la identidad de la marca.",
+              "unidad": "sistema",
+              "min": 160000,
+              "max": 300000,
+              "fuente": "estimacion"
+            },
+            {
+              "id": "dis-folleto",
+              "nombre": "Folleto díptico",
+              "detalle": "Diseño listo para imprenta.",
+              "unidad": "pieza",
+              "min": 96000,
+              "max": 185000,
+              "fuente": "tar-dis"
+            },
+            {
+              "id": "dis-menu",
+              "nombre": "Carta o menú",
+              "detalle": "Hasta 6 páginas, impresa o digital con QR.",
+              "unidad": "pieza",
+              "min": 260000,
+              "max": 520000,
+              "fuente": "tar-org"
+            },
+            {
+              "id": "dis-logo-animado",
+              "nombre": "Logo animado",
+              "detalle": "Animación del logo en After Effects para videos y redes, hasta 5 segundos.",
+              "unidad": "animación",
+              "min": 120000,
+              "max": 250000,
+              "fuente": "estimacion"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "titulo": "Web",
+      "texto": "Webs a medida, rápidas y pensadas para el celular. Incluyen botón de WhatsApp, formulario de contacto y publicación con tu dominio. El dominio y el hosting se cobran aparte, a costo.",
+      "grupos": [
+        {
+          "titulo": "Sitios",
+          "items": [
+            {
+              "id": "web-landing",
+              "nombre": "Landing",
+              "detalle": "Una página con secciones: presentación, servicios, galería y contacto.",
+              "unidad": "proyecto",
+              "min": 250000,
+              "max": 450000,
+              "fuente": "sodi"
+            },
+            {
+              "id": "web-landing-turnos",
+              "nombre": "Landing con turnos",
+              "detalle": "Landing con formulario para pedir turno que llega ordenado a tu WhatsApp.",
+              "unidad": "proyecto",
+              "min": 380000,
+              "max": 650000,
+              "fuente": "estimacion"
+            },
+            {
+              "id": "web-institucional",
+              "nombre": "Web institucional",
+              "detalle": "Varias secciones o páginas, como la de Villguz: servicios, marcas, consejos, turnos y contacto.",
+              "unidad": "proyecto",
+              "min": 500000,
+              "max": 900000,
+              "fuente": "lafuerza"
+            },
+            {
+              "id": "web-sistema",
+              "nombre": "Sistema interno simple",
+              "detalle": "Herramienta privada a medida: agenda de turnos, liquidaciones o control de pagos.",
+              "unidad": "proyecto",
+              "min": 450000,
+              "max": 1000000,
+              "fuente": "estimacion"
+            }
+          ]
+        },
+        {
+          "titulo": "Extras y mantenimiento",
+          "items": [
+            {
+              "id": "web-seccion",
+              "nombre": "Sección o página extra",
+              "detalle": "Una sección más sobre una web en marcha.",
+              "unidad": "sección",
+              "min": 50000,
+              "max": 80000,
+              "fuente": "estimacion"
+            },
+            {
+              "id": "web-puesta",
+              "nombre": "Puesta online",
+              "detalle": "Conexión del dominio, certificado de seguridad y alta en Google.",
+              "unidad": "única vez",
+              "min": 30000,
+              "max": 50000,
+              "fuente": "estimacion"
+            },
+            {
+              "id": "web-mantenimiento",
+              "nombre": "Mantenimiento",
+              "detalle": "Cambios de textos y fotos, copias de seguridad y control de que todo funcione.",
+              "unidad": "mes",
+              "min": 15000,
+              "max": 40000,
+              "fuente": "faro"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "combos": [
+    {
+      "id": "combo-arranque",
+      "nombre": "Arranque",
+      "para": "Para quien empieza y necesita estar online con una imagen profesional.",
+      "items": [
+        "dis-logo-manual",
+        "web-landing"
+      ],
+      "descuento": 12
+    },
+    {
+      "id": "combo-agenda",
+      "nombre": "Agenda",
+      "para": "Profesionales que trabajan con turnos: estética, salud, fotografía, talleres.",
+      "items": [
+        "dis-logo-manual",
+        "web-landing-turnos"
+      ],
+      "descuento": 12
+    },
+    {
+      "id": "combo-marca-web",
+      "nombre": "Marca completa + web",
+      "para": "Pymes que quieren renovar su imagen y su web de una vez.",
+      "items": [
+        "dis-identidad",
+        "web-institucional"
+      ],
+      "descuento": 15
+    },
+    {
+      "id": "combo-todo",
+      "nombre": "Todo incluido",
+      "para": "Marca, web y fotos propias para que todo hable el mismo idioma.",
+      "items": [
+        "dis-identidad",
+        "web-institucional",
+        "foto-institucional-media"
+      ],
+      "descuento": 15
+    },
+    {
+      "id": "combo-ecommerce",
+      "nombre": "Vender online",
+      "para": "Para tiendas que necesitan fotos de producto y piezas para redes.",
+      "items": [
+        "foto-producto-pack",
+        "dis-plantillas"
+      ],
+      "descuento": 10
+    },
+    {
+      "id": "combo-artista",
+      "nombre": "Marca personal",
+      "para": "Artistas, músicos y profesionales que se venden a sí mismos.",
+      "items": [
+        "foto-book",
+        "web-landing"
+      ],
+      "descuento": 10
+    }
+  ],
+  "fuentes": {
+    "lea": {
+      "nombre": "Tarifario fotográfico 2026 (sep 2026)",
+      "url": "https://leonelaarguello.com/tarifario-fotografico-2026/"
+    },
+    "lab": {
+      "nombre": "El Laburante, fotógrafo de eventos 2026",
+      "url": "https://ellaburante.com/blog/fotografo-eventos-precios-2026"
+    },
+    "tar-foto": {
+      "nombre": "Tarifario.org, fotografía",
+      "url": "https://tarifario.org/fotografia-c35"
+    },
+    "tar-dis": {
+      "nombre": "Tarifario.org, identidad",
+      "url": "https://tarifario.org/identidad-c7"
+    },
+    "tar-org": {
+      "nombre": "Tarifario.org, diseño gráfico",
+      "url": "https://tarifario.org/"
+    },
+    "ardg": {
+      "nombre": "ARDG Rosario, tarifario (sep 2026)",
+      "url": "https://ardg.ar/tarifario/"
+    },
+    "sodi": {
+      "nombre": "Sodi, precios web 2026",
+      "url": "https://sodi.com.ar/blog/cuanto-cuesta-pagina-web-argentina"
+    },
+    "lafuerza": {
+      "nombre": "La Fuerza Marketing, precios web 2026",
+      "url": "https://lafuerzamarketing.com.ar/cuanto-cuesta-pagina-web-argentina-2026/"
+    },
+    "faro": {
+      "nombre": "Faro Studio, costos web (sep 2026)",
+      "url": "https://www.farostudio.com.ar/blog/cuanto-cuesta-pagina-web-argentina-2026/"
+    },
+    "estimacion": {
+      "nombre": "Estimación propia sobre valor hora de referencia",
+      "url": ""
+    }
+  }
+}

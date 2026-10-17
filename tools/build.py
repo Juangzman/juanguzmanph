@@ -140,14 +140,14 @@ ISO = (RAIZ / "img" / "isotipo.svg").read_text().replace("#333333", "currentColo
     '<svg ', '<svg aria-hidden="true" focusable="false" ')
 
 NAV = [("Fotografía", "/fotografia.html", "fotografia"), ("Diseño", "/diseno.html", "diseno"),
-       ("Servicios", "/#servicios", "servicios"), ("Sobre mí", "/#sobre", "sobre")]
+       ("Servicios", "/#servicios", "servicios"), ("Tarifario", "/tarifario/", "tarifario"), ("Sobre mí", "/#sobre", "sobre")]
 
 
 def flecha(clase="ph-arrow-right"):
     return f'<i class="ph-light {clase}" aria-hidden="true"></i>'
 
 
-def cabeza(titulo, descripcion, ruta, imagen_og=None):
+def cabeza(titulo, descripcion, ruta, imagen_og=None, extra=""):
     og = imagen_og or f"{SITIO}/img/f/conciertos-01-1600.jpg"
     return f"""<!doctype html>
 <html lang="es-AR">
@@ -174,7 +174,7 @@ def cabeza(titulo, descripcion, ruta, imagen_og=None):
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
 <link rel="stylesheet" href="/css/styles.css?v={_ver('css/styles.css')}">
 <script defer src="/js/main.js?v={_ver('js/main.js')}"></script>
-</head>
+{extra}</head>
 <body>
 <a class="sr-only" href="#contenido">Saltar al contenido</a>
 """
@@ -444,6 +444,7 @@ def pagina_inicio():
       <span class="etiqueta" data-r>03 — Servicios</span>
       <h2 id="t-serv" data-r>Lo que hago</h2>
       <p class="lead" data-r style="--d:1">Un solo aliado para la imagen de tu marca: la foto, el diseño y la experiencia digital.</p>
+      <a class="link" href="/tarifario/" data-r style="--d:2">Ver precios de referencia {flecha()}</a>
     </div>
     <ul class="servicios__lista">
 {servicios}    </ul>
@@ -845,12 +846,18 @@ def main():
     (RAIZ / "fotografia.html").write_text(relativas(pagina_fotografia(), ""))
     (RAIZ / "diseno.html").write_text(relativas(pagina_diseno(), ""))
     (RAIZ / "proyectos").mkdir(exist_ok=True)
+    (RAIZ / "tarifario").mkdir(exist_ok=True)
+    (RAIZ / "tarifario" / "index.html").write_text(relativas(pagina_tarifario(sys.modules[__name__]), "../"))
     for slug, contenido in proyectos().items():
         (RAIZ / "proyectos" / f"{slug}.html").write_text(relativas(contenido, "../"))
     # favicon: isotipo en tinta
     (RAIZ / "img" / "favicon.svg").write_text(
         (RAIZ / "img" / "isotipo.svg").read_text().replace("#333333", "#1a1a1a"))
     print("Listo: index.html, fotografia.html, diseno.html y", len(proyectos()), "proyectos")
+
+
+import sys  # noqa: E402
+from tarifario import pagina_tarifario  # noqa: E402  (tools/tarifario.py: pagina del tarifario)
 
 
 if __name__ == "__main__":
