@@ -20,40 +20,54 @@
 
 <!-- Ingreso: solo con tu clave de GitHub se puede ver y cambiar algo -->
 <section class="ingreso" id="ingreso">
-  <form class="ingreso__card" id="formIngreso" autocomplete="on">
-    <span class="etiqueta">Juan Guzman</span>
+  <form class="ingreso__card" id="formIngreso" data-modo="usuario" autocomplete="on">
+    <span class="etiqueta" id="marca">Estudio</span>
     <h1>Estudio</h1>
     <p class="texto">Tu espacio privado para elegir y ordenar las fotos de la web.</p>
-    <label class="campo">
-      <span>Clave de acceso</span>
-      <input type="password" id="clave" name="password" autocomplete="current-password" required spellcheck="false" placeholder="github_pat_…">
-    </label>
+    <div class="campos" id="camposUsuario">
+      <label class="campo">
+        <span>Usuario</span>
+        <input type="text" id="usuario" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      </label>
+      <label class="campo">
+        <span>Contraseña</span>
+        <input type="password" id="contrasena" name="password" autocomplete="current-password" required>
+      </label>
+    </div>
+    <div class="campos" id="camposGithub" hidden>
+      <p class="nota" id="primeraVez" hidden><b>Primera vez:</b> entrá con tu clave de GitHub y después creá tu usuario en <i>Accesos</i>. Desde ahí en adelante, entrás con usuario y contraseña.</p>
+      <label class="campo">
+        <span>Clave de GitHub</span>
+        <input type="password" id="clave" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+      </label>
+      <details class="ayuda">
+        <summary>¿Cómo consigo la clave de GitHub?</summary>
+        <ol>
+          <li>En github.com tocá tu foto → <b>Settings</b> → <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b>.</li>
+          <li>Nombre: <i>Estudio web</i>. Vencimiento: el más largo que te deje.</li>
+          <li>Repository access: <b>Only select repositories</b> → el repositorio de la web.</li>
+          <li>Permissions → <b>Add permissions</b> → <b>Contents</b> → <b>Read and write</b>.</li>
+          <li><b>Generate token</b>, copiala (empieza con <i>github_pat_</i>) y pegala acá.</li>
+        </ol>
+      </details>
+    </div>
     <label class="check"><input type="checkbox" id="recordar" checked> Recordar en este dispositivo</label>
     <button class="btn btn--primario" type="submit" id="btnEntrar">Entrar <i class="ph-light ph-arrow-right" aria-hidden="true"></i></button>
     <p class="error" id="errorIngreso" role="alert" hidden></p>
-    <details class="ayuda">
-      <summary>¿Cómo consigo mi clave?</summary>
-      <ol>
-        <li>En github.com tocá tu foto → <b>Settings</b> → <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b>.</li>
-        <li>Nombre: <i>Estudio web</i>. Vencimiento: el más largo que te deje.</li>
-        <li>Repository access: <b>Only select repositories</b> → <i>juanguzmanph</i>.</li>
-        <li>Permissions → Repository permissions → <b>Contents: Read and write</b>.</li>
-        <li><b>Generate token</b>, copiala (empieza con <i>github_pat_</i>) y pegala acá.</li>
-      </ol>
-      <p>La clave queda guardada solo en este dispositivo. Sin ella nadie puede cambiar nada.</p>
-    </details>
+    <button type="button" class="cambiar-modo" id="cambiarModo">Entrar con clave de GitHub</button>
   </form>
 </section>
 
 <div class="app" id="app" hidden>
   <header class="app__barra">
-    <div class="app__marca"><span>Estudio</span><small id="estado">Galería de fotografía</small></div>
+    <div class="app__marca"><span>Estudio</span><small><span id="quien"></span> · <span id="estado">Galería de fotografía</span></small></div>
     <div class="app__acciones">
       <div class="segmento" role="group" aria-label="Modo">
         <button type="button" class="segmento__btn" data-vista="editar" aria-pressed="true"><i class="ph-light ph-squares-four" aria-hidden="true"></i><span>Editar</span></button>
         <button type="button" class="segmento__btn" data-vista="previa" aria-pressed="false"><i class="ph-light ph-eye" aria-hidden="true"></i><span>Así se ve</span></button>
       </div>
       <button type="button" class="btn btn--primario" id="btnPublicar" disabled><i class="ph-light ph-cloud-arrow-up" aria-hidden="true"></i> Publicar <b id="cuentaCambios" hidden></b></button>
+      <button type="button" class="icono" id="btnAccesos" title="Accesos" aria-label="Accesos"><i class="ph-light ph-users" aria-hidden="true"></i></button>
       <button type="button" class="icono" id="btnSalir" title="Salir" aria-label="Salir"><i class="ph-light ph-sign-out" aria-hidden="true"></i></button>
     </div>
   </header>
@@ -88,8 +102,39 @@
   </main>
 </div>
 
+<dialog class="accesos" id="accesos" aria-labelledby="t-accesos">
+  <div class="accesos__cab">
+    <h2 id="t-accesos">Accesos</h2>
+    <button type="button" class="icono" id="cerrarAccesos" aria-label="Cerrar"><i class="ph-light ph-x" aria-hidden="true"></i></button>
+  </div>
+  <p class="texto">Cada persona entra con su usuario y su contraseña. Nadie más puede ver ni cambiar nada.</p>
+  <ul class="accesos__lista" id="listaAccesos"></ul>
+
+  <div class="nota" id="accesosBloqueo" hidden>
+    Para sumar o quitar usuarios, entrá con tu <b>usuario y contraseña</b> (no con la clave de GitHub).
+    Si te olvidaste la contraseña, podés <button type="button" class="link" id="reiniciarAccesos">empezar de cero</button>.
+  </div>
+
+  <form class="accesos__form" id="formAcceso" autocomplete="off">
+    <h3>Nuevo usuario</h3>
+    <label class="campo"><span>Usuario</span><input type="text" id="nuevoUsuario" autocapitalize="none" spellcheck="false" placeholder="ej. juan" required></label>
+    <label class="campo"><span>Contraseña (mínimo 10 caracteres)</span><input type="password" id="nuevaContrasena" autocomplete="new-password" required></label>
+    <label class="campo"><span>Repetir contraseña</span><input type="password" id="repetirContrasena" autocomplete="new-password" required></label>
+    <p class="error" id="errorAcceso" role="alert" hidden></p>
+    <button class="btn btn--primario" type="submit" id="btnCrearAcceso">Crear acceso</button>
+  </form>
+
+  <form class="accesos__form" id="formClaveGithub" autocomplete="off" hidden>
+    <h3>Clave de GitHub</h3>
+    <p class="meta">Cuando venza (una vez por año), pegá la nueva acá: todos siguen entrando igual, sin cambiar sus contraseñas.</p>
+    <label class="campo"><span>Nueva clave</span><input type="password" id="nuevaClaveGithub" placeholder="github_pat_…" required></label>
+    <button class="btn btn--secundario" type="submit">Actualizar clave</button>
+  </form>
+</dialog>
+
 <div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
 
+<script src="config.js"></script>
 <script src="estudio.js"></script>
 </body>
 </html>

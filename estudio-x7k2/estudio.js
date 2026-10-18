@@ -2,11 +2,15 @@
    Todo pasa en tu navegador: las fotos se achican acá y se guardan en GitHub con tu clave.
    Después GitHub vuelve a generar la web sola (.github/workflows/publicar.yml). */
 (() => {
-  const REPO = { owner: 'Juangzman', repo: 'juanguzmanph', rama: 'main' };
+  const CFG = window.ESTUDIO_CONFIG;
+  const REPO = { owner: CFG.owner, repo: CFG.repo, rama: CFG.rama };
   const API = `https://api.github.com/repos/${REPO.owner}/${REPO.repo}`;
   const RAW = `https://raw.githubusercontent.com/${REPO.owner}/${REPO.repo}/${REPO.rama}/`;
-  const CLAVE = 'estudio-clave';
-  const ANCHOS = [800, 1600];
+  const CLAVE = `estudio-sesion-${CFG.repo}`;
+  const ANCHOS = CFG.anchos;
+  const FOTOS = CFG.carpetaFotos;
+  const WEB = CFG.raizWeb;
+  document.getElementById('marca').textContent = CFG.marca;
 
   const $ = (s) => document.querySelector(s);
   const el = (tag, attrs = {}, html = '') => { const n = document.createElement(tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); if (html) n.innerHTML = html; return n; };
@@ -60,17 +64,67 @@
     fr.readAsDataURL(blob);
   });
 
+  /* ---------- Cifrado de accesos ----------
+     La clave de GitHub se guarda cifrada en accesos.json con una llave al azar (K).
+     Cada usuario guarda K cifrada con su propia contraseña. Así:
+     - se entra con usuario y contraseña, sin tocar GitHub;
+     - si la clave de GitHub vence, se cambia una sola vez y todos siguen entrando. */
+  const te = new TextEncoder(), td = new TextDecoder();
+  const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const deB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const azar = (n) => crypto.getRandomValues(new Uint8Array(n));
+  const ITER = 600000;
+  const norm = (u) => u.trim().toLowerCase();
+  const llaveDeContrasena = async (contrasena, sal) => {
+    const base = await crypto.subtle.importKey('raw', te.encode(contrasena), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: sal, iterations: ITER, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  };
+  const llaveCruda = (bytes) => crypto.subtle.importKey('raw', bytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
+  const cifrar = async (llave, datos, extra) => {
+    const iv = azar(12);
+    const c = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: te.encode(extra || '') }, llave, datos);
+    return { iv: b64(iv), datos: b64(c) };
+  };
+  const descifrar = async (llave, { iv, datos }, extra) =>
+    crypto.subtle.decrypt({ name: 'AES-GCM', iv: deB64(iv), additionalData: te.encode(extra || '') }, llave, deB64(datos));
+
+  let accesos = null;   // contenido de accesos.json (null = todavía no hay)
+  let K = null;         // llave de los accesos (solo si se entró con usuario y contraseña o se crearon recién)
+  let quien = '';       // usuario que entró ('' = con clave de GitHub)
+
+  const leerAccesos = async () => {
+    const urls = [`${WEB}${CFG.accesos}?nc=${Date.now()}`, `${RAW}${CFG.accesos}?nc=${Date.now()}`];
+    for (const u of urls) {
+      try { const r = await fetch(u, { cache: 'no-store' }); if (r.ok) return await r.json(); } catch (e) {}
+    }
+    return null;
+  };
+
   /* ---------- Ingreso ---------- */
-  const entrar = async (clave, recordar) => {
-    token = clave.trim();
+  const guardarSesion = (recordar) => {
+    const s = JSON.stringify({ token, k: K ? b64(K) : null, quien });
+    try { sessionStorage.setItem(CLAVE, s); if (recordar) localStorage.setItem(CLAVE, s); } catch (e) { /* modo privado: funciona mientras la pestaña esté abierta */ }
+  };
+
+  const abrir = async () => {
     const repo = await gh('');
     if (!repo.permissions || !repo.permissions.push) { const e = new Error('sin permiso'); e.status = 403; throw e; }
-    try {
-      (recordar ? localStorage : sessionStorage).setItem(CLAVE, token);
-    } catch (e) { /* navegador en modo privado: igual funciona mientras la pestaña esté abierta */ }
     await cargarGaleria();
+    $('#quien').textContent = quien ? `Hola, ${quien}` : 'Administrador';
     $('#ingreso').hidden = true;
     $('#app').hidden = false;
+  };
+
+  const entrarConUsuario = async (usuario, contrasena) => {
+    accesos = await leerAccesos();
+    const u = accesos && accesos.usuarios.find((x) => x.usuario === norm(usuario));
+    if (!u) { const e = new Error('usuario'); e.motivo = 'datos'; throw e; }
+    try {
+      const llave = await llaveDeContrasena(contrasena, deB64(u.sal));
+      K = new Uint8Array(await descifrar(llave, u, u.usuario));
+      token = td.decode(await descifrar(await llaveCruda(K), accesos.clave, 'github'));
+    } catch (e) { const x = new Error('contraseña'); x.motivo = 'datos'; throw x; }
+    quien = u.usuario;
   };
 
   const salir = () => {
@@ -79,27 +133,140 @@
     location.reload();
   };
 
+  const modoIngreso = (github) => {
+    $('#camposUsuario').hidden = github;
+    $('#camposGithub').hidden = !github;
+    $('#usuario').required = !github; $('#contrasena').required = !github; $('#clave').required = github;
+    $('#cambiarModo').textContent = github ? 'Entrar con usuario y contraseña' : 'Entrar con clave de GitHub';
+    $('#formIngreso').dataset.modo = github ? 'github' : 'usuario';
+  };
+  $('#cambiarModo').addEventListener('click', () => modoIngreso($('#formIngreso').dataset.modo !== 'github'));
+
   $('#formIngreso').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const err = $('#errorIngreso');
     err.hidden = true;
     $('#btnEntrar').disabled = true;
+    $('#btnEntrar').classList.add('esperando');
     try {
-      await entrar($('#clave').value, $('#recordar').checked);
+      if ($('#formIngreso').dataset.modo === 'github') {
+        token = $('#clave').value.trim(); K = null; quien = '';
+        accesos = await leerAccesos();
+      } else {
+        await entrarConUsuario($('#usuario').value, $('#contrasena').value);
+      }
+      await abrir();
+      guardarSesion($('#recordar').checked);
     } catch (e) {
-      token = null;
-      err.textContent = e.status === 401 ? 'La clave no es válida o venció. Generá una nueva.'
-        : e.status === 403 || e.status === 404 ? 'Esa clave no tiene permiso para cambiar la web (revisá que tenga Contents: Read and write sobre juanguzmanph).'
-        : 'No pude conectar con GitHub. Revisá tu conexión e intentá de nuevo.';
+      token = null; K = null;
+      err.textContent = e.motivo === 'datos' ? 'Usuario o contraseña incorrectos.'
+        : e.status === 401 ? 'La clave de GitHub no es válida o venció. Pedile al administrador que la actualice.'
+        : e.status === 403 || e.status === 404 ? 'Esa clave no tiene permiso para cambiar la web (necesita Contents: Read and write).'
+        : 'No pude conectar. Revisá tu conexión e intentá de nuevo.';
       err.hidden = false;
     }
     $('#btnEntrar').disabled = false;
+    $('#btnEntrar').classList.remove('esperando');
   });
   $('#btnSalir').addEventListener('click', salir);
 
+  /* ---------- Accesos: usuarios y contraseñas ---------- */
+  const guardarAccesos = async (mensaje) => {
+    let sha;
+    try { sha = (await gh(`/contents/${CFG.accesos}?ref=${REPO.rama}`)).sha; } catch (e) { if (e.status !== 404) throw e; }
+    const contenido = btoa(unescape(encodeURIComponent(JSON.stringify(accesos, null, 1) + '\n')));
+    await gh(`/contents/${CFG.accesos}`, { method: 'PUT', body: { message: mensaje, content: contenido, branch: REPO.rama, ...(sha ? { sha } : {}) } });
+  };
+
+  const pintarAccesos = () => {
+    const lista = $('#listaAccesos');
+    lista.innerHTML = '';
+    const usuarios = accesos ? accesos.usuarios : [];
+    usuarios.forEach((u) => {
+      const li = el('li', {}, `<span><i class="ph-light ph-user-circle"></i> ${u.usuario}${u.usuario === quien ? ' <small>(vos)</small>' : ''}</span>`);
+      const b = el('button', { type: 'button', class: 'link' }, 'Quitar');
+      b.disabled = usuarios.length === 1;
+      b.onclick = async () => {
+        if (!confirm(`¿Quitar el acceso de ${u.usuario}?`)) return;
+        accesos.usuarios = accesos.usuarios.filter((x) => x !== u);
+        try { await guardarAccesos(`Estudio: quito el acceso de ${u.usuario}`); avisar(`Acceso de ${u.usuario} quitado.`); } catch (e) { avisar('No se pudo guardar. Intentá de nuevo.'); }
+        pintarAccesos();
+      };
+      li.append(b);
+      lista.append(li);
+    });
+    if (!usuarios.length) lista.append(el('li', { class: 'meta' }, 'Todavía no hay usuarios. Creá el primero abajo.'));
+    const sinLlave = accesos && !K;
+    $('#accesosBloqueo').hidden = !sinLlave;
+    $('#formAcceso').hidden = sinLlave;
+    $('#formClaveGithub').hidden = !K;
+  };
+
+  $('#btnAccesos').addEventListener('click', () => { pintarAccesos(); $('#accesos').showModal(); });
+  $('#cerrarAccesos').addEventListener('click', () => $('#accesos').close());
+
+  $('#formAcceso').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const usuario = norm($('#nuevoUsuario').value), c1 = $('#nuevaContrasena').value, c2 = $('#repetirContrasena').value;
+    const err = $('#errorAcceso');
+    err.hidden = true;
+    const falla = !/^[a-z0-9._-]{3,30}$/.test(usuario) ? 'El usuario lleva de 3 a 30 letras o números, sin espacios.'
+      : c1.length < 10 ? 'La contraseña tiene que tener al menos 10 caracteres.'
+      : c1 !== c2 ? 'Las contraseñas no coinciden.'
+      : accesos && accesos.usuarios.some((u) => u.usuario === usuario) ? 'Ese usuario ya existe.' : '';
+    if (falla) { err.textContent = falla; err.hidden = false; return; }
+    const btn = $('#btnCrearAcceso');
+    btn.disabled = true;
+    try {
+      if (!accesos) { // primera vez: se crea la llave y se guarda la clave de GitHub cifrada
+        K = azar(32);
+        accesos = { version: 1, clave: await cifrar(await llaveCruda(K), te.encode(token), 'github'), usuarios: [] };
+      }
+      const sal = azar(16);
+      const envuelta = await cifrar(await llaveDeContrasena(c1, sal), K, usuario);
+      accesos.usuarios.push({ usuario, sal: b64(sal), ...envuelta });
+      await guardarAccesos(`Estudio: acceso para ${usuario}`);
+      ev.target.reset();
+      avisar(`Listo: ${usuario} ya puede entrar con su contraseña (en unos minutos).`);
+      pintarAccesos();
+    } catch (e) {
+      err.textContent = 'No se pudo guardar. Revisá tu conexión e intentá de nuevo.';
+      err.hidden = false;
+    }
+    btn.disabled = false;
+  });
+
+  $('#formClaveGithub').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const nueva = $('#nuevaClaveGithub').value.trim();
+    const anterior = token;
+    try {
+      token = nueva;
+      const repo = await gh('');
+      if (!repo.permissions || !repo.permissions.push) throw new Error('permiso');
+      accesos.clave = await cifrar(await llaveCruda(K), te.encode(token), 'github');
+      await guardarAccesos('Estudio: actualizo la clave de GitHub');
+      guardarSesion(!!localStorage.getItem(CLAVE));
+      ev.target.reset();
+      avisar('Clave de GitHub actualizada. Todos siguen entrando con su contraseña.');
+    } catch (e) {
+      token = anterior;
+      avisar('Esa clave no funciona o no tiene permiso de escritura.');
+    }
+  });
+
+  $('#reiniciarAccesos').addEventListener('click', async () => {
+    if (!confirm('Se borran todos los usuarios y vas a crear el primero de nuevo. ¿Seguir?')) return;
+    accesos = null; K = null;
+    pintarAccesos();
+    $('#accesosBloqueo').hidden = true;
+    $('#formAcceso').hidden = false;
+    avisar('Creá el primer usuario: al guardarlo se reemplazan los accesos anteriores.');
+  });
+
   /* ---------- Galería ---------- */
   const cargarGaleria = async () => {
-    const texto = await gh(`/contents/data/galeria.json?ref=${REPO.rama}`, { accept: 'application/vnd.github.raw+json' });
+    const texto = await gh(`/contents/${CFG.galeria}?ref=${REPO.rama}`, { accept: 'application/vnd.github.raw+json' });
     galeria = JSON.parse(texto);
     original = JSON.stringify(galeria);
     actual = actual || galeria.categorias[0].id;
@@ -125,7 +292,7 @@
 
   const miniatura = (f) => {
     const n = nuevas.get(f.slug);
-    return n ? n.url : publicadas.get(f.slug) || `../img/f/${f.slug}-800.jpg`;
+    return n ? n.url : publicadas.get(f.slug) || `${WEB}${FOTOS}/${f.slug}-${ANCHOS[0]}.jpg`;
   };
 
   const pintarChips = () => {
@@ -162,7 +329,7 @@
       const fig = el('figure', { class: 'foto', draggable: 'true', 'data-i': i });
       const img = el('img', { src: miniatura(f), alt: '', loading: i > 11 ? 'lazy' : 'eager', decoding: 'async' });
       // recién publicada: mientras GitHub genera la web, la tomo del repositorio
-      img.onerror = () => { if (!img.dataset.raw) { img.dataset.raw = 1; img.src = RAW + `img/f/${f.slug}-800.jpg`; } };
+      img.onerror = () => { if (!img.dataset.raw) { img.dataset.raw = 1; img.src = RAW + `${FOTOS}/${f.slug}-${ANCHOS[0]}.jpg`; } };
       fig.append(img);
       if (c.portada === f.slug) fig.append(el('span', { class: 'foto__sello' }, '<i class="ph-light ph-star"></i> Portada'));
       else if (nuevas.has(f.slug)) fig.append(el('span', { class: 'foto__sello foto__sello--nueva' }, 'Nueva'));
@@ -220,7 +387,7 @@
     c.fotos.forEach((f) => {
       const fig = el('figure');
       const img = el('img', { src: miniatura(f), alt: '', loading: 'lazy', width: f.w, height: f.h });
-      img.onerror = () => { if (!img.dataset.raw) { img.dataset.raw = 1; img.src = RAW + `img/f/${f.slug}-800.jpg`; } };
+      img.onerror = () => { if (!img.dataset.raw) { img.dataset.raw = 1; img.src = RAW + `${FOTOS}/${f.slug}-${ANCHOS[0]}.jpg`; } };
       const b = el('button', { type: 'button', tabindex: '-1' });
       b.append(img);
       fig.append(b);
@@ -233,7 +400,7 @@
       const tarjeta = el('div', { class: 'cat' });
       const caja = el('div', { class: 'cat__img' });
       const img = el('img', { src: miniatura(port), alt: '' });
-      img.onerror = () => { if (!img.dataset.raw) { img.dataset.raw = 1; img.src = RAW + `img/f/${port.slug}-800.jpg`; } };
+      img.onerror = () => { if (!img.dataset.raw) { img.dataset.raw = 1; img.src = RAW + `${FOTOS}/${port.slug}-${ANCHOS[0]}.jpg`; } };
       caja.append(img);
       tarjeta.append(caja, el('div', { class: 'cat__pie' }, `<h3>${c.nombre}</h3><span class="meta">${String(c.fotos.length).padStart(2, '0')}</span>`));
       pp.append(el('p', { class: 'etiqueta' }, 'Tarjeta en el inicio'), tarjeta);
@@ -246,7 +413,7 @@
     $('#tituloCat').textContent = c.nombre;
     $('#infoCat').textContent = `${c.fotos.length} foto${c.fotos.length === 1 ? '' : 's'} en la web`;
     $('#subirA').textContent = c.nombre;
-    $('#verEnWeb').href = `../fotografia.html#${c.id}`;
+    $('#verEnWeb').href = `${WEB}${CFG.paginaGaleria}#${c.id}`;
     $('#vistaEditar').hidden = vista !== 'editar';
     $('#vistaPrevia').hidden = vista !== 'previa';
     if (vista === 'editar') pintarGrilla(); else pintarPrevia();
@@ -294,15 +461,15 @@
     let webp = true, w = 0, h = 0;
     for (const ancho of ANCHOS) {
       const c = achicar(img, ancho);
-      archivos.push({ ruta: `img/f/${slug}-${ancho}.jpg`, blob: await aBlob(c, 'image/jpeg', 0.84) });
+      archivos.push({ ruta: `${FOTOS}/${slug}-${ancho}.jpg`, blob: await aBlob(c, 'image/jpeg', 0.84) });
       const bw = await aBlob(c, 'image/webp', 0.8);
-      if (bw && bw.type === 'image/webp') archivos.push({ ruta: `img/f/${slug}-${ancho}.webp`, blob: bw });
+      if (bw && bw.type === 'image/webp') archivos.push({ ruta: `${FOTOS}/${slug}-${ancho}.webp`, blob: bw });
       else webp = false;
       w = c.width; h = c.height;
     }
     if (!webp) for (let k = archivos.length - 1; k >= 0; k--) if (archivos[k].ruta.endsWith('.webp')) archivos.splice(k, 1);
     URL.revokeObjectURL(url);
-    const vista800 = archivos.find((a) => a.ruta.endsWith('-800.jpg'));
+    const vista800 = archivos.find((a) => a.ruta.endsWith(`-${ANCHOS[0]}.jpg`));
     nuevas.set(slug, { archivos, url: URL.createObjectURL(vista800.blob) });
     const foto = { slug, w, h };
     if (!webp) foto.webp = false;
@@ -355,7 +522,7 @@
         }
       }
       $('#estado').textContent = 'Guardando…';
-      arbol.push({ path: 'data/galeria.json', mode: '100644', type: 'blob', content: JSON.stringify(galeria, null, 1) + '\n' });
+      arbol.push({ path: CFG.galeria, mode: '100644', type: 'blob', content: JSON.stringify(galeria, null, 1) + '\n' });
       const ref = await gh(`/git/ref/heads/${REPO.rama}`);
       const base = await gh(`/git/commits/${ref.object.sha}`);
       const tree = await gh('/git/trees', { method: 'POST', body: { base_tree: base.tree.sha, tree: arbol } });
@@ -378,16 +545,22 @@
 
   window.addEventListener('beforeunload', (e) => { if (hayCambios()) { e.preventDefault(); e.returnValue = ''; } });
 
-  /* ---------- Arranque: si la clave está guardada, entra directo ---------- */
-  let guardada = null, recordada = false;
-  try { recordada = !!localStorage.getItem(CLAVE); guardada = localStorage.getItem(CLAVE) || sessionStorage.getItem(CLAVE); } catch (e) {}
-  if (guardada) {
-    entrar(guardada, recordada).catch((e) => {
-      token = null;
-      const vencida = e.status === 401 || e.status === 403;
-      if (vencida) { try { localStorage.removeItem(CLAVE); sessionStorage.removeItem(CLAVE); } catch (x) {} }
-      $('#errorIngreso').textContent = vencida ? 'Tu clave guardada ya no funciona. Pegá una nueva.' : 'No pude conectar con GitHub. Revisá tu conexión y recargá.';
-      $('#errorIngreso').hidden = false;
-    });
-  }
+  /* ---------- Arranque ---------- */
+  (async () => {
+    let ses = null;
+    try { ses = JSON.parse(sessionStorage.getItem(CLAVE) || localStorage.getItem(CLAVE) || 'null'); } catch (e) {}
+    if (ses && ses.token) {
+      token = ses.token; K = ses.k ? deB64(ses.k) : null; quien = ses.quien || '';
+      try { accesos = await leerAccesos(); await abrir(); return; } catch (e) {
+        token = null; K = null;
+        if (e.status === 401 || e.status === 403) { try { localStorage.removeItem(CLAVE); sessionStorage.removeItem(CLAVE); } catch (x) {} }
+        $('#errorIngreso').textContent = e.status === 401 ? 'Tu sesión venció. Entrá de nuevo.' : 'No pude conectar. Revisá tu conexión y recargá.';
+        $('#errorIngreso').hidden = false;
+      }
+    }
+    // primera vez (todavía no hay usuarios): se entra con la clave de GitHub
+    const hay = await leerAccesos();
+    modoIngreso(!hay);
+    if (!hay) $('#primeraVez').hidden = false;
+  })();
 })();
