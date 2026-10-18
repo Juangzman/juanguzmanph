@@ -1117,6 +1117,136 @@
    "portada": "gastronomia-25",
    "fotos": [
     {
+     "slug": "gastronomia-mvd2bjn6g7a",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bk012vg",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bkg1mla",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2blmvra3",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bmqohst",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2boqqmv6",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bqlvdwx",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2brwd81t",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bse6kd5",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bstsb3w",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2btal6kl",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2btph82h",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bu9m8j8",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2buq1595",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bv7wvbh",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bvr5zcf",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bw7a6tq",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bwnkhog",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bx4b0zc",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bxl9riq",
+     "w": 1600,
+     "h": 1067
+    },
+    {
+     "slug": "gastronomia-mvd2bxx8ys9",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bye69fp",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2byvcuuc",
+     "w": 1600,
+     "h": 1067
+    },
+    {
+     "slug": "gastronomia-mvd2bz8wdep",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2bzr4ojy",
+     "w": 1600,
+     "h": 2400
+    },
+    {
+     "slug": "gastronomia-mvd2c08s146",
+     "w": 1600,
+     "h": 2400
+    },
+    {
      "slug": "gastronomia-01",
      "w": 1600,
      "h": 1066
@@ -1665,34 +1795,8 @@
   {
    "id": "retratos",
    "nombre": "Retratos",
-   "portada": "retratos-01",
-   "fotos": [
-    {
-     "slug": "retratos-01",
-     "w": 1600,
-     "h": 2400
-    },
-    {
-     "slug": "retratos-02",
-     "w": 1600,
-     "h": 2400
-    },
-    {
-     "slug": "retratos-03",
-     "w": 1600,
-     "h": 2400
-    },
-    {
-     "slug": "retratos-04",
-     "w": 1600,
-     "h": 2400
-    },
-    {
-     "slug": "retratos-05",
-     "w": 1600,
-     "h": 2400
-    }
-   ]
+   "portada": null,
+   "fotos": []
   }
  ]
 }
