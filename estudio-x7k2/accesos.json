@@ -1,0 +1,15 @@
+{
+ "version": 1,
+ "clave": {
+  "iv": "b/1SJtpuPNCCt3Wr",
+  "datos": "4dtNViHmk3+SG4fFcfzI/kWO8XgKGn+7CYlyZY+Q9hGz0xkxxldjnYmue1uAnhLkqIy+tTyuZGym87pVuOklSKn+G8lc4FgetOzXM3Q3URxs5SQzXWC85d9yzT4CD0LzM0+YxnObCJW3AxRU1w=="
+ },
+ "usuarios": [
+  {
+   "usuario": "juanguzman",
+   "sal": "lBoWvbh8ImBKIqRfoZyaxg==",
+   "iv": "z1fuzhcZ4Sm+NrdQ",
+   "datos": "DxB47u7f6uXxDfSGc/zWeZ/iEKctyFUZySToTXp/B9GF/Pt/DIg4BtYusZysZwuz"
+  }
+ ]
+}
