@@ -166,8 +166,7 @@ def cabeza(titulo, descripcion, ruta, imagen_og=None, extra=""):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://framerusercontent.com">
-<link rel="preload" href="/fonts/bebas-light.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@300..600&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
 <link rel="stylesheet" href="/css/styles.css?v={_ver('css/styles.css')}">
 <script defer src="/js/main.js?v={_ver('js/main.js')}"></script>

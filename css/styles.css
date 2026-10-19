@@ -3,10 +3,6 @@
    Tema oscuro. Proporción del manual: 60% negro · 30% blanco · 10% terracota
    ========================================================= */
 
-/* Bebas Neue (OFL) servida desde la web. Manual: títulos en Light */
-@font-face { font-family: "Bebas Neue"; src: url("../fonts/bebas-light.woff") format("woff"); font-weight: 300; font-display: swap; }
-@font-face { font-family: "Bebas Neue"; src: url("../fonts/bebas-regular.woff") format("woff"); font-weight: 400; font-display: swap; }
-
 :root {
   /* Color (manual 03.2) */
   --negro: #1a1a1a;          /* tinta: fondo principal (60%) */
@@ -57,7 +53,7 @@ html, body { overflow-x: clip; }
 .nw { white-space: nowrap; }
 
 /* ---------- Tipografia ---------- */
-h1, h2, h3 { font-family: var(--f-display); font-weight: 300; letter-spacing: 0.005em; margin: 0; text-wrap: balance; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 400; letter-spacing: 0.005em; margin: 0; text-wrap: balance; }
 h1 { font-size: clamp(64px, 16.5vw, 184px); line-height: 0.86; }
 h2 { font-size: clamp(48px, 10vw, 112px); line-height: 0.9; }
 h3 { font-size: clamp(30px, 4.4vw, 44px); line-height: 0.95; }
@@ -140,7 +136,7 @@ p { margin: 0; }
 [data-menu-open] .menu { transform: none; visibility: visible; transition: transform 520ms var(--ease-drawer), visibility 0s; }
 [data-menu-open] .nav { background: var(--negro); box-shadow: none; }
 .menu ul { list-style: none; margin: 0; padding: 0; }
-.menu li a { display: block; font-family: var(--f-display); font-weight: 300; font-size: clamp(56px, 17vw, 96px); line-height: 1.02; opacity: 0; transform: translateY(16px); transition: opacity 300ms ease, transform 300ms var(--ease-out); }
+.menu li a { display: block; font-family: var(--f-display); font-size: clamp(56px, 17vw, 96px); line-height: 1.02; opacity: 0; transform: translateY(16px); transition: opacity 300ms ease, transform 300ms var(--ease-out); }
 [data-menu-open] .menu li a { opacity: 1; transform: none; transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out); transition-delay: calc(140ms + var(--i) * 50ms); }
 .menu li a[aria-current="page"] { color: var(--terracota); }
 .menu__pie { display: grid; gap: 6px; font-size: 15px; color: var(--texto-2); }
@@ -224,7 +220,7 @@ html[data-menu-open] { overflow: hidden; }
 .fila__img picture, .fila__img img { width: 100%; height: 100%; }
 .fila__img img { object-fit: cover; object-position: 50% 35%; transition: transform 700ms var(--ease-out), opacity 500ms ease; }
 .fila__cuerpo { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
-.fila__titulo { font-family: var(--f-display); font-weight: 300; font-size: clamp(40px, 8vw, 96px); line-height: 0.92; }
+.fila__titulo { font-family: var(--f-display); font-size: clamp(40px, 8vw, 96px); line-height: 0.92; }
 .fila__meta { display: grid; gap: 2px; text-align: right; font-size: 13px; color: var(--gris); flex: 0 1 auto; max-width: 42%; }
 .fila__titulo { min-width: 0; }
 @media (min-width: 900px) {
@@ -426,7 +422,7 @@ a.chip { display: inline-flex; align-items: center; }
 
 .siguiente { display: block; margin-top: var(--seccion); padding-block: clamp(48px, 8vw, 96px); border-top: 1px solid var(--linea); }
 .siguiente .etiqueta { display: block; margin-bottom: 12px; }
-.siguiente strong { font-family: var(--f-display); font-weight: 300; font-size: clamp(56px, 12vw, 160px); line-height: 0.88; display: block; transition: color 300ms ease; }
+.siguiente strong { font-family: var(--f-display); font-weight: 400; font-size: clamp(56px, 12vw, 160px); line-height: 0.88; display: block; transition: color 300ms ease; }
 .siguiente i { font-size: 0.5em; display: inline-block; vertical-align: 0.35em; margin-left: 0.1em; transition: transform 400ms var(--ease-out); }
 @media (hover: hover) and (pointer: fine) { .siguiente:hover strong { color: var(--terracota); } .siguiente:hover i { transform: translateX(12px); } }
 
