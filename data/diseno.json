@@ -1,0 +1,235 @@
+{
+ "piezas": {},
+ "areas": {
+  "logos": [
+   {
+    "tipo": "pieza",
+    "slug": "vibra-logo",
+    "alt": "Logo de Vibra Dulce, pastelería",
+    "tam": "c6",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "maggie-logo",
+    "alt": "Logo de Maggie Moon, velas aromáticas",
+    "tam": "c6",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "suna-logo",
+    "alt": "Logotipo de Suna, jabones naturales, sobre terracota",
+    "tam": "c3",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "suna-logo-negro",
+    "alt": "Logotipo de Suna en negativo",
+    "tam": "c3",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "suna-iso",
+    "alt": "Isotipo de Suna sobre terracota",
+    "tam": "c3",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "suna-iso-negro",
+    "alt": "Isotipo de Suna en negativo",
+    "tam": "c3",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-logo-claro",
+    "alt": "Logotipo de Villguz en positivo",
+    "tam": "c3",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-logo-azul",
+    "alt": "Logotipo de Villguz sobre azul",
+    "tam": "c3",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-iso-verde",
+    "alt": "Isotipo de Villguz sobre azul",
+    "tam": "c3",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-iso-negro",
+    "alt": "Isotipo de Villguz en negro",
+    "tam": "c3",
+    "ratio": "1"
+   }
+  ],
+  "placas": [
+   {
+    "tipo": "pieza",
+    "slug": "fiat-argo",
+    "alt": "Placa de financiación Fiat Argo",
+    "tam": "c3",
+    "ratio": "9/16"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "fiat-cronos",
+    "alt": "Placa de financiación Fiat Cronos",
+    "tam": "c3",
+    "ratio": "9/16"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "fiat-strada",
+    "alt": "Placa de financiación Fiat Strada",
+    "tam": "c3",
+    "ratio": "9/16"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "fiat-titano",
+    "alt": "Placa de financiación Fiat Titano",
+    "tam": "c3",
+    "ratio": "9/16"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-placa-venta",
+    "alt": "Placa de venta de un lavarropas reacondicionado",
+    "tam": "c6",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-placa-hotsale",
+    "alt": "Placa de Hot Sale para Villguz",
+    "tam": "c6",
+    "ratio": "1"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vibra-placa-brownie",
+    "alt": "Historia de Vibra Dulce: torta brownie",
+    "tam": "c4",
+    "ratio": "636/1152"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vibra-placa-imperial",
+    "alt": "Historia de Vibra Dulce: imperial ruso",
+    "tam": "c4",
+    "ratio": "635/1152"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vibra-placa-chaja",
+    "alt": "Historia de Vibra Dulce: torta chajá",
+    "tam": "c4",
+    "ratio": "635/1152"
+   }
+  ],
+  "redes": [
+   {
+    "tipo": "pieza",
+    "slug": "vg-feed-inverter",
+    "alt": "Carrusel: electrodomésticos comunes contra inverter",
+    "tam": "c3",
+    "ratio": "4/5"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-feed-heladera",
+    "alt": "Carrusel: recomendaciones para la heladera",
+    "tam": "c3",
+    "ratio": "4/5"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-feed-lavarropas",
+    "alt": "Carrusel: recomendaciones para el lavarropas",
+    "tam": "c3",
+    "ratio": "4/5"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-feed-oficial-1",
+    "alt": "Publicación de servicio técnico oficial",
+    "tam": "c3",
+    "ratio": "4/5"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-historia-trabajador",
+    "alt": "Historia por el Día del Trabajador",
+    "tam": "c4",
+    "ratio": "9/16"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-historia-corea",
+    "alt": "Historia sobre la visita del equipo técnico de LG",
+    "tam": "c4",
+    "ratio": "9/16"
+   },
+   {
+    "tipo": "pieza",
+    "slug": "vg-historia-venta",
+    "alt": "Historia de venta de un lavarropas reacondicionado",
+    "tam": "c4",
+    "ratio": "9/16"
+   }
+  ],
+  "motion": [
+   {
+    "tipo": "video",
+    "slug": "villguz-logo",
+    "alt": "Animación del logo de Villguz",
+    "pie": "Logo animado",
+    "tam": "c3",
+    "ratio": "9/16"
+   },
+   {
+    "tipo": "video",
+    "slug": "villguz-firma",
+    "alt": "Firma animada de Villguz",
+    "pie": "Firma animada",
+    "tam": "c3",
+    "ratio": "9/16"
+   },
+   {
+    "tipo": "video",
+    "slug": "villguz-reel",
+    "alt": "Reel de Villguz recorriendo el local",
+    "pie": "Reel",
+    "tam": "c3",
+    "ratio": "9/16"
+   },
+   {
+    "tipo": "video",
+    "slug": "yaris",
+    "alt": "Video de lanzamiento del Toyota Yaris Cross",
+    "pie": "Lanzamiento",
+    "tam": "c3",
+    "ratio": "9/16"
+   },
+   {
+    "tipo": "video",
+    "slug": "xco",
+    "alt": "Video de mountain bike del XCO argentino",
+    "pie": "Filmmaker · XCO argentino",
+    "tam": "centro",
+    "ratio": "9/16"
+   }
+  ]
+ }
+}

@@ -1,0 +1,80 @@
+{
+ "contacto": {
+  "email": "juanguzmanph@gmail.com",
+  "whatsapp": "+54 381 615-2579",
+  "instagram": "juanchigzmn",
+  "linkedin": "https://www.linkedin.com/in/juan-alfredo-guzman-56434258/",
+  "linkedin_nombre": "Juan Alfredo Guzman"
+ },
+ "presentacion": {
+  "kicker": "Fotografía y diseño · Tucumán, Argentina",
+  "frase": "Ayudo a marcas, negocios y personas a profesionalizar su imagen,",
+  "destacado": "del lente al píxel."
+ },
+ "servicios": [
+  {
+   "icono": "ph-camera",
+   "titulo": "Fotografía",
+   "texto": "Conciertos, eventos, deportes, gastronomía, producto, moda, book y retratos, con dirección de arte en cada sesión."
+  },
+  {
+   "icono": "ph-browser",
+   "titulo": "Diseño y desarrollo web",
+   "texto": "Webs únicas, pensadas para el celular, que transmiten confianza y te traen consultas. También sistemas a medida para ordenar turnos, clientes y pagos."
+  },
+  {
+   "icono": "ph-pen-nib",
+   "titulo": "Identidad visual",
+   "texto": "Logotipo, manual de marca y sistema gráfico para que tu marca se vea igual en todos lados."
+  },
+  {
+   "icono": "ph-instagram-logo",
+   "titulo": "Redes y e-commerce",
+   "texto": "Carruseles, historias y campañas que acompañan tus ventas."
+  },
+  {
+   "icono": "ph-film-slate",
+   "titulo": "Filmmaker",
+   "texto": "Reels y videos cortos con la misma mirada que mi fotografía."
+  }
+ ],
+ "sobre": {
+  "parrafos": [
+   "Soy Juan Alfredo Guzman, fotógrafo y diseñador digital en San Miguel de Tucumán. Trabajo de forma remota con marcas, negocios y personas.",
+   "Mi formación en marketing digital y e-commerce me lleva a pensar cada imagen en función de un resultado. Soy fotógrafo y filmmaker, y esa mirada guía mi dirección de arte."
+  ],
+  "foto": {
+   "remota": "mS6satP1zghi9fVVNLxIgfro8.jpg",
+   "w": 3195,
+   "h": 4792
+  },
+  "formacion": [
+   {
+    "titulo": "Lic. en Diseño Digital",
+    "detalle": "Universidad del Este, en curso"
+   },
+   {
+    "titulo": "Marketing Digital y E-commerce",
+    "detalle": "EAE Madrid, 2019"
+   },
+   {
+    "titulo": "Fotografía Social y Fotoperiodismo",
+    "detalle": "UBA, 2020"
+   },
+   {
+    "titulo": "Diseño Web HTML y CSS",
+    "detalle": "Coderhouse, 2022"
+   }
+  ],
+  "herramientas": [
+   "Figma",
+   "Photoshop",
+   "Illustrator",
+   "Lightroom",
+   "After Effects",
+   "CapCut",
+   "Canva",
+   "Notion"
+  ]
+ }
+}

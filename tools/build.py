@@ -15,12 +15,20 @@ def _ver(ruta):
     return hashlib.md5((RAIZ / ruta).read_bytes()).hexdigest()[:8]
 CDN = "https://framerusercontent.com/images/"
 
-EMAIL = "juanguzmanph@gmail.com"
-WHATSAPP_URL = "https://wa.me/5493816152579"
-WHATSAPP_TXT = "+54 381 615-2579"
-INSTAGRAM_URL = "https://www.instagram.com/juanchigzmn/"
-INSTAGRAM_TXT = "@juanchigzmn"
-LINKEDIN_URL = "https://www.linkedin.com/in/juan-alfredo-guzman-56434258/"
+# Textos y datos que se editan desde la pagina interna (data/sitio.json)
+import json as _json, re as _re
+SITIO_DATOS = _json.loads((RAIZ / "data" / "sitio.json").read_text())
+_C = SITIO_DATOS["contacto"]
+EMAIL = _C["email"]
+WHATSAPP_TXT = _C["whatsapp"]
+_wa = _re.sub(r"\D", "", WHATSAPP_TXT)
+if _wa.startswith("54") and not _wa.startswith("549"):
+    _wa = "549" + _wa[2:]  # celulares de Argentina llevan 9 en el link de WhatsApp
+WHATSAPP_URL = f"https://wa.me/{_wa}"
+INSTAGRAM_TXT = "@" + _C["instagram"].lstrip("@")
+INSTAGRAM_URL = f"https://www.instagram.com/{_C['instagram'].lstrip('@')}/"
+LINKEDIN_URL = _C.get("linkedin", "")
+LINKEDIN_NOMBRE = _C.get("linkedin_nombre", "LinkedIn")
 SITIO = "https://www.juanguzmanph.com"
 
 e = html.escape
@@ -61,6 +69,8 @@ def full(f, w, h):
 import json
 _FOTOS = json.loads((RAIZ / "tools" / "fotos.json").read_text())
 _DIS = json.loads((RAIZ / "tools" / "diseno.json").read_text())
+DISENO = json.loads((RAIZ / "data" / "diseno.json").read_text())  # areas editables desde la pagina interna
+_DIS.update(DISENO.get("piezas", {}))
 _GAL = json.loads((RAIZ / "data" / "galeria.json").read_text())["categorias"]
 NOMBRES = {c["id"]: c["nombre"] for c in _GAL}
 CATEGORIAS = [(c["id"], c["nombre"], [(f["slug"], f["w"], f["h"]) for f in c["fotos"]]) for c in _GAL]
@@ -115,24 +125,9 @@ def telefono(slug, alt, desliza=True, cls=""):
 PORTADAS = {c["id"]: c.get("portada") or (c["fotos"][0]["slug"] if c["fotos"] else None) for c in _GAL}
 ORDEN_INICIO = list(NOMBRES)
 
-# Hero: fotos de la carpeta "Fotos para el incio", en el orden en que se muestran
-# (slug, categoria, descripcion)
-HERO = [
-    ("inicio-13", "Conciertos", "Público con las manos en alto frente al escenario, en blanco y negro"),
-    ("inicio-04", "Deportes", "Ciclista de mountain bike levantando polvo en una curva"),
-    ("inicio-01", "Moda", "Pareja de novios frente a un castillo"),
-    ("inicio-12", "Conciertos", "Cantante con el público en un recital"),
-    ("inicio-09", "Eventos", "DJ con luces azules en Medusa"),
-    ("inicio-07", "Gastronomía", "Manos espolvoreando harina sobre un bollo de masa"),
-    ("inicio-02", "Deportes", "Ciclista bajando entre raíces en el monte"),
-    ("inicio-03", "Moda", "Producción de trajes de baño en grupo"),
-    ("inicio-14", "Conciertos", "Escenario iluminado frente a una multitud"),
-    ("inicio-05", "Eventos", "Consola de sonido en primer plano durante un show"),
-    ("inicio-10", "Deportes", "Ciclista de mountain bike en un descenso"),
-    ("inicio-06", "Conciertos", "Músico sentado bajo un foco en el escenario"),
-    ("inicio-11", "Deportes", "Ciclista en un sendero de tierra"),
-    ("inicio-08", "Deportes", "Ciclista bajando un sendero entre árboles"),
-]
+# Portada (data/inicio.json, se edita desde la pagina interna)
+INICIO = json.loads((RAIZ / "data" / "inicio.json").read_text())
+HERO = [(x["slug"], x["cat"], x.get("alt", ""), *([x["foco"]] if x.get("foco") else [])) for x in INICIO["movil"]]
 
 # ----------------------------------------------------------------------------
 # Piezas comunes
@@ -221,7 +216,7 @@ def contacto():
       <li><a href="mailto:{EMAIL}"><span>Email</span><span>{EMAIL} {flecha("ph-arrow-up-right")}</span></a></li>
       <li><a href="{WHATSAPP_URL}" target="_blank" rel="noopener"><span>WhatsApp</span><span>{WHATSAPP_TXT} {flecha("ph-arrow-up-right")}</span></a></li>
       <li><a href="{INSTAGRAM_URL}" target="_blank" rel="noopener"><span>Instagram</span><span>{INSTAGRAM_TXT} {flecha("ph-arrow-up-right")}</span></a></li>
-      <li><a href="{LINKEDIN_URL}" target="_blank" rel="noopener"><span>LinkedIn</span><span>Juan Alfredo Guzman {flecha("ph-arrow-up-right")}</span></a></li>
+      <li><a href="{LINKEDIN_URL}" target="_blank" rel="noopener"><span>LinkedIn</span><span>{e(LINKEDIN_NOMBRE)} {flecha("ph-arrow-up-right")}</span></a></li>
     </ul>
     <footer class="pie">
       <a class="marca" href="/" aria-label="Juan Guzman, inicio">{ISO}<span>Juan Guzman</span></a>
@@ -264,21 +259,18 @@ AREAS = [
     ("motion", "Motion", "Videos en After Effects", ("v", "/video/yaris.jpg"), "Cuadro del video de lanzamiento del Yaris Cross"),
 ]
 
-SERVICIOS = [
-    ("ph-camera", "Fotografía", "Conciertos, eventos, deportes, gastronomía, producto, moda, book y retratos, con dirección de arte en cada sesión."),
-    ("ph-browser", "Diseño y desarrollo web", "Webs únicas, pensadas para el celular, que transmiten confianza y te traen consultas. También sistemas a medida para ordenar turnos, clientes y pagos."),
-    ("ph-pen-nib", "Identidad visual", "Logotipo, manual de marca y sistema gráfico para que tu marca se vea igual en todos lados."),
-    ("ph-instagram-logo", "Redes y <span class=\"nw\">e-commerce</span>", "Carruseles, historias y campañas que acompañan tus ventas."),
-    ("ph-film-slate", "Filmmaker", "Reels y videos cortos con la misma mirada que mi fotografía."),
-]
+_nw = lambda t: e(t).replace("e-commerce", '<span class="nw">e-commerce</span>')
+SERVICIOS = [(x.get("icono", "ph-sparkle"), _nw(x["titulo"]), e(x["texto"])) for x in SITIO_DATOS["servicios"]]
+FORMACION = [(e(x["titulo"]), e(x["detalle"])) for x in SITIO_DATOS["sobre"]["formacion"]]
+HERRAMIENTAS = [e(x) for x in SITIO_DATOS["sobre"]["herramientas"]]
 
-FORMACION = [
-    ("Lic. en Diseño Digital", "Universidad del Este, en curso"),
-    ("Marketing Digital y E-commerce", "EAE Madrid, 2019"),
-    ("Fotografía Social y Fotoperiodismo", "UBA, 2020"),
-    ("Diseño Web HTML y CSS", "Coderhouse, 2022"),
-]
-HERRAMIENTAS = ["Figma", "Photoshop", "Illustrator", "Lightroom", "After Effects", "CapCut", "Canva", "Notion"]
+
+def foto_sobre():
+    f = SITIO_DATOS["sobre"]["foto"]
+    alt = "Retrato de Juan Guzman"
+    if f.get("remota"):
+        return remota(f["remota"], f["w"], f["h"], alt, "(min-width: 900px) 40vw, 100vw")
+    return foto(f["slug"], alt, "(min-width: 900px) 40vw, 100vw")
 
 
 def img_trabajo(ref, alt, sizes):
@@ -290,22 +282,12 @@ def img_trabajo(ref, alt, sizes):
     return f'<img src="{ref[1]}" width="720" height="1280" loading="lazy" decoding="async" alt="{e(alt)}">'
 
 
-HERO_DIM = {sl: (w, h, nombres, reales) for sl, w, h, nombres, reales in json.loads((RAIZ / "tools" / "hero.json").read_text())}
+HERO_DIM = {sl: (v["w"], v["h"], v["nombres"], v["reales"]) for sl, v in INICIO["fotos"].items()}
 
 
 # Portada en pantallas anchas: las horizontales solas y las verticales agrupadas de a 2 o 3
 # (categoria, [(slug, foco)], descripcion)
-HERO_ESCRITORIO = [
-    ("Conciertos", [("inicio-13", "55% 45%")], "Público con las manos en alto frente al escenario, en blanco y negro"),
-    ("Deportes", [("inicio-04", "50% 35%"), ("inicio-02", "50% 40%"), ("inicio-10", "50% 40%")], "Tres ciclistas de mountain bike en carrera"),
-    ("Moda", [("inicio-01", "30% 60%")], "Pareja de novios frente a un castillo"),
-    ("Conciertos", [("inicio-14", "50% 40%"), ("inicio-12", "75% 35%"), ("inicio-06", "50% 50%")], "Escenario, cantante y músico en vivo"),
-    ("Eventos", [("inicio-09", "50% 50%")], "DJ con luces azules en Medusa"),
-    ("Deportes", [("inicio-11", "50% 40%"), ("deportes-12", "50% 30%"), ("inicio-08", "50% 40%")], "Ciclistas bajando senderos de tierra"),
-    ("Gastronomía", [("inicio-07", "62% 55%")], "Manos espolvoreando harina sobre un bollo de masa"),
-    ("Eventos", [("eventos-17", "50% 40%"), ("inicio-05", "50% 50%"), ("eventos-23", "50% 35%")], "DJ, consola de sonido y público en una fiesta"),
-    ("Moda", [("inicio-03", "50% 40%")], "Producción de trajes de baño en grupo"),
-]
+HERO_ESCRITORIO = [(x["cat"], [(f["slug"], f.get("foco")) for f in x["fotos"]], x.get("alt", "")) for x in INICIO["escritorio"]]
 
 
 def _hero_img(slug, alt, sizes, carga, foco=None):
@@ -342,7 +324,7 @@ def hero():
   <div class="hero__velo" aria-hidden="true"></div>
   <div class="wrap hero__pie">
     <div class="hero__texto">
-      <p class="etiqueta hero__kicker" data-r>Fotografía y diseño · Tucumán, Argentina</p>
+      <p class="etiqueta hero__kicker" data-r>{e(SITIO_DATOS["presentacion"]["kicker"])}</p>
       <h1 id="t-hero" class="lineas"><span><span style="--i:0">Juan</span></span><span><span style="--i:1">Guzman</span></span></h1>
     </div>
     <div class="hero__estado" data-r style="--d:3">
@@ -386,7 +368,7 @@ def pagina_inicio():
 <section class="intro" aria-label="Presentación">
   <div class="wrap intro__in">
     <span class="intro__iso" data-r aria-hidden="true">{ISO}</span>
-    <p class="intro__frase" data-r>Ayudo a marcas, negocios y personas a profesionalizar su imagen, <em>del lente al píxel.</em></p>
+    <p class="intro__frase" data-r>{e(SITIO_DATOS["presentacion"]["frase"])} <em>{e(SITIO_DATOS["presentacion"]["destacado"])}</em></p>
     <div class="intro__acciones" data-r style="--d:1">
       <a class="btn btn--primario" href="#fotografia">Fotografía {flecha()}</a>
       <a class="btn btn--secundario" href="#diseno">Diseño {flecha()}</a>
@@ -409,7 +391,7 @@ def pagina_inicio():
   </div>
 </section>
 
-<div class="banda paralaje" aria-hidden="true">{foto("deportes-13", "", "100vw")}</div>
+<div class="banda paralaje" aria-hidden="true">{foto(INICIO.get("banda") or "deportes-13", "", "100vw")}</div>
 
 <section class="seccion" id="diseno" aria-labelledby="t-diseno">
   <div class="wrap">
@@ -453,12 +435,11 @@ def pagina_inicio():
 
 <section class="seccion" id="sobre" aria-labelledby="t-sobre" style="padding-top:0">
   <div class="wrap sobre">
-    <div class="sobre__foto img-carga" data-r>{remota("mS6satP1zghi9fVVNLxIgfro8.jpg", 3195, 4792, "Retrato de Juan Guzman", "(min-width: 900px) 40vw, 100vw")}</div>
+    <div class="sobre__foto img-carga" data-r>{foto_sobre()}</div>
     <div class="sobre__texto">
       <span class="etiqueta" data-r>04 — Sobre mí</span>
       <h2 id="t-sobre" data-r>Sobre mí</h2>
-      <p class="texto" data-r style="--d:1">Soy Juan Alfredo Guzman, fotógrafo y diseñador digital en San Miguel de Tucumán. Trabajo de forma remota con marcas, negocios y personas.</p>
-      <p class="texto" data-r style="--d:2">Mi formación en marketing digital y e-commerce me lleva a pensar cada imagen en función de un resultado. Soy fotógrafo y filmmaker, y esa mirada guía mi dirección de arte.</p>
+{"".join(f'      <p class="texto" data-r style="--d:{min(i + 1, 3)}">{e(p)}</p>{chr(10)}' for i, p in enumerate(SITIO_DATOS["sobre"]["parrafos"]))}
       <div class="datos" data-r style="--d:3">
         <div><h4>Formación</h4><ul>{formacion}</ul></div>
         <div><h4>Herramientas</h4><ul class="herramientas">{herramientas}</ul></div>
@@ -519,6 +500,28 @@ def fig(slug, alt, cls, ratio=None, sizes="(min-width: 900px) 33vw, 50vw", claro
     st = f' style="aspect-ratio:{ratio}"' if ratio else ""
     c = " claro" if claro else ""
     return f'<figure class="{cls}{c} img-carga" data-r{st}>{pieza(slug, alt, sizes)}</figure>'
+
+
+TAMANOS = {  # tam -> (clases, sizes)
+    "c3": ("c3", "(min-width: 900px) 25vw, 50vw"),
+    "c4": ("c4 t3", "(min-width: 900px) 33vw, 33vw"),
+    "c6": ("c6", "(min-width: 900px) 50vw, 50vw"),
+    "c12": ("c12", "(min-width: 900px) 90vw, 100vw"),
+    "centro": ("c4 centro", "(min-width: 900px) 33vw, 70vw"),
+}
+
+
+def mosaico_area(clave):
+    """Mosaico de un area de Diseño armado con data/diseno.json."""
+    items = ""
+    for x in DISENO["areas"].get(clave, []):
+        cls, sizes = TAMANOS.get(x.get("tam", "c3"), TAMANOS["c3"])
+        if x.get("tipo") == "video":
+            items += "    " + video(f"/video/{x['slug']}.mp4", f"/video/{x['slug']}.jpg", cls, x.get("alt", ""), e(x.get("pie", ""))) + "\n"
+        else:
+            w, h = _DIS[x["slug"]]
+            items += "    " + fig(x["slug"], x.get("alt", ""), cls, x.get("ratio") or f"{w}/{h}", sizes, claro=bool(x.get("claro"))) + "\n"
+    return f'<div class="mosaico auto">\n{items}  </div>'
 
 
 def video(src, poster, cls, etiqueta, pie=""):
@@ -769,55 +772,16 @@ def pagina_diseno():
   </div>""", ("Ver el caso completo", "/proyectos/villguz.html")),
         area("logos", 4, "Logos",
              "Marcas pensadas para funcionar en grande y en chico: logotipo, isotipo y sus versiones en color, negativo y monocromo.",
-             f"""<div class="mosaico">
-    {fig("vibra-logo", "Logo de Vibra Dulce, pastelería", "c6", "1", "(min-width: 900px) 45vw, 50vw")}
-    {fig("maggie-logo", "Logo de Maggie Moon, velas aromáticas", "c6", "1", "(min-width: 900px) 45vw, 50vw")}
-    {fig("suna-logo", "Logotipo de Suna, jabones naturales, sobre terracota", "c3", "1", sq)}
-    {fig("suna-logo-negro", "Logotipo de Suna en negativo", "c3", "1", sq)}
-    {fig("suna-iso", "Isotipo de Suna sobre terracota", "c3", "1", sq)}
-    {fig("suna-iso-negro", "Isotipo de Suna en negativo", "c3", "1", sq)}
-    {fig("vg-logo-claro", "Logotipo de Villguz en positivo", "c3", "1", sq)}
-    {fig("vg-logo-azul", "Logotipo de Villguz sobre azul", "c3", "1", sq)}
-    {fig("vg-iso-verde", "Isotipo de Villguz sobre azul", "c3", "1", sq)}
-    {fig("vg-iso-negro", "Isotipo de Villguz en negro", "c3", "1", sq)}
-  </div>"""),
+             mosaico_area("logos")),
         area("placas", 5, "Placas",
              "Piezas de venta para redes: la cuota, el beneficio o el precio se leen en un segundo y el sistema se repite producto por producto.",
-             f"""<div class="mosaico">
-    {fig("fiat-argo", "Placa de financiación Fiat Argo", "c3", "9/16", sq)}
-    {fig("fiat-cronos", "Placa de financiación Fiat Cronos", "c3", "9/16", sq)}
-    {fig("fiat-strada", "Placa de financiación Fiat Strada", "c3", "9/16", sq)}
-    {fig("fiat-titano", "Placa de financiación Fiat Titano", "c3", "9/16", sq)}
-    {fig("vg-placa-venta", "Placa de venta de un lavarropas reacondicionado", "c6", "1", "(min-width: 900px) 50vw, 50vw")}
-    {fig("vg-placa-hotsale", "Placa de Hot Sale para Villguz", "c6", "1", "(min-width: 900px) 50vw, 50vw")}
-  </div>
-  <div class="mosaico tres">
-    {fig("vibra-placa-brownie", "Historia de Vibra Dulce: torta brownie", "c4", "636/1152", "(min-width: 900px) 33vw, 33vw")}
-    {fig("vibra-placa-imperial", "Historia de Vibra Dulce: imperial ruso", "c4", "635/1152", "(min-width: 900px) 33vw, 33vw")}
-    {fig("vibra-placa-chaja", "Historia de Vibra Dulce: torta chajá", "c4", "635/1152", "(min-width: 900px) 33vw, 33vw")}
-  </div>""", ("Ver el proyecto de concesionarias", "/proyectos/automotriz.html")),
+             mosaico_area("placas"), ("Ver el proyecto de concesionarias", "/proyectos/automotriz.html")),
         area("redes", 6, "Redes",
              "Sistemas de plantillas para Instagram: carruseles que educan, historias que venden y piezas institucionales que construyen confianza.",
-             f"""<div class="mosaico">
-    {fig("vg-feed-inverter", "Carrusel: electrodomésticos comunes contra inverter", "c3", "4/5", sq)}
-    {fig("vg-feed-heladera", "Carrusel: recomendaciones para la heladera", "c3", "4/5", sq)}
-    {fig("vg-feed-lavarropas", "Carrusel: recomendaciones para el lavarropas", "c3", "4/5", sq)}
-    {fig("vg-feed-oficial-1", "Publicación de servicio técnico oficial", "c3", "4/5", sq)}
-    {fig("vg-historia-trabajador", "Historia por el Día del Trabajador", "c4", "9/16")}
-    {fig("vg-historia-corea", "Historia sobre la visita del equipo técnico de LG", "c4", "9/16")}
-    {fig("vg-historia-venta", "Historia de venta de un lavarropas reacondicionado", "c4 ancho", "9/16")}
-  </div>"""),
+             mosaico_area("redes")),
         area("motion", 7, "Motion",
              "Animaciones hechas en After Effects: logos que cobran vida, firmas animadas, reels y lanzamientos de producto. También filmo y edito video deportivo.",
-             f"""<div class="mosaico">
-    {video("/video/villguz-logo.mp4", "/video/villguz-logo.jpg", "c3", "Animación del logo de Villguz", "Logo animado")}
-    {video("/video/villguz-firma.mp4", "/video/villguz-firma.jpg", "c3", "Firma animada de Villguz", "Firma animada")}
-    {video("/video/villguz-reel.mp4", "/video/villguz-reel.jpg", "c3", "Reel de Villguz recorriendo el local", "Reel")}
-    {video("/video/yaris.mp4", "/video/yaris.jpg", "c3", "Video de lanzamiento del Toyota Yaris Cross", "Lanzamiento")}
-  </div>
-  <div class="mosaico">
-    {video("/video/xco.mp4", "/video/xco.jpg", "c4 centro", "Video de mountain bike del XCO argentino", "Filmmaker · XCO argentino")}
-  </div>"""),
+             mosaico_area("motion")),
     ]
     chips = "".join(f'<a class="chip" href="#{k}">{t}</a>' for k, t, *_ in AREAS)
     cuerpo = f"""{navegacion("diseno")}
