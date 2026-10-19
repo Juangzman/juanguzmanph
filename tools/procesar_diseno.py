@@ -39,7 +39,12 @@ D = {
  "vg-logo-azul": (V+"Logos/Logos Villguz/Mesa de trabajo 8.png", (22,45,95)),
  "vg-iso-verde": (V+"Logos/Logos Villguz/Mesa de trabajo 7.png", (22,45,95)),
  "vg-iso-negro": (V+"Logos/Logos Villguz/Mesa de trabajo 4.png", (245,245,245)),
+ "vibra-logo": (REPO+"/tools/fuentes/vibra-dulce-logo.png", (247, 217, 227)),
+ "maggie-logo": (REPO+"/tools/fuentes/maggie-moon-logo.png", (244, 240, 250)),
  # Placas
+ "vibra-placa-brownie": (REPO+"/tools/fuentes/vibra-placa-brownie.jpg", None),
+ "vibra-placa-imperial": (REPO+"/tools/fuentes/vibra-placa-imperial.jpg", None),
+ "vibra-placa-chaja": (REPO+"/tools/fuentes/vibra-placa-chaja.jpg", None),
  "vg-placa-venta": (V+"PublicacionesHISTORIASig/MARKETT9010.png", None),
  "vg-placa-hotsale": (V+"PublicacionesHISTORIASig/hotsaley9010.png", None),
 }

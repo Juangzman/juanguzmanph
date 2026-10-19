@@ -395,10 +395,12 @@ a.chip { display: inline-flex; align-items: center; }
 .mosaico .claro img { object-fit: contain; }
 .mosaico .ancho { grid-column: 1 / -1; }
 .mosaico .centro { grid-column: 1 / -1; justify-self: center; width: min(100%, 360px); }
+.mosaico.tres { grid-template-columns: repeat(3, 1fr); padding-top: 6px; }
 @media (min-width: 900px) {
   .mosaico { gap: 14px; grid-template-columns: repeat(12, 1fr); }
   .mosaico .c3 { grid-column: span 3; } .mosaico .c4 { grid-column: span 4; } .mosaico .c6 { grid-column: span 6; } .mosaico .c8 { grid-column: span 8; } .mosaico .c12 { grid-column: span 12; }
   .mosaico .centro { grid-column: 5 / span 4; width: auto; justify-self: stretch; }
+  .mosaico.tres { grid-template-columns: repeat(12, 1fr); padding-top: 14px; }
 }
 
 .pantalla { position: relative; height: clamp(480px, 70vh, 760px); overflow: hidden; background: var(--blanco); }

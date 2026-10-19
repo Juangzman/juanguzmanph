@@ -771,6 +771,8 @@ def pagina_diseno():
         area("logos", 4, "Logos",
              "Marcas pensadas para funcionar en grande y en chico: logotipo, isotipo y sus versiones en color, negativo y monocromo.",
              f"""<div class="mosaico">
+    {fig("vibra-logo", "Logo de Vibra Dulce, pastelería", "c6", "1", "(min-width: 900px) 45vw, 50vw")}
+    {fig("maggie-logo", "Logo de Maggie Moon, velas aromáticas", "c6", "1", "(min-width: 900px) 45vw, 50vw")}
     {fig("suna-logo", "Logotipo de Suna, jabones naturales, sobre terracota", "c3", "1", sq)}
     {fig("suna-logo-negro", "Logotipo de Suna en negativo", "c3", "1", sq)}
     {fig("suna-iso", "Isotipo de Suna sobre terracota", "c3", "1", sq)}
@@ -789,6 +791,11 @@ def pagina_diseno():
     {fig("fiat-titano", "Placa de financiación Fiat Titano", "c3", "9/16", sq)}
     {fig("vg-placa-venta", "Placa de venta de un lavarropas reacondicionado", "c6", "1", "(min-width: 900px) 50vw, 50vw")}
     {fig("vg-placa-hotsale", "Placa de Hot Sale para Villguz", "c6", "1", "(min-width: 900px) 50vw, 50vw")}
+  </div>
+  <div class="mosaico tres">
+    {fig("vibra-placa-brownie", "Historia de Vibra Dulce: torta brownie", "c4", "636/1152", "(min-width: 900px) 33vw, 33vw")}
+    {fig("vibra-placa-imperial", "Historia de Vibra Dulce: imperial ruso", "c4", "635/1152", "(min-width: 900px) 33vw, 33vw")}
+    {fig("vibra-placa-chaja", "Historia de Vibra Dulce: torta chajá", "c4", "635/1152", "(min-width: 900px) 33vw, 33vw")}
   </div>""", ("Ver el proyecto de concesionarias", "/proyectos/automotriz.html")),
         area("redes", 6, "Redes",
              "Sistemas de plantillas para Instagram: carruseles que educan, historias que venden y piezas institucionales que construyen confianza.",
