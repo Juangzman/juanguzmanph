@@ -226,7 +226,7 @@ def contacto():
     <footer class="pie">
       <a class="marca" href="/" aria-label="Juan Guzman, inicio">{ISO}<span>Juan Guzman</span></a>
       <span>Fotografía y diseño · San Miguel de Tucumán</span>
-      <span>© <span data-anio>2026</span> Juan Guzman</span>
+      <span>© <span data-anio>2026</span> Juan Guzman · <a class="pie__interno" href="/estudio-x7k2/" rel="nofollow">Interno</a></span>
     </footer>
   </div>
 </section>
