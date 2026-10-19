@@ -141,7 +141,7 @@ ISO = (RAIZ / "img" / "isotipo.svg").read_text().replace("#333333", "currentColo
     '<svg ', '<svg aria-hidden="true" focusable="false" ')
 
 NAV = [("Fotografía", "/fotografia.html", "fotografia"), ("Diseño", "/diseno.html", "diseno"),
-       ("Servicios", "/#servicios", "servicios"), ("Tarifario", "/tarifario/", "tarifario"), ("Sobre mí", "/#sobre", "sobre")]
+       ("Servicios", "/#servicios", "servicios"), ("Sobre mí", "/#sobre", "sobre")]
 
 
 def flecha(clase="ph-arrow-right"):
@@ -445,7 +445,6 @@ def pagina_inicio():
       <span class="etiqueta" data-r>03 — Servicios</span>
       <h2 id="t-serv" data-r>Lo que hago</h2>
       <p class="lead" data-r style="--d:1">Un solo aliado para la imagen de tu marca: la foto, el diseño y la experiencia digital.</p>
-      <a class="link" href="/tarifario/" data-r style="--d:2">Ver precios de referencia {flecha()}</a>
     </div>
     <ul class="servicios__lista">
 {servicios}    </ul>
@@ -854,8 +853,8 @@ def main():
     (RAIZ / "fotografia.html").write_text(relativas(pagina_fotografia(), ""))
     (RAIZ / "diseno.html").write_text(relativas(pagina_diseno(), ""))
     (RAIZ / "proyectos").mkdir(exist_ok=True)
-    (RAIZ / "tarifario").mkdir(exist_ok=True)
-    (RAIZ / "tarifario" / "index.html").write_text(relativas(pagina_tarifario(sys.modules[__name__]), "../"))
+    # cotizador privado (antes /tarifario/): no se enlaza desde ningun lado
+    (RAIZ / "cotizador-q4m9" / "index.html").write_text(relativas(pagina_tarifario(sys.modules[__name__]), "../"))
     for slug, contenido in proyectos().items():
         (RAIZ / "proyectos" / f"{slug}.html").write_text(relativas(contenido, "../"))
     # favicon: isotipo en tinta

@@ -1,7 +1,7 @@
 {
-  "name": "Tarifario · Juan Guzman",
-  "short_name": "Tarifario",
-  "description": "Precios de referencia y cotizador para fotografía, diseño y web en Tucumán. Funciona sin internet.",
+  "name": "Cotizador · Juan Guzman",
+  "short_name": "Cotizador",
+  "description": "Cotizador privado de Juan Guzman. Funciona sin internet.",
   "lang": "es-AR",
   "start_url": "./",
   "scope": "./",

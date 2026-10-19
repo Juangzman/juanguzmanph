@@ -1,7 +1,7 @@
-"""Pagina del tarifario: precios de referencia + cotizador (juanguzmanph.com/tarifario/).
+"""Pagina del tarifario: precios de referencia + cotizador (juanguzmanph.com/cotizador-q4m9/).
 
 La genera tools/build.py. Los precios se editan en tools/tarifario.json.
-La logica del cotizador esta en tarifario/app.js y el estilo en tarifario/tarifario.css.
+La logica del cotizador esta en cotizador-q4m9/app.js y el estilo en cotizador-q4m9/tarifario.css.
 """
 import json
 from pathlib import Path
@@ -242,13 +242,15 @@ def metodo(b, n):
 
 def pagina_tarifario(b):
     datos_js = json.dumps(DATOS, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    extra = (f'<link rel="stylesheet" href="/tarifario/tarifario.css?v={b._ver("tarifario/tarifario.css")}">\n'
-             '<link rel="manifest" href="/tarifario/manifest.webmanifest">\n'
-             '<link rel="apple-touch-icon" href="/tarifario/icono-180.png">\n'
+    extra = ('<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">\n'
+             f'<script src="/cotizador-q4m9/acceso.js?v={b._ver("cotizador-q4m9/acceso.js")}"></script>\n'
+             f'<link rel="stylesheet" href="/cotizador-q4m9/tarifario.css?v={b._ver("cotizador-q4m9/tarifario.css")}">\n'
+             '<link rel="manifest" href="/cotizador-q4m9/manifest.webmanifest">\n'
+             '<link rel="apple-touch-icon" href="/cotizador-q4m9/icono-180.png">\n'
              '<meta name="apple-mobile-web-app-capable" content="yes">\n'
              '<meta name="apple-mobile-web-app-title" content="Tarifario">\n'
-             f'<script defer src="/tarifario/app.js?v={b._ver("tarifario/app.js")}"></script>\n')
-    cuerpo = f"""{b.navegacion("tarifario")}
+             f'<script defer src="/cotizador-q4m9/app.js?v={b._ver("cotizador-q4m9/app.js")}"></script>\n')
+    cuerpo = f"""{b.navegacion("")}
 <main id="contenido" class="tf" data-tarifario>
 <div class="wrap pag-cab tf-cab">
   <h1 class="lineas" style="font-size:clamp(64px,11vw,148px)"><span><span style="--i:0">Tarifario</span></span></h1>
@@ -272,4 +274,4 @@ def pagina_tarifario(b):
 {b.contacto()}"""
     return (b.cabeza("Tarifario 2026 · Precios de fotografía, diseño y web en Tucumán",
                      f"Cotizador gratis con precios de referencia ({DATOS['actualizado']}) para fotografía, books, foto de producto, logos, manuales de marca y páginas web en Tucumán. Armá tu presupuesto y descargalo en PDF.",
-                     "/tarifario/", f"{b.SITIO}/img/w/vg-web-hero-1600.jpg", extra) + cuerpo + b.cierre())
+                     "/cotizador-q4m9/", f"{b.SITIO}/img/w/vg-web-hero-1600.jpg", extra) + cuerpo + b.cierre())
