@@ -166,7 +166,8 @@ def cabeza(titulo, descripcion, ruta, imagen_og=None, extra=""):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://framerusercontent.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@300..600&display=swap">
+<link rel="preload" href="/fonts/bebas-light.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..600&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
 <link rel="stylesheet" href="/css/styles.css?v={_ver('css/styles.css')}">
 <script defer src="/js/main.js?v={_ver('js/main.js')}"></script>
@@ -211,7 +212,7 @@ def contacto():
       <a class="btn btn--claro" href="mailto:{EMAIL}?subject={asunto}">Escribime {flecha()}</a>
       <a class="btn btn--linea-clara" href="{WHATSAPP_URL}" target="_blank" rel="noopener"><i class="ph-light ph-whatsapp-logo" aria-hidden="true"></i> WhatsApp</a>
     </div>
-    <div class="contacto__patron" aria-hidden="true"></div>
+    <div class="contacto__iso" aria-hidden="true">{ISO}</div>
     <ul class="canales">
       <li><a href="mailto:{EMAIL}"><span>Email</span><span>{EMAIL} {flecha("ph-arrow-up-right")}</span></a></li>
       <li><a href="{WHATSAPP_URL}" target="_blank" rel="noopener"><span>WhatsApp</span><span>{WHATSAPP_TXT} {flecha("ph-arrow-up-right")}</span></a></li>
@@ -219,7 +220,7 @@ def contacto():
       <li><a href="{LINKEDIN_URL}" target="_blank" rel="noopener"><span>LinkedIn</span><span>{e(LINKEDIN_NOMBRE)} {flecha("ph-arrow-up-right")}</span></a></li>
     </ul>
     <footer class="pie">
-      <a class="pie__logo" href="/" aria-label="Juan Guzman Fotografía, inicio"><img src="/img/logo-beige.svg" width="515" height="418" alt="Juan Guzman Fotografía" loading="lazy"></a>
+      <a class="pie__iso" href="/" aria-label="Juan Guzman, inicio">{ISO}</a>
       <span>Fotografía y diseño · San Miguel de Tucumán</span>
       <span>© <span data-anio>2026</span> Juan Guzman · <a class="pie__interno" href="/estudio-x7k2/" rel="nofollow">Interno</a></span>
     </footer>
@@ -371,7 +372,7 @@ def pagina_inicio():
 {hero()}
 <section class="intro" aria-label="Presentación">
   <div class="wrap intro__in">
-    <span class="intro__iso" data-r aria-hidden="true"><img src="/img/logo-beige.svg" width="515" height="418" alt=""></span>
+    <span class="intro__iso" data-r aria-hidden="true">{ISO}</span>
     <p class="intro__frase" data-r>{e(SITIO_DATOS["presentacion"]["frase"])} <em>{e(SITIO_DATOS["presentacion"]["destacado"])}</em></p>
     <div class="intro__acciones" data-r style="--d:1">
       <a class="btn btn--primario" href="#fotografia">Fotografía {flecha()}</a>

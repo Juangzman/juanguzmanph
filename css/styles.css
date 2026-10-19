@@ -3,6 +3,10 @@
    Tema oscuro. Proporción del manual: 60% negro · 30% blanco · 10% terracota
    ========================================================= */
 
+/* Bebas Neue (OFL) servida desde la web. Manual: títulos en Light */
+@font-face { font-family: "Bebas Neue"; src: url("../fonts/bebas-light.woff") format("woff"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Bebas Neue"; src: url("../fonts/bebas-regular.woff") format("woff"); font-weight: 400; font-display: swap; }
+
 :root {
   /* Color (manual 03.2) */
   --negro: #1a1a1a;          /* tinta: fondo principal (60%) */
@@ -13,8 +17,8 @@
   --gris: #9a9a9a;           /* secundario sobre negro (contraste AA) */
   --linea: rgba(250, 250, 250, 0.12);
   --linea-2: rgba(250, 250, 250, 0.28);
-  --terracota: #c27a62;
-  --beige: #e5d9c5;          /* beige arena: el logo sobre fondos oscuros */      /* acento (10%) */
+  --terracota: #c27a62;       /* acento (10%) */
+  --beige: #e5d9c5;          /* beige arena: el logo sobre fondos oscuros */
 
   --f-display: "Bebas Neue", "Oswald", Impact, sans-serif;
   --f-texto: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -53,7 +57,7 @@ html, body { overflow-x: clip; }
 .nw { white-space: nowrap; }
 
 /* ---------- Tipografia ---------- */
-h1, h2, h3 { font-family: var(--f-display); font-weight: 400; letter-spacing: 0.005em; margin: 0; text-wrap: balance; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 300; letter-spacing: 0.005em; margin: 0; text-wrap: balance; }
 h1 { font-size: clamp(64px, 16.5vw, 184px); line-height: 0.86; }
 h2 { font-size: clamp(48px, 10vw, 112px); line-height: 0.9; }
 h3 { font-size: clamp(30px, 4.4vw, 44px); line-height: 0.95; }
@@ -136,7 +140,7 @@ p { margin: 0; }
 [data-menu-open] .menu { transform: none; visibility: visible; transition: transform 520ms var(--ease-drawer), visibility 0s; }
 [data-menu-open] .nav { background: var(--negro); box-shadow: none; }
 .menu ul { list-style: none; margin: 0; padding: 0; }
-.menu li a { display: block; font-family: var(--f-display); font-size: clamp(56px, 17vw, 96px); line-height: 1.02; opacity: 0; transform: translateY(16px); transition: opacity 300ms ease, transform 300ms var(--ease-out); }
+.menu li a { display: block; font-family: var(--f-display); font-weight: 300; font-size: clamp(56px, 17vw, 96px); line-height: 1.02; opacity: 0; transform: translateY(16px); transition: opacity 300ms ease, transform 300ms var(--ease-out); }
 [data-menu-open] .menu li a { opacity: 1; transform: none; transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out); transition-delay: calc(140ms + var(--i) * 50ms); }
 .menu li a[aria-current="page"] { color: var(--terracota); }
 .menu__pie { display: grid; gap: 6px; font-size: 15px; color: var(--texto-2); }
@@ -201,8 +205,7 @@ html[data-menu-open] { overflow: hidden; }
 .intro__frase { font-size: clamp(28px, 4.6vw, 64px); line-height: 1.08; letter-spacing: -0.02em; font-weight: 300; max-width: 22ch; text-wrap: balance; }
 .intro__frase em { font-style: normal; color: var(--terracota); }
 .intro__iso { display: flex; align-items: center; gap: 24px; color: var(--beige); }
-.intro__iso img { width: clamp(96px, 11vw, 132px); height: auto; flex: none; }
-.intro__iso svg { width: 34px; height: auto; }
+.intro__iso svg { width: 34px; height: auto; flex: none; }
 .intro__iso::after { content: ""; flex: 1; height: 1px; background: var(--linea); }
 @media (min-width: 900px) { .intro__iso { grid-column: 1 / -1; } }
 .intro__acciones { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -221,7 +224,7 @@ html[data-menu-open] { overflow: hidden; }
 .fila__img picture, .fila__img img { width: 100%; height: 100%; }
 .fila__img img { object-fit: cover; object-position: 50% 35%; transition: transform 700ms var(--ease-out), opacity 500ms ease; }
 .fila__cuerpo { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
-.fila__titulo { font-family: var(--f-display); font-size: clamp(40px, 8vw, 96px); line-height: 0.92; }
+.fila__titulo { font-family: var(--f-display); font-weight: 300; font-size: clamp(40px, 8vw, 96px); line-height: 0.92; }
 .fila__meta { display: grid; gap: 2px; text-align: right; font-size: 13px; color: var(--gris); flex: 0 1 auto; max-width: 42%; }
 .fila__titulo { min-width: 0; }
 @media (min-width: 900px) {
@@ -303,9 +306,8 @@ html[data-menu-open] { overflow: hidden; }
 /* Contacto: bloque carbón (negro del logo) */
 .contacto { position: relative; overflow: hidden; isolation: isolate; background: var(--carbon); color: var(--blanco); padding-block: var(--seccion) 0; }
 /* isologo grande como marca de agua de fondo */
-/* patrón del monograma (elemento gráfico del manual) */
-.contacto__patron { position: absolute; z-index: -1; inset: 0; background: url("../img/patron.svg") 0 0 / 150px 150px repeat; opacity: 0.045; pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 55%, transparent 100%); mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 55%, transparent 100%); }
+.contacto__iso { position: absolute; z-index: -1; top: clamp(40px, 8vw, 96px); right: calc(var(--pad) * -0.5); width: clamp(220px, 42vw, 560px); color: var(--beige); opacity: 0.04; pointer-events: none; }
+.contacto__iso svg { width: 100%; height: auto; }
 .contacto > .wrap { position: relative; }
 .contacto h2 { font-size: clamp(64px, 15vw, 200px); line-height: 0.86; }
 .contacto .lead { margin-top: 24px; }
@@ -319,7 +321,8 @@ html[data-menu-open] { overflow: hidden; }
 @media (min-width: 900px) { .canales { grid-template-columns: repeat(4, 1fr); column-gap: 24px; } .canales a { flex-direction: column; align-items: flex-start; } .canales a span:last-child { text-align: left; } }
 .pie { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; padding: 40px 0 calc(40px + env(safe-area-inset-bottom)); font-size: 13px; color: var(--gris); }
 .pie .marca { color: var(--blanco); }
-.pie__logo img { display: block; width: 96px; height: auto; }
+.pie__iso { display: block; color: var(--beige); }
+.pie__iso svg { display: block; width: 28px; height: auto; }
 .pie__interno { color: var(--gris); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--linea-2); transition: color 200ms ease; }
 @media (hover: hover) and (pointer: fine) { .pie__interno:hover { color: var(--blanco); } }
 
@@ -423,7 +426,7 @@ a.chip { display: inline-flex; align-items: center; }
 
 .siguiente { display: block; margin-top: var(--seccion); padding-block: clamp(48px, 8vw, 96px); border-top: 1px solid var(--linea); }
 .siguiente .etiqueta { display: block; margin-bottom: 12px; }
-.siguiente strong { font-family: var(--f-display); font-weight: 400; font-size: clamp(56px, 12vw, 160px); line-height: 0.88; display: block; transition: color 300ms ease; }
+.siguiente strong { font-family: var(--f-display); font-weight: 300; font-size: clamp(56px, 12vw, 160px); line-height: 0.88; display: block; transition: color 300ms ease; }
 .siguiente i { font-size: 0.5em; display: inline-block; vertical-align: 0.35em; margin-left: 0.1em; transition: transform 400ms var(--ease-out); }
 @media (hover: hover) and (pointer: fine) { .siguiente:hover strong { color: var(--terracota); } .siguiente:hover i { transform: translateX(12px); } }
 
