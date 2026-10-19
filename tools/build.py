@@ -211,7 +211,7 @@ def contacto():
       <a class="btn btn--claro" href="mailto:{EMAIL}?subject={asunto}">Escribime {flecha()}</a>
       <a class="btn btn--linea-clara" href="{WHATSAPP_URL}" target="_blank" rel="noopener"><i class="ph-light ph-whatsapp-logo" aria-hidden="true"></i> WhatsApp</a>
     </div>
-    <div class="contacto__iso" aria-hidden="true">{ISO}</div>
+    <div class="contacto__patron" aria-hidden="true"></div>
     <ul class="canales">
       <li><a href="mailto:{EMAIL}"><span>Email</span><span>{EMAIL} {flecha("ph-arrow-up-right")}</span></a></li>
       <li><a href="{WHATSAPP_URL}" target="_blank" rel="noopener"><span>WhatsApp</span><span>{WHATSAPP_TXT} {flecha("ph-arrow-up-right")}</span></a></li>
@@ -219,7 +219,7 @@ def contacto():
       <li><a href="{LINKEDIN_URL}" target="_blank" rel="noopener"><span>LinkedIn</span><span>{e(LINKEDIN_NOMBRE)} {flecha("ph-arrow-up-right")}</span></a></li>
     </ul>
     <footer class="pie">
-      <a class="marca" href="/" aria-label="Juan Guzman, inicio">{ISO}<span>Juan Guzman</span></a>
+      <a class="pie__logo" href="/" aria-label="Juan Guzman Fotografía, inicio"><img src="/img/logo-beige.svg" width="515" height="418" alt="Juan Guzman Fotografía" loading="lazy"></a>
       <span>Fotografía y diseño · San Miguel de Tucumán</span>
       <span>© <span data-anio>2026</span> Juan Guzman · <a class="pie__interno" href="/estudio-x7k2/" rel="nofollow">Interno</a></span>
     </footer>
@@ -371,7 +371,7 @@ def pagina_inicio():
 {hero()}
 <section class="intro" aria-label="Presentación">
   <div class="wrap intro__in">
-    <span class="intro__iso" data-r aria-hidden="true">{ISO}</span>
+    <span class="intro__iso" data-r aria-hidden="true"><img src="/img/logo-beige.svg" width="515" height="418" alt=""></span>
     <p class="intro__frase" data-r>{e(SITIO_DATOS["presentacion"]["frase"])} <em>{e(SITIO_DATOS["presentacion"]["destacado"])}</em></p>
     <div class="intro__acciones" data-r style="--d:1">
       <a class="btn btn--primario" href="#fotografia">Fotografía {flecha()}</a>

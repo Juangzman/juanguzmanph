@@ -13,7 +13,8 @@
   --gris: #9a9a9a;           /* secundario sobre negro (contraste AA) */
   --linea: rgba(250, 250, 250, 0.12);
   --linea-2: rgba(250, 250, 250, 0.28);
-  --terracota: #c27a62;      /* acento (10%) */
+  --terracota: #c27a62;
+  --beige: #e5d9c5;          /* beige arena: el logo sobre fondos oscuros */      /* acento (10%) */
 
   --f-display: "Bebas Neue", "Oswald", Impact, sans-serif;
   --f-texto: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -97,7 +98,8 @@ p { margin: 0; }
 .nav__in { height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .marca { display: inline-flex; align-items: center; gap: 10px; }
 .marca svg { width: 22px; height: auto; color: currentColor; }
-.marca span { font-family: var(--f-display); font-size: 24px; letter-spacing: 0.04em; line-height: 1; padding-top: 3px; }
+.marca { color: var(--beige); }
+.marca span { font-family: var(--f-display); font-size: 24px; letter-spacing: 0.04em; line-height: 1; padding: 3px 0 0 10px; border-left: 1px solid currentColor; }
 .nav__links { display: none; gap: 32px; font-size: 14px; letter-spacing: 0.02em; }
 .nav__links a { position: relative; padding: 6px 0; color: var(--texto-2); transition: color 200ms ease; }
 .nav__links a[aria-current="page"] { color: var(--blanco); }
@@ -198,7 +200,8 @@ html[data-menu-open] { overflow: hidden; }
 .intro__in { display: grid; gap: 36px; }
 .intro__frase { font-size: clamp(28px, 4.6vw, 64px); line-height: 1.08; letter-spacing: -0.02em; font-weight: 300; max-width: 22ch; text-wrap: balance; }
 .intro__frase em { font-style: normal; color: var(--terracota); }
-.intro__iso { display: flex; align-items: center; gap: 16px; color: var(--terracota); }
+.intro__iso { display: flex; align-items: center; gap: 24px; color: var(--beige); }
+.intro__iso img { width: clamp(96px, 11vw, 132px); height: auto; flex: none; }
 .intro__iso svg { width: 34px; height: auto; }
 .intro__iso::after { content: ""; flex: 1; height: 1px; background: var(--linea); }
 @media (min-width: 900px) { .intro__iso { grid-column: 1 / -1; } }
@@ -300,8 +303,9 @@ html[data-menu-open] { overflow: hidden; }
 /* Contacto: bloque carbón (negro del logo) */
 .contacto { position: relative; overflow: hidden; isolation: isolate; background: var(--carbon); color: var(--blanco); padding-block: var(--seccion) 0; }
 /* isologo grande como marca de agua de fondo */
-.contacto__iso { position: absolute; z-index: -1; top: clamp(40px, 8vw, 96px); right: calc(var(--pad) * -0.5); width: clamp(220px, 42vw, 560px); color: var(--blanco); opacity: 0.05; pointer-events: none; }
-.contacto__iso svg { width: 100%; height: auto; }
+/* patrón del monograma (elemento gráfico del manual) */
+.contacto__patron { position: absolute; z-index: -1; inset: 0; background: url("../img/patron.svg") 0 0 / 150px 150px repeat; opacity: 0.045; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 55%, transparent 100%); mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 55%, transparent 100%); }
 .contacto > .wrap { position: relative; }
 .contacto h2 { font-size: clamp(64px, 15vw, 200px); line-height: 0.86; }
 .contacto .lead { margin-top: 24px; }
@@ -315,6 +319,7 @@ html[data-menu-open] { overflow: hidden; }
 @media (min-width: 900px) { .canales { grid-template-columns: repeat(4, 1fr); column-gap: 24px; } .canales a { flex-direction: column; align-items: flex-start; } .canales a span:last-child { text-align: left; } }
 .pie { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; padding: 40px 0 calc(40px + env(safe-area-inset-bottom)); font-size: 13px; color: var(--gris); }
 .pie .marca { color: var(--blanco); }
+.pie__logo img { display: block; width: 96px; height: auto; }
 .pie__interno { color: var(--gris); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--linea-2); transition: color 200ms ease; }
 @media (hover: hover) and (pointer: fine) { .pie__interno:hover { color: var(--blanco); } }
 
