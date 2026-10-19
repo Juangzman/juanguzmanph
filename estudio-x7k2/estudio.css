@@ -22,7 +22,7 @@
 /* Barra superior */
 .app__barra { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(env(safe-area-inset-top) + 10px) var(--pad) 10px; background: rgba(26, 26, 26, 0.88); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-bottom: 1px solid var(--linea); }
 .app__marca { display: grid; line-height: 1.1; min-width: 0; }
-.app__marca span { font-family: var(--f-display); font-size: 30px; }
+.app__marca > span { font-family: var(--f-display); font-size: 30px; }
 .app__marca small { font-size: 12px; color: var(--gris); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .app__acciones { display: flex; align-items: center; gap: 8px; }
 .app__acciones .btn { min-height: 44px; padding: 0 18px; gap: 8px; }
@@ -108,3 +108,96 @@
 .accesos__form { display: grid; gap: 14px; padding-top: 18px; border-top: 1px solid var(--linea); }
 .accesos__form h3 { font-size: 28px; }
 .accesos .link { background: none; padding: 0; color: var(--blanco); }
+
+/* ---------- Interno: pestañas y paneles ---------- */
+.app__barra { flex-wrap: wrap; row-gap: 8px; }
+.pestanas { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; order: 3; width: 100%; }
+.pestanas::-webkit-scrollbar { display: none; }
+.pestanas button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 14px; border-radius: 999px; font-size: 14px; color: var(--texto-2); transition: background-color 160ms ease, color 160ms ease; }
+.pestanas button i { font-size: 18px; }
+.pestanas button[aria-current="true"] { background: var(--blanco); color: var(--negro); }
+@media (hover: hover) and (pointer: fine) { .pestanas button[aria-current="false"]:hover { color: var(--blanco); background: rgba(250, 250, 250, 0.08); } }
+@media (min-width: 1100px) { .pestanas { order: 0; width: auto; } }
+.estudio .filtros { top: calc(env(safe-area-inset-top) + 114px); }
+@media (min-width: 1100px) { .estudio .filtros { top: calc(env(safe-area-inset-top) + 65px); } }
+.app__cab-acc { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
+.bloque-int { display: grid; gap: 14px; padding: 28px 0; border-top: 1px solid var(--linea); }
+.bloque-int:first-of-type { border-top: 0; padding-top: 8px; }
+.bloque-int h3 { display: flex; align-items: center; gap: 10px; font-size: clamp(28px, 4vw, 40px); }
+.bloque-int h3 i { color: var(--terracota); font-size: 0.8em; }
+.bloque-int .pista { margin: 0; }
+.fila-botones { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; margin-bottom: 6px; }
+.subir--chico { flex-direction: row; display: inline-flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 999px; }
+.subir--chico i { font-size: 22px; }
+.subir--chico small { color: var(--gris); }
+.campo-mini { width: 100%; min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--linea-2); background: rgba(26, 26, 26, 0.85); color: var(--blanco); font: inherit; font-size: 13px; }
+
+/* Portada en celular: fotos verticales */
+.grilla--alta .foto { aspect-ratio: 9 / 16; }
+.foto__pie { position: absolute; left: 6px; right: 6px; top: 40px; }
+.foto--alta .foto__acciones { justify-content: center; }
+
+/* Portada en computadora: una fila por pantalla */
+.pantallas { display: grid; gap: 14px; }
+.pantalla-fila { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--linea); border-radius: 14px; background: var(--carbon-2); }
+.pantalla-fila__cab { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pantalla-fila__cab .campo-mini { width: auto; min-width: 160px; }
+.pantalla-fila__acc { display: flex; gap: 6px; margin-left: auto; }
+.pantalla-fila__fotos { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; aspect-ratio: 16 / 7; border-radius: 10px; overflow: hidden; background: var(--negro); }
+.pantalla-fila__foto { position: relative; overflow: hidden; }
+.pantalla-fila__foto img { width: 100%; height: 100%; object-fit: cover; }
+.pantalla-fila__foto .quitar { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; font-size: 15px; background: rgba(26, 26, 26, 0.7); }
+.pantalla-fila__mas { display: grid; place-items: center; align-content: center; gap: 6px; border: 1.5px dashed var(--linea-2); color: var(--texto-2); font-size: 13px; border-radius: 6px; }
+.pantalla-fila__mas i { font-size: 24px; color: var(--terracota); }
+@media (hover: hover) and (pointer: fine) { .pantalla-fila__mas:hover { border-color: var(--blanco); color: var(--blanco); } }
+.banda-int { display: grid; gap: 12px; justify-items: start; }
+.banda-int > div { width: 100%; aspect-ratio: 16 / 5; overflow: hidden; border-radius: 12px; background: var(--carbon); }
+.banda-int img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Diseño: piezas con su tamaño */
+.color { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--texto-2); }
+.color input { width: 44px; height: 44px; padding: 0; border: 1px solid var(--linea-2); border-radius: 10px; background: none; }
+.grilla-piezas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (min-width: 700px) { .grilla-piezas { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1100px) { .grilla-piezas { grid-template-columns: repeat(6, 1fr); } }
+.pieza { margin: 0; display: grid; gap: 8px; align-content: start; padding: 8px; border: 1px solid var(--linea); border-radius: 12px; background: var(--carbon-2); cursor: grab; }
+.pieza.arrastrando { opacity: 0.35; }
+.pieza.destino { box-shadow: 0 0 0 3px var(--terracota); }
+.pieza__img { position: relative; overflow: hidden; border-radius: 8px; background: var(--carbon); max-height: 320px; }
+.pieza__img img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.pieza__pie { display: grid; gap: 6px; }
+.pieza__acc { display: flex; justify-content: space-between; gap: 4px; }
+.pieza__acc .icono { width: 32px; height: 32px; font-size: 15px; }
+
+/* Textos */
+.textos { display: grid; gap: 18px; max-width: 760px; }
+.tarjeta { display: grid; gap: 14px; padding: clamp(18px, 3vw, 28px); border: 1px solid var(--linea); border-radius: 16px; background: var(--carbon-2); }
+.tarjeta h3 { font-size: 32px; }
+.tarjeta h4 { margin: 8px 0 0; font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris); }
+.tarjeta textarea { min-height: 110px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--linea-2); background: var(--negro); color: var(--blanco); font: inherit; font-size: 16px; line-height: 1.5; resize: vertical; }
+.tarjeta textarea:focus { outline: 2px solid var(--terracota); outline-offset: 1px; }
+.campo small { line-height: 1.4; }
+.lista { display: grid; gap: 10px; }
+.lista > .btn { justify-self: start; min-height: 44px; }
+.lista__fila { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 12px; border: 1px solid var(--linea); border-radius: 12px; }
+.lista__cuerpo { display: grid; gap: 10px; }
+.lista__acc { display: grid; gap: 6px; align-content: start; }
+.lista__acc .icono { width: 34px; height: 34px; font-size: 15px; }
+.sobre-foto { display: flex; align-items: end; gap: 16px; }
+.sobre-foto img { width: 120px; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 10px; filter: grayscale(1); }
+.sobre-foto .btn { min-height: 44px; cursor: pointer; }
+
+/* Cotizador adentro del interno */
+.panel--cotizador { position: relative; }
+.panel--cotizador iframe { display: block; width: 100%; height: calc(100svh - 120px); border: 0; background: var(--negro); }
+@media (min-width: 1100px) { .panel--cotizador iframe { height: calc(100svh - 66px); } }
+
+/* Selector de fotos */
+.selector { width: min(calc(100% - 24px), 980px); }
+.selector__chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+.selector__grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; max-height: 60svh; overflow-y: auto; }
+.selector__foto { aspect-ratio: 4 / 5; overflow: hidden; border-radius: 8px; background: var(--carbon); padding: 0; transition: transform 160ms var(--ease-out), box-shadow 160ms ease; }
+.selector__foto img { width: 100%; height: 100%; object-fit: cover; }
+@media (hover: hover) and (pointer: fine) { .selector__foto:hover { box-shadow: 0 0 0 3px var(--terracota); } }
+.selector__foto:active { transform: scale(0.97); }
+@media (max-width: 699px) { .estudio .filtros { position: static; } }

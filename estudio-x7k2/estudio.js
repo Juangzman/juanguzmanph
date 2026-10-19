@@ -7,6 +7,7 @@
   const API = `https://api.github.com/repos/${REPO.owner}/${REPO.repo}`;
   const RAW = `https://raw.githubusercontent.com/${REPO.owner}/${REPO.repo}/${REPO.rama}/`;
   const CLAVE = `estudio-sesion-${CFG.repo}`;
+  const CARPETAS = CFG.carpetas || { fotos: CFG.carpetaFotos, portada: 'img/h', piezas: 'img/d', videos: 'video' };
   const ANCHOS = CFG.anchos;
   const FOTOS = CFG.carpetaFotos;
   const WEB = CFG.raizWeb;
@@ -16,10 +17,8 @@
   const el = (tag, attrs = {}, html = '') => { const n = document.createElement(tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); if (html) n.innerHTML = html; return n; };
 
   let token = null;
-  let galeria = null;        // contenido de data/galeria.json
-  let original = '';         // para saber si hay cambios
+  let galeria = null;        // contenido de data/galeria.json (atajo a DOCS.galeria.datos)
   let actual = null;         // id de la categoría que se está viendo
-  let vista = 'editar';
   const nuevas = new Map();  // slug -> { archivos: [{ ruta, blob }], url }  (subidas sin publicar)
   const publicadas = new Map(); // slug -> miniatura local, hasta que GitHub regenere la web
   let ocupado = false;
@@ -109,7 +108,7 @@
   const abrir = async () => {
     const repo = await gh('');
     if (!repo.permissions || !repo.permissions.push) { const e = new Error('sin permiso'); e.status = 403; throw e; }
-    await cargarGaleria();
+    await cargarTodo();
     $('#quien').textContent = quien ? `Hola, ${quien}` : 'Administrador';
     $('#ingreso').hidden = true;
     $('#app').hidden = false;
@@ -264,46 +263,61 @@
     avisar('Creá el primer usuario: al guardarlo se reemplazan los accesos anteriores.');
   });
 
-  /* ---------- Galería ---------- */
-  const cargarGaleria = async () => {
-    const texto = await gh(`/contents/${CFG.galeria}?ref=${REPO.rama}`, { accept: 'application/vnd.github.raw+json' });
-    galeria = JSON.parse(texto);
-    original = JSON.stringify(galeria);
-    actual = actual || galeria.categorias[0].id;
+  /* =====================================================================
+     CONTENIDO: cada parte de la web vive en un archivo de data/
+     ===================================================================== */
+  const DOCS = {};            // clave -> { ruta, datos, original }
+  const RUTAS = CFG.datos || { galeria: CFG.galeria };
+  let panel = 'fotos';
+
+  const cargarTodo = async () => {
+    for (const [k, ruta] of Object.entries(RUTAS)) {
+      try {
+        const t = await gh(`/contents/${ruta}?ref=${REPO.rama}`, { accept: 'application/vnd.github.raw+json' });
+        const datos = JSON.parse(t);
+        DOCS[k] = { ruta, datos, original: JSON.stringify(datos) };
+      } catch (e) { if (e.status !== 404) throw e; }
+    }
+    galeria = DOCS.galeria ? DOCS.galeria.datos : null;
+    if (galeria) actual = actual || galeria.categorias[0].id;
+    // pestañas que no aplican a esta web (por ejemplo, un cliente sin portada editable)
+    document.querySelectorAll('[data-panel]').forEach((b) => {
+      const k = b.dataset.panel;
+      const falta = { fotos: !DOCS.galeria, inicio: !DOCS.inicio, diseno: !DOCS.diseno, textos: !DOCS.sitio, cotizador: !CFG.cotizador }[k];
+      b.hidden = !!falta;
+    });
     pintar();
   };
 
-  const cat = (id = actual) => galeria.categorias.find((c) => c.id === id);
-  const hayCambios = () => galeria && (JSON.stringify(galeria) !== original || [...nuevas.keys()].some(enUso));
-  const enUso = (slug) => galeria.categorias.some((c) => c.fotos.some((f) => f.slug === slug));
-  const contarCambios = () => {
-    if (!galeria) return 0;
-    const antes = JSON.parse(original);
-    let n = [...nuevas.keys()].filter(enUso).length;
-    galeria.categorias.forEach((c) => {
-      const a = antes.categorias.find((x) => x.id === c.id);
-      if (!a) { n++; return; }
-      if (a.portada !== c.portada) n++;
-      const sa = a.fotos.map((f) => f.slug).join(), sc = c.fotos.filter((f) => !nuevas.has(f.slug)).map((f) => f.slug).join();
-      if (sa !== sc) n++;
-    });
-    return n;
-  };
+  const enUso = (slug) => Object.values(DOCS).some((d) => JSON.stringify(d.datos).includes(`"${slug}"`));
+  const docsCambiados = () => Object.entries(DOCS).filter(([, d]) => JSON.stringify(d.datos) !== d.original);
+  const hayCambios = () => docsCambiados().length > 0 || [...nuevas.keys()].some(enUso);
+  const contarCambios = () => docsCambiados().length + [...nuevas.keys()].filter(enUso).length;
 
-  const miniatura = (f) => {
-    const n = nuevas.get(f.slug);
-    return n ? n.url : publicadas.get(f.slug) || `${WEB}${FOTOS}/${f.slug}-${ANCHOS[0]}.jpg`;
+  /* ---------- Miniaturas ---------- */
+  const RUTA_MINI = {
+    f: (s) => `${CARPETAS.fotos}/${s}-${ANCHOS[0]}.jpg`,
+    h: (s) => `${CARPETAS.portada}/${s}-960.jpg`,
+    d: (s) => `${CARPETAS.piezas}/${s}-800.jpg`,
+    v: (s) => `${CARPETAS.videos}/${s}.jpg`,
   };
+  const tipoFoto = (slug) => (DOCS.inicio && DOCS.inicio.datos.fotos && DOCS.inicio.datos.fotos[slug] ? 'h' : 'f');
+  const mini = (tipo, slug, attrs = {}) => {
+    const n = nuevas.get(slug);
+    const ruta = RUTA_MINI[tipo](slug);
+    const img = el('img', { alt: '', decoding: 'async', loading: 'lazy', ...attrs });
+    img.src = n ? n.url : publicadas.get(slug) || WEB + ruta;
+    img.onerror = () => { if (!img.dataset.raw) { img.dataset.raw = 1; img.src = RAW + ruta; } };
+    return img;
+  };
+  const miniatura = (f) => mini('f', f.slug).src;
 
-  const pintarChips = () => {
-    const chips = $('#chips');
-    chips.innerHTML = '';
-    galeria.categorias.forEach((c) => {
-      const b = el('button', { type: 'button', class: 'chip', 'aria-pressed': String(c.id === actual) }, `${c.nombre}<sup>${c.fotos.length}</sup>`);
-      b.onclick = () => { actual = c.id; pintar(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-      chips.append(b);
-    });
-  };
+  /* ---------- Pestañas ---------- */
+  document.querySelectorAll('[data-panel]').forEach((b) => b.addEventListener('click', () => {
+    panel = b.dataset.panel;
+    pintar();
+    window.scrollTo({ top: 0 });
+  }));
 
   const pintarEstado = () => {
     const n = contarCambios();
@@ -314,33 +328,75 @@
     $('#estado').textContent = n ? `${n} cambio${n > 1 ? 's' : ''} sin publicar` : 'Todo publicado';
   };
 
-  const mover = (desde, hasta) => {
-    const fotos = cat().fotos;
-    const [f] = fotos.splice(desde, 1);
-    fotos.splice(hasta, 0, f);
-    pintar();
+  const pintar = () => {
+    document.querySelectorAll('[data-panel]').forEach((b) => b.setAttribute('aria-current', String(b.dataset.panel === panel)));
+    document.querySelectorAll('.panel').forEach((p) => { p.hidden = p.id !== `panel-${panel}`; });
+    if (panel === 'fotos' && galeria) pintarFotos();
+    if (panel === 'inicio' && DOCS.inicio) pintarInicio();
+    if (panel === 'diseno' && DOCS.diseno) pintarDiseno();
+    if (panel === 'textos' && DOCS.sitio) pintarTextos();
+    if (panel === 'cotizador') abrirCotizador();
+    pintarEstado();
   };
 
-  const pintarGrilla = () => {
+  const boton = (icono, titulo, fn, extra = '') => {
+    const b = el('button', { type: 'button', class: `icono ${extra}`, title: titulo, 'aria-label': titulo }, `<i class="ph-light ${icono}"></i>`);
+    b.onclick = (e) => { e.stopPropagation(); fn(); };
+    return b;
+  };
+  const moverEn = (lista, desde, hasta) => { if (hasta < 0 || hasta >= lista.length) return; const [x] = lista.splice(desde, 1); lista.splice(hasta, 0, x); };
+  const arrastrable = (nodo, i, alSoltar) => {
+    nodo.draggable = true;
+    nodo.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', String(i)); e.dataTransfer.effectAllowed = 'move'; nodo.classList.add('arrastrando'); });
+    nodo.addEventListener('dragend', () => nodo.classList.remove('arrastrando'));
+    nodo.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('text/plain')) { e.preventDefault(); nodo.classList.add('destino'); } });
+    nodo.addEventListener('dragleave', () => nodo.classList.remove('destino'));
+    nodo.addEventListener('drop', (e) => { e.preventDefault(); nodo.classList.remove('destino'); const d = Number(e.dataTransfer.getData('text/plain')); if (!Number.isNaN(d) && d !== i) alSoltar(d, i); });
+  };
+  const zonaArchivos = (zona, input, fn) => {
+    input.onchange = (e) => { fn(e.target.files); e.target.value = ''; };
+    ['dragenter', 'dragover'].forEach((t) => zona.addEventListener(t, (e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); zona.classList.add('encima'); } }));
+    ['dragleave', 'drop'].forEach((t) => zona.addEventListener(t, () => zona.classList.remove('encima')));
+    zona.addEventListener('drop', (e) => { if (e.dataTransfer.files.length) { e.preventDefault(); fn(e.dataTransfer.files); } });
+  };
+
+  /* =====================================================================
+     FOTOGRAFÍA: galería por categorías
+     ===================================================================== */
+  let vista = 'editar';
+  const cat = (id = actual) => galeria.categorias.find((c) => c.id === id);
+
+  const pintarFotos = () => {
     const c = cat();
+    const chips = $('#chips');
+    chips.innerHTML = '';
+    galeria.categorias.forEach((x) => {
+      const b = el('button', { type: 'button', class: 'chip', 'aria-pressed': String(x.id === actual) }, `${x.nombre}<sup>${x.fotos.length}</sup>`);
+      b.onclick = () => { actual = x.id; pintar(); };
+      chips.append(b);
+    });
+    $('#tituloCat').textContent = c.nombre;
+    $('#infoCat').textContent = `${c.fotos.length} foto${c.fotos.length === 1 ? '' : 's'} en la web`;
+    $('#subirA').textContent = c.nombre;
+    $('#verEnWeb').href = `${WEB}${CFG.paginaGaleria}#${c.id}`;
+    $('#vistaEditar').hidden = vista !== 'editar';
+    $('#vistaPrevia').hidden = vista !== 'previa';
+    if (vista === 'editar') pintarGrilla(c); else pintarPrevia(c);
+  };
+
+  const pintarGrilla = (c) => {
     const g = $('#grilla');
     g.innerHTML = '';
     c.fotos.forEach((f, i) => {
-      const fig = el('figure', { class: 'foto', draggable: 'true', 'data-i': i });
-      const img = el('img', { src: miniatura(f), alt: '', loading: i > 11 ? 'lazy' : 'eager', decoding: 'async' });
-      // recién publicada: mientras GitHub genera la web, la tomo del repositorio
-      img.onerror = () => { if (!img.dataset.raw) { img.dataset.raw = 1; img.src = RAW + `${FOTOS}/${f.slug}-${ANCHOS[0]}.jpg`; } };
-      fig.append(img);
+      const fig = el('figure', { class: 'foto' });
+      fig.append(mini('f', f.slug, { loading: i > 11 ? 'lazy' : 'eager' }));
       if (c.portada === f.slug) fig.append(el('span', { class: 'foto__sello' }, '<i class="ph-light ph-star"></i> Portada'));
       else if (nuevas.has(f.slug)) fig.append(el('span', { class: 'foto__sello foto__sello--nueva' }, 'Nueva'));
       fig.append(el('span', { class: 'foto__n' }, String(i + 1)));
-
       const acc = el('div', { class: 'foto__acciones' });
-      const boton = (icono, titulo, fn, extra = '') => { const b = el('button', { type: 'button', class: `icono ${extra}`, title: titulo, 'aria-label': titulo }, `<i class="ph-light ${icono}"></i>`); b.onclick = (e) => { e.stopPropagation(); fn(); }; return b; };
-      acc.append(boton('ph-caret-left', 'Mover antes', () => i > 0 && mover(i, i - 1)));
-      acc.append(boton('ph-caret-right', 'Mover después', () => i < c.fotos.length - 1 && mover(i, i + 1)));
-      acc.append(boton('ph-star', 'Usar de portada en el inicio', () => { c.portada = f.slug; pintar(); avisar(`Portada de ${c.nombre} cambiada.`); }, c.portada === f.slug ? 'activo' : ''));
-      // mover a otra categoría
+      acc.append(boton('ph-caret-left', 'Mover antes', () => { moverEn(c.fotos, i, i - 1); pintar(); }));
+      acc.append(boton('ph-caret-right', 'Mover después', () => { moverEn(c.fotos, i, i + 1); pintar(); }));
+      acc.append(boton('ph-star', 'Portada del álbum en el inicio', () => { c.portada = f.slug; pintar(); avisar(`Portada de ${c.nombre} cambiada.`); }, c.portada === f.slug ? 'activo' : ''));
       const sel = el('select', { 'aria-label': 'Mover a otra categoría', title: 'Mover a otra categoría' });
       sel.append(el('option', { value: '' }, 'Mover a…'));
       galeria.categorias.filter((x) => x.id !== c.id).forEach((x) => sel.append(el('option', { value: x.id }, x.nombre)));
@@ -364,32 +420,19 @@
         avisar('Foto sacada de la web.', { texto: 'Deshacer', fn: () => { c.fotos.splice(i, 0, f); if (eraPortada) c.portada = f.slug; pintar(); } });
       }, 'peligro'));
       fig.append(acc);
-
-      // arrastrar para ordenar (computadora)
-      fig.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', String(i)); e.dataTransfer.effectAllowed = 'move'; fig.classList.add('arrastrando'); });
-      fig.addEventListener('dragend', () => fig.classList.remove('arrastrando'));
-      fig.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('text/plain')) { e.preventDefault(); fig.classList.add('destino'); } });
-      fig.addEventListener('dragleave', () => fig.classList.remove('destino'));
-      fig.addEventListener('drop', (e) => {
-        e.preventDefault(); fig.classList.remove('destino');
-        const desde = Number(e.dataTransfer.getData('text/plain'));
-        if (!Number.isNaN(desde) && desde !== i) mover(desde, i);
-      });
+      arrastrable(fig, i, (d, h) => { moverEn(c.fotos, d, h); pintar(); });
       g.append(fig);
     });
     if (!c.fotos.length) g.append(el('p', { class: 'vacio' }, 'Todavía no hay fotos en esta categoría. Subí las primeras arriba.'));
   };
 
-  const pintarPrevia = () => {
-    const c = cat();
+  const pintarPrevia = (c) => {
     const p = $('#previa');
     p.innerHTML = '';
     c.fotos.forEach((f) => {
       const fig = el('figure');
-      const img = el('img', { src: miniatura(f), alt: '', loading: 'lazy', width: f.w, height: f.h });
-      img.onerror = () => { if (!img.dataset.raw) { img.dataset.raw = 1; img.src = RAW + `${FOTOS}/${f.slug}-${ANCHOS[0]}.jpg`; } };
       const b = el('button', { type: 'button', tabindex: '-1' });
-      b.append(img);
+      b.append(mini('f', f.slug, { width: f.w, height: f.h }));
       fig.append(b);
       p.append(fig);
     });
@@ -399,25 +442,10 @@
     if (port) {
       const tarjeta = el('div', { class: 'cat' });
       const caja = el('div', { class: 'cat__img' });
-      const img = el('img', { src: miniatura(port), alt: '' });
-      img.onerror = () => { if (!img.dataset.raw) { img.dataset.raw = 1; img.src = RAW + `${FOTOS}/${port.slug}-${ANCHOS[0]}.jpg`; } };
-      caja.append(img);
+      caja.append(mini('f', port.slug));
       tarjeta.append(caja, el('div', { class: 'cat__pie' }, `<h3>${c.nombre}</h3><span class="meta">${String(c.fotos.length).padStart(2, '0')}</span>`));
-      pp.append(el('p', { class: 'etiqueta' }, 'Tarjeta en el inicio'), tarjeta);
+      pp.append(el('p', { class: 'etiqueta' }, 'Tarjeta del álbum en el inicio'), tarjeta);
     }
-  };
-
-  const pintar = () => {
-    const c = cat();
-    pintarChips();
-    $('#tituloCat').textContent = c.nombre;
-    $('#infoCat').textContent = `${c.fotos.length} foto${c.fotos.length === 1 ? '' : 's'} en la web`;
-    $('#subirA').textContent = c.nombre;
-    $('#verEnWeb').href = `${WEB}${CFG.paginaGaleria}#${c.id}`;
-    $('#vistaEditar').hidden = vista !== 'editar';
-    $('#vistaPrevia').hidden = vista !== 'previa';
-    if (vista === 'editar') pintarGrilla(); else pintarPrevia();
-    pintarEstado();
   };
 
   document.querySelectorAll('[data-vista]').forEach((b) => b.addEventListener('click', () => {
@@ -426,7 +454,7 @@
     pintar();
   }));
 
-  /* ---------- Subir fotos: se achican en el navegador ---------- */
+  /* ---------- Procesar imágenes y videos en el navegador ---------- */
   const cargarImagen = (file) => new Promise((ok, mal) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -434,10 +462,8 @@
     img.onerror = () => { URL.revokeObjectURL(url); mal(new Error('formato')); };
     img.src = url; // el navegador ya respeta la orientación de la cámara
   });
-
-  // achica por pasos para que quede nítida
-  const achicar = (img, ancho) => {
-    const w0 = img.naturalWidth, h0 = img.naturalHeight;
+  const achicar = (img, ancho, fondo) => { // por pasos, para que quede nítida
+    const w0 = img.naturalWidth || img.videoWidth, h0 = img.naturalHeight || img.videoHeight;
     const w = Math.min(ancho, w0), h = Math.round(h0 * w / w0);
     let fuente = img, cw = w0, ch = h0;
     while (cw / 2 >= w) {
@@ -448,67 +474,359 @@
     }
     const c = document.createElement('canvas'); c.width = w; c.height = h;
     const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
-    x.fillStyle = '#1a1a1a'; x.fillRect(0, 0, w, h);
+    x.fillStyle = fondo || '#1a1a1a'; x.fillRect(0, 0, w, h); // los PNG transparentes quedan sobre este color
     x.drawImage(fuente, 0, 0, w, h);
     return c;
   };
   const aBlob = (canvas, tipo, calidad) => new Promise((ok) => canvas.toBlob(ok, tipo, calidad));
+  const nuevoSlug = (prefijo) => `${prefijo}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
 
-  const procesar = async (file, idCat) => {
+  // devuelve { slug, w, h, webp, nombres, reales } y deja los archivos listos para publicar
+  const procesarImagen = async (file, { carpeta, anchos, prefijo, fondo }) => {
     const { img, url } = await cargarImagen(file);
-    const slug = `${idCat}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+    const slug = nuevoSlug(prefijo);
     const archivos = [];
-    let webp = true, w = 0, h = 0;
-    for (const ancho of ANCHOS) {
-      const c = achicar(img, ancho);
-      archivos.push({ ruta: `${FOTOS}/${slug}-${ancho}.jpg`, blob: await aBlob(c, 'image/jpeg', 0.84) });
-      const bw = await aBlob(c, 'image/webp', 0.8);
-      if (bw && bw.type === 'image/webp') archivos.push({ ruta: `${FOTOS}/${slug}-${ancho}.webp`, blob: bw });
+    const reales = [];
+    let webp = true, w = 0, h = 0, previa = null;
+    for (const ancho of anchos) {
+      if (reales.length && reales[reales.length - 1] >= img.naturalWidth) break; // nunca se agranda
+      const c = achicar(img, ancho, fondo);
+      const jpg = await aBlob(c, 'image/jpeg', 0.86);
+      archivos.push({ ruta: `${carpeta}/${slug}-${ancho}.jpg`, blob: jpg });
+      if (!previa) previa = jpg;
+      const bw = await aBlob(c, 'image/webp', 0.82);
+      if (bw && bw.type === 'image/webp') archivos.push({ ruta: `${carpeta}/${slug}-${ancho}.webp`, blob: bw });
       else webp = false;
-      w = c.width; h = c.height;
+      reales.push(c.width); w = c.width; h = c.height;
     }
     if (!webp) for (let k = archivos.length - 1; k >= 0; k--) if (archivos[k].ruta.endsWith('.webp')) archivos.splice(k, 1);
     URL.revokeObjectURL(url);
-    const vista800 = archivos.find((a) => a.ruta.endsWith(`-${ANCHOS[0]}.jpg`));
-    nuevas.set(slug, { archivos, url: URL.createObjectURL(vista800.blob) });
-    const foto = { slug, w, h };
-    if (!webp) foto.webp = false;
-    return foto;
+    nuevas.set(slug, { archivos, url: URL.createObjectURL(previa) });
+    return { slug, w, h, webp, nombres: anchos.slice(0, reales.length), reales };
   };
 
-  const subir = async (files) => {
-    const lista = [...files].filter((f) => f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name));
-    if (!lista.length) return;
-    const c = cat();
-    const zona = $('#zonaSubir');
+  const procesarVideo = async (file, prefijo) => {
+    if (!/\.mp4$/i.test(file.name) && file.type !== 'video/mp4') throw Object.assign(new Error('formato'), { motivo: 'El video tiene que ser .mp4.' });
+    if (file.size > 40 * 1024 * 1024) throw Object.assign(new Error('pesado'), { motivo: 'El video pesa más de 40 MB. Comprimilo antes (por ejemplo con HandBrake, 720 px de ancho).' });
+    const url = URL.createObjectURL(file);
+    const v = document.createElement('video');
+    v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url;
+    await new Promise((ok, mal) => { v.onloadeddata = ok; v.onerror = mal; });
+    v.currentTime = Math.min(1, (v.duration || 2) / 2);
+    await new Promise((ok) => { v.onseeked = ok; });
+    const c = achicar(v, 720);
+    const poster = await aBlob(c, 'image/jpeg', 0.84);
+    URL.revokeObjectURL(url);
+    const slug = nuevoSlug(prefijo);
+    nuevas.set(slug, { archivos: [{ ruta: `${CARPETAS.videos}/${slug}.mp4`, blob: file }, { ruta: `${CARPETAS.videos}/${slug}.jpg`, blob: poster }], url: URL.createObjectURL(poster) });
+    return { slug, w: c.width, h: c.height };
+  };
+
+  const trabajando = async (zona, lista, fn) => {
     zona.classList.add('trabajando');
-    let ok = 0, mal = 0;
-    for (const [k, file] of lista.entries()) {
-      $('#estado').textContent = `Preparando foto ${k + 1} de ${lista.length}…`;
-      try {
-        const foto = await procesar(file, c.id);
-        c.fotos.splice(ok, 0, foto); // las nuevas quedan primero, en el orden elegido
-        ok++;
-        pintar();
-      } catch (e) { mal++; }
+    let ok = 0, mal = 0, motivo = '';
+    for (const [k, file] of [...lista].entries()) {
+      $('#estado').textContent = `Preparando ${k + 1} de ${lista.length}…`;
+      try { await fn(file, ok); ok++; pintar(); } catch (e) { mal++; motivo = e.motivo || 'exportalo en JPG o PNG'; }
     }
     zona.classList.remove('trabajando');
     pintarEstado();
-    avisar(mal ? `${ok} lista${ok === 1 ? '' : 's'}. ${mal} no se pudo abrir (exportala en JPG).` : `${ok} foto${ok === 1 ? '' : 's'} lista${ok === 1 ? '' : 's'}. Ordenalas y tocá Publicar.`);
+    avisar(mal ? `${ok} listo${ok === 1 ? '' : 's'}. ${mal} no se pudo usar: ${motivo}` : `${ok} listo${ok === 1 ? '' : 's'}. Revisá cómo queda y tocá Publicar.`);
   };
 
-  $('#archivos').addEventListener('change', (e) => { subir(e.target.files); e.target.value = ''; });
-  const zona = $('#zonaSubir');
-  ['dragenter', 'dragover'].forEach((t) => zona.addEventListener(t, (e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); zona.classList.add('encima'); } }));
-  ['dragleave', 'drop'].forEach((t) => zona.addEventListener(t, () => zona.classList.remove('encima')));
-  zona.addEventListener('drop', (e) => { if (e.dataTransfer.files.length) { e.preventDefault(); subir(e.dataTransfer.files); } });
+  // subir a la galería
+  zonaArchivos($('#zonaSubir'), $('#archivos'), (files) => {
+    const c = cat();
+    trabajando($('#zonaSubir'), files, async (file, k) => {
+      const r = await procesarImagen(file, { carpeta: CARPETAS.fotos, anchos: ANCHOS, prefijo: c.id });
+      const foto = { slug: r.slug, w: r.w, h: r.h };
+      if (!r.webp) foto.webp = false;
+      c.fotos.splice(k, 0, foto); // las nuevas quedan primero, en el orden elegido
+    });
+  });
 
-  /* ---------- Publicar: un solo guardado en GitHub con fotos y orden ---------- */
+  /* ---------- Elegir una foto ya subida ---------- */
+  const elegir = ({ titulo = 'Elegí una foto', conPortada = false } = {}) => new Promise((ok) => {
+    const d = $('#selector');
+    $('#selectorTitulo').textContent = titulo;
+    const grupos = galeria.categorias.map((c) => ({ id: c.id, nombre: c.nombre, fotos: c.fotos.map((f) => ({ slug: f.slug, tipo: 'f' })) }));
+    if (conPortada && DOCS.inicio) grupos.unshift({ id: '_portada', nombre: 'Fotos de portada', fotos: Object.keys(DOCS.inicio.datos.fotos || {}).map((s) => ({ slug: s, tipo: 'h' })) });
+    let g = grupos[0].id;
+    const dibujar = () => {
+      const chips = $('#selectorChips'); chips.innerHTML = '';
+      grupos.forEach((x) => { const b = el('button', { type: 'button', class: 'chip', 'aria-pressed': String(x.id === g) }, `${x.nombre}<sup>${x.fotos.length}</sup>`); b.onclick = () => { g = x.id; dibujar(); }; chips.append(b); });
+      const grilla = $('#selectorGrilla'); grilla.innerHTML = '';
+      grupos.find((x) => x.id === g).fotos.forEach((f) => {
+        const b = el('button', { type: 'button', class: 'selector__foto' });
+        b.append(mini(f.tipo, f.slug));
+        b.onclick = () => { d.close(); ok(f.slug); };
+        grilla.append(b);
+      });
+    };
+    dibujar();
+    d.onclose = () => ok(null);
+    d.showModal();
+  });
+  $('#cerrarSelector').addEventListener('click', () => $('#selector').close());
+
+  /* =====================================================================
+     INICIO: portada en celular, en computadora y foto de la franja
+     ===================================================================== */
+  const nombresCategorias = () => (galeria ? galeria.categorias.map((c) => c.nombre) : []);
+  const selectCategoria = (valor, alCambiar) => {
+    const s = el('select', { class: 'campo-mini', 'aria-label': 'Categoría que se muestra' });
+    [...new Set([...nombresCategorias(), valor].filter(Boolean))].forEach((n) => s.append(el('option', { value: n }, n)));
+    s.value = valor || '';
+    s.onchange = () => alCambiar(s.value);
+    return s;
+  };
+
+  const pintarInicio = () => {
+    const ini = DOCS.inicio.datos;
+    // celular
+    const g = $('#inicioMovil');
+    g.innerHTML = '';
+    ini.movil.forEach((x, i) => {
+      const fig = el('figure', { class: 'foto foto--alta' });
+      fig.append(mini(tipoFoto(x.slug), x.slug));
+      fig.append(el('span', { class: 'foto__n' }, String(i + 1)));
+      if (nuevas.has(x.slug)) fig.append(el('span', { class: 'foto__sello foto__sello--nueva' }, 'Nueva'));
+      const pie = el('div', { class: 'foto__pie' });
+      pie.append(selectCategoria(x.cat, (v) => { x.cat = v; x.alt = x.alt || `Fotografía de ${v.toLowerCase()}`; pintarEstado(); }));
+      fig.append(pie);
+      const acc = el('div', { class: 'foto__acciones' });
+      acc.append(boton('ph-caret-left', 'Antes', () => { moverEn(ini.movil, i, i - 1); pintar(); }));
+      acc.append(boton('ph-caret-right', 'Después', () => { moverEn(ini.movil, i, i + 1); pintar(); }));
+      acc.append(boton('ph-trash', 'Sacar de la portada', () => { ini.movil.splice(i, 1); pintar(); avisar('Foto sacada de la portada.', { texto: 'Deshacer', fn: () => { ini.movil.splice(i, 0, x); pintar(); } }); }, 'peligro'));
+      fig.append(acc);
+      arrastrable(fig, i, (d, h) => { moverEn(ini.movil, d, h); pintar(); });
+      g.append(fig);
+    });
+    // computadora
+    const p = $('#inicioAncho');
+    p.innerHTML = '';
+    ini.escritorio.forEach((pant, i) => {
+      const fila = el('div', { class: 'pantalla-fila' });
+      const cab = el('div', { class: 'pantalla-fila__cab' });
+      cab.append(el('span', { class: 'etiqueta' }, `Pantalla ${i + 1}`), selectCategoria(pant.cat, (v) => { pant.cat = v; pintarEstado(); }));
+      const acc = el('div', { class: 'pantalla-fila__acc' });
+      acc.append(boton('ph-caret-up', 'Subir', () => { moverEn(ini.escritorio, i, i - 1); pintar(); }));
+      acc.append(boton('ph-caret-down', 'Bajar', () => { moverEn(ini.escritorio, i, i + 1); pintar(); }));
+      acc.append(boton('ph-trash', 'Borrar pantalla', () => { ini.escritorio.splice(i, 1); pintar(); avisar('Pantalla borrada.', { texto: 'Deshacer', fn: () => { ini.escritorio.splice(i, 0, pant); pintar(); } }); }, 'peligro'));
+      cab.append(acc);
+      const fotos = el('div', { class: `pantalla-fila__fotos n${pant.fotos.length}` });
+      pant.fotos.forEach((f, j) => {
+        const caja = el('div', { class: 'pantalla-fila__foto' });
+        caja.append(mini(tipoFoto(f.slug), f.slug));
+        if (pant.fotos.length > 1) caja.append(boton('ph-x', 'Quitar esta foto', () => { pant.fotos.splice(j, 1); pintar(); }, 'quitar'));
+        fotos.append(caja);
+      });
+      if (pant.fotos.length < 3) {
+        const mas = el('button', { type: 'button', class: 'pantalla-fila__mas' }, '<i class="ph-light ph-plus"></i><span>Sumar foto</span>');
+        mas.onclick = async () => { const s = await elegir({ titulo: 'Sumar foto a la pantalla', conPortada: true }); if (s) { pant.fotos.push({ slug: s, foco: '50% 40%' }); pintar(); } };
+        fotos.append(mas);
+      }
+      fila.append(cab, fotos);
+      p.append(fila);
+    });
+    // franja
+    const b = $('#inicioBanda');
+    b.innerHTML = '';
+    if (ini.banda) b.append(mini('f', ini.banda));
+  };
+
+  zonaArchivos($('#zonaPortada'), $('#archivosPortada'), (files) => {
+    const ini = DOCS.inicio.datos;
+    trabajando($('#zonaPortada'), files, async (file) => {
+      const r = await procesarImagen(file, { carpeta: CARPETAS.portada, anchos: [960, 1600, 2560], prefijo: 'inicio' });
+      ini.fotos = ini.fotos || {};
+      ini.fotos[r.slug] = { w: r.w, h: r.h, nombres: r.nombres, reales: r.reales, ...(r.webp ? {} : { webp: false }) };
+      const c = nombresCategorias()[0] || '';
+      ini.movil.unshift({ slug: r.slug, cat: c, alt: `Fotografía de ${c.toLowerCase()}` });
+      const vertical = r.h > r.w;
+      if (!vertical) ini.escritorio.unshift({ cat: c, alt: `Fotografía de ${c.toLowerCase()}`, fotos: [{ slug: r.slug, foco: '50% 50%' }] });
+    });
+  });
+  $('#elegirPortada').addEventListener('click', async () => {
+    const s = await elegir({ titulo: 'Sumar a la portada (celular)', conPortada: true });
+    if (!s) return;
+    const c = nombresCategorias()[0] || '';
+    DOCS.inicio.datos.movil.unshift({ slug: s, cat: c, alt: `Fotografía de ${c.toLowerCase()}` });
+    pintar();
+  });
+  $('#nuevaPantalla').addEventListener('click', async () => {
+    const s = await elegir({ titulo: 'Primera foto de la nueva pantalla', conPortada: true });
+    if (!s) return;
+    const c = nombresCategorias()[0] || '';
+    DOCS.inicio.datos.escritorio.push({ cat: c, alt: `Fotografía de ${c.toLowerCase()}`, fotos: [{ slug: s, foco: '50% 40%' }] });
+    pintar();
+  });
+  $('#cambiarBanda').addEventListener('click', async () => {
+    const s = await elegir({ titulo: 'Foto de la franja del inicio' });
+    if (s) { DOCS.inicio.datos.banda = s; pintar(); }
+  });
+
+  /* =====================================================================
+     DISEÑO: logos, placas, redes y videos
+     ===================================================================== */
+  const AREAS_DIS = { logos: 'Logos', placas: 'Placas', redes: 'Redes', motion: 'Videos (motion)' };
+  const TAM = { c3: 'Chico · 4 por fila', c4: 'Mediano · 3 por fila', c6: 'Grande · 2 por fila', c12: 'Ancho completo', centro: 'Destacado al centro' };
+  let areaDis = 'logos';
+
+  const pintarDiseno = () => {
+    const dis = DOCS.diseno.datos;
+    const chips = $('#chipsDiseno');
+    chips.innerHTML = '';
+    Object.entries(AREAS_DIS).forEach(([k, n]) => {
+      const b = el('button', { type: 'button', class: 'chip', 'aria-pressed': String(k === areaDis) }, `${n}<sup>${(dis.areas[k] || []).length}</sup>`);
+      b.onclick = () => { areaDis = k; pintar(); };
+      chips.append(b);
+    });
+    const esVideo = areaDis === 'motion';
+    $('#subirDisenoTexto').innerHTML = esVideo ? `Subí videos a <b>${AREAS_DIS[areaDis]}</b>` : `Subí piezas a <b>${AREAS_DIS[areaDis]}</b>`;
+    $('#subirDisenoMeta').textContent = esVideo ? 'Videos .mp4 de hasta 40 MB. La portada del video se toma sola.' : 'JPG o PNG. Los PNG transparentes quedan sobre el color de fondo elegido.';
+    $('#archivosDiseno').accept = esVideo ? 'video/mp4' : 'image/jpeg,image/png,image/webp';
+    $('#fondoDiseno').closest('label').hidden = esVideo;
+    $('#verDiseno').href = `${WEB}diseno.html#${areaDis}`;
+    const g = $('#grillaDiseno');
+    g.innerHTML = '';
+    const items = dis.areas[areaDis] = dis.areas[areaDis] || [];
+    items.forEach((x, i) => {
+      const fig = el('figure', { class: `pieza pieza--${x.tam || 'c3'}` });
+      const caja = el('div', { class: 'pieza__img' });
+      if (x.ratio) caja.style.aspectRatio = x.ratio;
+      caja.append(mini(x.tipo === 'video' ? 'v' : 'd', x.slug));
+      if (x.tipo === 'video') caja.append(el('span', { class: 'foto__sello' }, '<i class="ph-light ph-play"></i> Video'));
+      else if (nuevas.has(x.slug)) caja.append(el('span', { class: 'foto__sello foto__sello--nueva' }, 'Nueva'));
+      const pie = el('div', { class: 'pieza__pie' });
+      const tam = el('select', { class: 'campo-mini', 'aria-label': 'Tamaño' });
+      Object.entries(TAM).forEach(([k, n]) => tam.append(el('option', { value: k }, n)));
+      tam.value = x.tam || 'c3';
+      tam.onchange = () => { x.tam = tam.value; pintar(); };
+      const desc = el('input', { class: 'campo-mini', type: 'text', placeholder: x.tipo === 'video' ? 'Etiqueta (ej. Logo animado)' : 'Descripción (para Google y accesibilidad)' });
+      desc.value = x.tipo === 'video' ? (x.pie || '') : (x.alt || '');
+      desc.oninput = () => { if (x.tipo === 'video') { x.pie = desc.value; x.alt = x.alt || desc.value; } else x.alt = desc.value; pintarEstado(); };
+      const acc = el('div', { class: 'pieza__acc' });
+      acc.append(boton('ph-caret-left', 'Antes', () => { moverEn(items, i, i - 1); pintar(); }));
+      acc.append(boton('ph-caret-right', 'Después', () => { moverEn(items, i, i + 1); pintar(); }));
+      acc.append(boton('ph-trash', 'Sacar de la web', () => { items.splice(i, 1); pintar(); avisar('Pieza sacada de la web.', { texto: 'Deshacer', fn: () => { items.splice(i, 0, x); pintar(); } }); }, 'peligro'));
+      pie.append(tam, desc, acc);
+      fig.append(caja, pie);
+      arrastrable(fig, i, (d, h) => { moverEn(items, d, h); pintar(); });
+      g.append(fig);
+    });
+    if (!items.length) g.append(el('p', { class: 'vacio' }, 'Todavía no hay piezas en esta área.'));
+  };
+
+  zonaArchivos($('#zonaDiseno'), $('#archivosDiseno'), (files) => {
+    const dis = DOCS.diseno.datos;
+    const items = dis.areas[areaDis] = dis.areas[areaDis] || [];
+    trabajando($('#zonaDiseno'), files, async (file, k) => {
+      if (areaDis === 'motion') {
+        const r = await procesarVideo(file, 'video');
+        items.splice(k, 0, { tipo: 'video', slug: r.slug, alt: 'Video', pie: '', tam: 'c3', ratio: `${r.w}/${r.h}` });
+      } else {
+        const r = await procesarImagen(file, { carpeta: CARPETAS.piezas, anchos: [800, 1600], prefijo: areaDis, fondo: $('#fondoDiseno').value });
+        dis.piezas = dis.piezas || {};
+        dis.piezas[r.slug] = [r.w, r.h];
+        if (!r.webp) { dis.sin_webp = dis.sin_webp || []; dis.sin_webp.push(r.slug); }
+        const tam = areaDis === 'logos' ? 'c3' : r.h > r.w * 1.3 ? 'c3' : 'c6';
+        items.splice(k, 0, { tipo: 'pieza', slug: r.slug, alt: `${AREAS_DIS[areaDis]}: pieza de diseño`, tam, ratio: areaDis === 'logos' ? '1' : `${r.w}/${r.h}` });
+      }
+    });
+  });
+
+  /* =====================================================================
+     TEXTOS Y DATOS
+     ===================================================================== */
+  const campo = (etiqueta, valor, alCambiar, { tipo = 'text', area = false, ayuda = '' } = {}) => {
+    const l = el('label', { class: 'campo' });
+    l.append(el('span', {}, etiqueta));
+    const i = area ? el('textarea', { rows: 4 }) : el('input', { type: tipo });
+    i.value = valor || '';
+    i.oninput = () => { alCambiar(i.value); pintarEstado(); };
+    l.append(i);
+    if (ayuda) l.append(el('small', { class: 'meta' }, ayuda));
+    return l;
+  };
+  const tarjeta = (titulo, ...hijos) => { const s = el('section', { class: 'tarjeta' }); s.append(el('h3', {}, titulo), ...hijos); return s; };
+  const lista = (items, dibujar, nuevo, etiquetaNuevo) => {
+    const cont = el('div', { class: 'lista' });
+    items.forEach((x, i) => {
+      const fila = el('div', { class: 'lista__fila' });
+      const cuerpo = el('div', { class: 'lista__cuerpo' });
+      dibujar(x, cuerpo);
+      const acc = el('div', { class: 'lista__acc' });
+      acc.append(boton('ph-caret-up', 'Subir', () => { moverEn(items, i, i - 1); pintar(); }));
+      acc.append(boton('ph-caret-down', 'Bajar', () => { moverEn(items, i, i + 1); pintar(); }));
+      acc.append(boton('ph-trash', 'Borrar', () => { items.splice(i, 1); pintar(); }, 'peligro'));
+      fila.append(cuerpo, acc);
+      cont.append(fila);
+    });
+    const mas = el('button', { type: 'button', class: 'btn btn--secundario' }, `<i class="ph-light ph-plus"></i> ${etiquetaNuevo}`);
+    mas.onclick = () => { items.push(nuevo()); pintar(); };
+    cont.append(mas);
+    return cont;
+  };
+
+  const pintarTextos = () => {
+    const s = DOCS.sitio.datos;
+    const t = $('#textos');
+    t.innerHTML = '';
+    const c = s.contacto;
+    t.append(tarjeta('Contacto',
+      campo('Email', c.email, (v) => { c.email = v; }, { tipo: 'email' }),
+      campo('WhatsApp / teléfono', c.whatsapp, (v) => { c.whatsapp = v; }, { ayuda: 'Como querés que se lea, con código de país. Ej.: +54 381 615-2579. El botón de WhatsApp se arma solo.' }),
+      campo('Instagram (usuario)', c.instagram, (v) => { c.instagram = v.replace(/^@/, ''); }, { ayuda: 'Sin la @. Ej.: juanchigzmn' }),
+      campo('LinkedIn (dirección)', c.linkedin, (v) => { c.linkedin = v; }, { tipo: 'url' }),
+      campo('LinkedIn (nombre que se ve)', c.linkedin_nombre, (v) => { c.linkedin_nombre = v; })));
+    const pr = s.presentacion;
+    t.append(tarjeta('Presentación del inicio',
+      campo('Texto sobre tu nombre en la portada', pr.kicker, (v) => { pr.kicker = v; }),
+      campo('Frase', pr.frase, (v) => { pr.frase = v; }, { area: true }),
+      campo('Final destacado en color', pr.destacado, (v) => { pr.destacado = v; })));
+    t.append(tarjeta('Servicios', lista(s.servicios, (x, cuerpo) => {
+      cuerpo.append(campo('Título', x.titulo, (v) => { x.titulo = v; }), campo('Texto', x.texto, (v) => { x.texto = v; }, { area: true }));
+    }, () => ({ icono: 'ph-sparkle', titulo: 'Nuevo servicio', texto: '' }), 'Sumar servicio')));
+    const so = s.sobre;
+    const fotoSobre = el('div', { class: 'sobre-foto' });
+    const fimg = so.foto.remota ? el('img', { src: `https://framerusercontent.com/images/${so.foto.remota}?scale-down-to=512`, alt: '' }) : mini('f', so.foto.slug);
+    const cambiarFoto = el('label', { class: 'btn btn--secundario' }, '<i class="ph-light ph-image"></i> Cambiar foto');
+    const inFoto = el('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp', hidden: '' });
+    inFoto.onchange = async () => {
+      const file = inFoto.files[0]; if (!file) return;
+      try {
+        const r = await procesarImagen(file, { carpeta: CARPETAS.fotos, anchos: ANCHOS, prefijo: 'sobre' });
+        so.foto = { slug: r.slug, w: r.w, h: r.h, ...(r.webp ? {} : { webp: false }) };
+        pintar(); avisar('Foto lista. Tocá Publicar para verla en la web.');
+      } catch (e) { avisar('No pude abrir esa foto: exportala en JPG.'); }
+    };
+    cambiarFoto.append(inFoto);
+    fotoSobre.append(fimg, cambiarFoto);
+    t.append(tarjeta('Sobre mí',
+      fotoSobre,
+      campo('Texto', so.parrafos.join('\n\n'), (v) => { so.parrafos = v.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean); }, { area: true, ayuda: 'Dejá una línea en blanco entre párrafos.' }),
+      el('h4', {}, 'Formación'),
+      lista(so.formacion, (x, cuerpo) => { cuerpo.append(campo('Título', x.titulo, (v) => { x.titulo = v; }), campo('Dónde y cuándo', x.detalle, (v) => { x.detalle = v; })); },
+        () => ({ titulo: '', detalle: '' }), 'Sumar estudio'),
+      campo('Herramientas', so.herramientas.join(', '), (v) => { so.herramientas = v.split(',').map((x) => x.trim()).filter(Boolean); }, { ayuda: 'Separadas por coma.' })));
+  };
+
+  /* =====================================================================
+     COTIZADOR: se abre adentro, sin salir del interno
+     ===================================================================== */
+  const abrirCotizador = () => {
+    const f = $('#marcoCotizador');
+    if (!f.getAttribute('src')) f.src = `${WEB}${CFG.cotizador}`;
+  };
+
+  /* =====================================================================
+     PUBLICAR: un solo guardado en GitHub con archivos y textos
+     ===================================================================== */
   const publicar = async () => {
     if (ocupado) return;
     ocupado = true;
-    const btn = $('#btnPublicar');
-    btn.disabled = true;
+    $('#btnPublicar').disabled = true;
     try {
       const pendientes = [...nuevas.entries()].filter(([slug]) => enUso(slug));
       const total = pendientes.reduce((n, [, v]) => n + v.archivos.length, 0);
@@ -522,21 +840,21 @@
         }
       }
       $('#estado').textContent = 'Guardando…';
-      arbol.push({ path: CFG.galeria, mode: '100644', type: 'blob', content: JSON.stringify(galeria, null, 1) + '\n' });
+      const cambiados = docsCambiados();
+      cambiados.forEach(([, d]) => arbol.push({ path: d.ruta, mode: '100644', type: 'blob', content: JSON.stringify(d.datos, null, 1) + '\n' }));
       const ref = await gh(`/git/ref/heads/${REPO.rama}`);
       const base = await gh(`/git/commits/${ref.object.sha}`);
       const tree = await gh('/git/trees', { method: 'POST', body: { base_tree: base.tree.sha, tree: arbol } });
-      const n = pendientes.length;
-      const mensaje = n ? `Estudio: ${n} foto${n > 1 ? 's' : ''} nueva${n > 1 ? 's' : ''} y orden de la galería` : 'Estudio: orden de la galería';
+      const partes = cambiados.map(([k]) => ({ galeria: 'galería', sitio: 'textos', inicio: 'portada', diseno: 'diseño' }[k] || k));
+      const mensaje = `Interno: ${pendientes.length ? `${pendientes.length} archivo${pendientes.length > 1 ? 's' : ''} nuevo${pendientes.length > 1 ? 's' : ''}, ` : ''}cambios en ${partes.join(', ') || 'archivos'}`;
       const commit = await gh('/git/commits', { method: 'POST', body: { message: mensaje, tree: tree.sha, parents: [ref.object.sha] } });
       await gh(`/git/refs/heads/${REPO.rama}`, { method: 'PATCH', body: { sha: commit.sha } });
-      // las publicadas dejan de contar como nuevas pero conservan la miniatura local
       pendientes.forEach(([slug, v]) => { publicadas.set(slug, v.url); nuevas.delete(slug); });
       [...nuevas.keys()].forEach((slug) => { if (!enUso(slug)) nuevas.delete(slug); });
-      original = JSON.stringify(galeria);
+      cambiados.forEach(([, d]) => { d.original = JSON.stringify(d.datos); });
       avisar('Publicado. La web se actualiza sola en 3 a 5 minutos.');
     } catch (e) {
-      avisar(e.status === 401 ? 'Tu clave venció. Salí y entrá con una nueva.' : e.status === 409 || e.status === 422 ? 'La web cambió mientras editabas. Recargá la página e intentá de nuevo.' : 'No se pudo publicar. Revisá tu conexión e intentá de nuevo; tus cambios siguen acá.');
+      avisar(e.status === 401 ? 'La clave de GitHub venció. Actualizala en Accesos.' : e.status === 409 || e.status === 422 ? 'La web cambió mientras editabas. Recargá la página e intentá de nuevo.' : 'No se pudo publicar. Revisá tu conexión e intentá de nuevo; tus cambios siguen acá.');
     }
     ocupado = false;
     pintar();

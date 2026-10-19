@@ -7,7 +7,7 @@
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#1a1a1a">
 <meta name="color-scheme" content="dark">
-<title>Estudio</title>
+<title>Interno</title>
 <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,8 +22,8 @@
 <section class="ingreso" id="ingreso">
   <form class="ingreso__card" id="formIngreso" data-modo="usuario" autocomplete="on">
     <span class="etiqueta" id="marca">Estudio</span>
-    <h1>Estudio</h1>
-    <p class="texto">Tu espacio privado para elegir y ordenar las fotos de la web.</p>
+    <h1>Interno</h1>
+    <p class="texto">Tu espacio privado para cambiar fotos, textos y datos de la web.</p>
     <div class="campos" id="camposUsuario">
       <label class="campo">
         <span>Usuario</span>
@@ -60,48 +60,130 @@
 
 <div class="app" id="app" hidden>
   <header class="app__barra">
-    <div class="app__marca"><span>Estudio</span><small><span id="quien"></span> · <span id="estado">Galería de fotografía</span></small></div>
+    <div class="app__marca"><span>Interno</span><small><span id="quien"></span> · <span id="estado">Todo publicado</span></small></div>
+    <nav class="pestanas" aria-label="Secciones">
+      <button type="button" data-panel="fotos"><i class="ph-light ph-images" aria-hidden="true"></i><span>Fotografía</span></button>
+      <button type="button" data-panel="inicio"><i class="ph-light ph-house" aria-hidden="true"></i><span>Inicio</span></button>
+      <button type="button" data-panel="diseno"><i class="ph-light ph-pen-nib" aria-hidden="true"></i><span>Diseño</span></button>
+      <button type="button" data-panel="textos"><i class="ph-light ph-text-aa" aria-hidden="true"></i><span>Textos y datos</span></button>
+      <button type="button" data-panel="cotizador"><i class="ph-light ph-calculator" aria-hidden="true"></i><span>Cotizador</span></button>
+    </nav>
     <div class="app__acciones">
-      <div class="segmento" role="group" aria-label="Modo">
-        <button type="button" class="segmento__btn" data-vista="editar" aria-pressed="true"><i class="ph-light ph-squares-four" aria-hidden="true"></i><span>Editar</span></button>
-        <button type="button" class="segmento__btn" data-vista="previa" aria-pressed="false"><i class="ph-light ph-eye" aria-hidden="true"></i><span>Así se ve</span></button>
-      </div>
-      <button type="button" class="btn btn--primario" id="btnPublicar" disabled><i class="ph-light ph-cloud-arrow-up" aria-hidden="true"></i> Publicar <b id="cuentaCambios" hidden></b></button>
-      <a class="icono" href="../cotizador-q4m9/" title="Cotizador" aria-label="Cotizador"><i class="ph-light ph-calculator" aria-hidden="true"></i></a>
+      <button type="button" class="btn btn--primario" id="btnPublicar" disabled><i class="ph-light ph-cloud-arrow-up" aria-hidden="true"></i> <span class="nw">Publicar</span> <b id="cuentaCambios" hidden></b></button>
+      <a class="icono" href="../" target="_blank" rel="noopener" title="Ver la web" aria-label="Ver la web"><i class="ph-light ph-globe" aria-hidden="true"></i></a>
       <button type="button" class="icono" id="btnAccesos" title="Accesos" aria-label="Accesos"><i class="ph-light ph-users" aria-hidden="true"></i></button>
       <button type="button" class="icono" id="btnSalir" title="Salir" aria-label="Salir"><i class="ph-light ph-sign-out" aria-hidden="true"></i></button>
     </div>
   </header>
 
-  <nav class="filtros" aria-label="Categorías"><div class="wrap filtros__in" id="chips"></div></nav>
-
-  <main class="wrap app__main">
-    <div class="app__cab">
-      <div>
-        <h2 id="tituloCat">Categoría</h2>
-        <p class="meta" id="infoCat"></p>
+  <!-- FOTOGRAFÍA -->
+  <div class="panel" id="panel-fotos">
+    <nav class="filtros" aria-label="Categorías"><div class="wrap filtros__in" id="chips"></div></nav>
+    <main class="wrap app__main">
+      <div class="app__cab">
+        <div><h2 id="tituloCat">Categoría</h2><p class="meta" id="infoCat"></p></div>
+        <div class="app__cab-acc">
+          <div class="segmento" role="group" aria-label="Modo">
+            <button type="button" class="segmento__btn" data-vista="editar" aria-pressed="true"><i class="ph-light ph-squares-four" aria-hidden="true"></i><span>Editar</span></button>
+            <button type="button" class="segmento__btn" data-vista="previa" aria-pressed="false"><i class="ph-light ph-eye" aria-hidden="true"></i><span>Así se ve</span></button>
+          </div>
+          <a class="link" id="verEnWeb" href="../fotografia.html" target="_blank" rel="noopener">Ver en la web <i class="ph-light ph-arrow-up-right" aria-hidden="true"></i></a>
+        </div>
       </div>
-      <a class="link" id="verEnWeb" href="../fotografia.html" target="_blank" rel="noopener">Ver en la web <i class="ph-light ph-arrow-up-right" aria-hidden="true"></i></a>
-    </div>
+      <section id="vistaEditar">
+        <label class="subir" id="zonaSubir">
+          <input type="file" id="archivos" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+          <i class="ph-light ph-image-square" aria-hidden="true"></i>
+          <span class="subir__titulo">Subí fotos a <b id="subirA">esta categoría</b></span>
+          <span class="meta">Arrastralas acá o tocá para elegir. Se achican y optimizan solas antes de subir.</span>
+        </label>
+        <p class="pista">Arrastrá para ordenar · <i class="ph-light ph-star" aria-hidden="true"></i> portada del álbum en el inicio · <i class="ph-light ph-folder-simple" aria-hidden="true"></i> mover a otra categoría · <i class="ph-light ph-trash" aria-hidden="true"></i> sacar de la web</p>
+        <div class="grilla" id="grilla"></div>
+      </section>
+      <section id="vistaPrevia" hidden>
+        <p class="pista">Así queda la categoría en la página de Fotografía. La primera foto es la que se ve arriba a la izquierda.</p>
+        <div class="previa-portada" id="previaPortada"></div>
+        <div class="galeria" id="previa"></div>
+      </section>
+    </main>
+  </div>
 
-    <section id="vistaEditar">
-      <label class="subir" id="zonaSubir">
-        <input type="file" id="archivos" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
-        <i class="ph-light ph-image-square" aria-hidden="true"></i>
-        <span class="subir__titulo">Subí fotos a <b id="subirA">esta categoría</b></span>
-        <span class="meta">Arrastralas acá o tocá para elegir. Se achican y optimizan solas antes de subir.</span>
-      </label>
-      <p class="pista">Arrastrá para ordenar · <i class="ph-light ph-star" aria-hidden="true"></i> portada de la categoría en el inicio · <i class="ph-light ph-folder-simple" aria-hidden="true"></i> mover a otra categoría · <i class="ph-light ph-trash" aria-hidden="true"></i> sacar de la web</p>
-      <div class="grilla" id="grilla"></div>
-    </section>
+  <!-- INICIO -->
+  <div class="panel" id="panel-inicio" hidden>
+    <main class="wrap app__main">
+      <div class="app__cab">
+        <div><h2>Inicio</h2><p class="meta">Las fotos que pasan en la portada y la franja entre Fotografía y Diseño.</p></div>
+        <a class="link" href="../" target="_blank" rel="noopener">Ver en la web <i class="ph-light ph-arrow-up-right" aria-hidden="true"></i></a>
+      </div>
+      <section class="bloque-int">
+        <h3><i class="ph-light ph-device-mobile" aria-hidden="true"></i> Portada en el celular</h3>
+        <p class="pista">Una foto por pantalla, en este orden. Elegí qué categoría dice abajo de cada una.</p>
+        <div class="fila-botones">
+          <label class="subir subir--chico" id="zonaPortada">
+            <input type="file" id="archivosPortada" accept="image/jpeg,image/png,image/webp" multiple>
+            <i class="ph-light ph-upload-simple" aria-hidden="true"></i><span>Subir fotos nuevas <small>(alta calidad)</small></span>
+          </label>
+          <button type="button" class="btn btn--secundario" id="elegirPortada"><i class="ph-light ph-images" aria-hidden="true"></i> Elegir de la galería</button>
+        </div>
+        <div class="grilla grilla--alta" id="inicioMovil"></div>
+      </section>
+      <section class="bloque-int">
+        <h3><i class="ph-light ph-desktop" aria-hidden="true"></i> Portada en la computadora</h3>
+        <p class="pista">Cada pantalla muestra 1 foto horizontal o 2 a 3 verticales una al lado de la otra. Las fotos nuevas horizontales se suman solas.</p>
+        <div class="pantallas" id="inicioAncho"></div>
+        <button type="button" class="btn btn--secundario" id="nuevaPantalla"><i class="ph-light ph-plus" aria-hidden="true"></i> Nueva pantalla</button>
+      </section>
+      <section class="bloque-int">
+        <h3><i class="ph-light ph-panorama" aria-hidden="true"></i> Franja entre Fotografía y Diseño</h3>
+        <div class="banda-int"><div id="inicioBanda"></div><button type="button" class="btn btn--secundario" id="cambiarBanda"><i class="ph-light ph-swap" aria-hidden="true"></i> Cambiar foto</button></div>
+      </section>
+    </main>
+  </div>
 
-    <section id="vistaPrevia" hidden>
-      <p class="pista">Así queda la categoría en la página de Fotografía. La primera foto es la que se ve arriba a la izquierda.</p>
-      <div class="previa-portada" id="previaPortada"></div>
-      <div class="galeria" id="previa"></div>
-    </section>
-  </main>
+  <!-- DISEÑO -->
+  <div class="panel" id="panel-diseno" hidden>
+    <nav class="filtros" aria-label="Áreas"><div class="wrap filtros__in" id="chipsDiseno"></div></nav>
+    <main class="wrap app__main">
+      <div class="app__cab">
+        <div><h2>Diseño</h2><p class="meta">Logos, placas, redes y videos de la página de Diseño.</p></div>
+        <a class="link" id="verDiseno" href="../diseno.html" target="_blank" rel="noopener">Ver en la web <i class="ph-light ph-arrow-up-right" aria-hidden="true"></i></a>
+      </div>
+      <div class="fila-botones">
+        <label class="subir subir--chico" id="zonaDiseno">
+          <input type="file" id="archivosDiseno" multiple>
+          <i class="ph-light ph-upload-simple" aria-hidden="true"></i><span id="subirDisenoTexto">Subí piezas</span>
+        </label>
+        <label class="color"><span>Fondo para PNG transparentes</span><input type="color" id="fondoDiseno" value="#ffffff"></label>
+      </div>
+      <p class="pista" id="subirDisenoMeta"></p>
+      <div class="grilla-piezas" id="grillaDiseno"></div>
+    </main>
+  </div>
+
+  <!-- TEXTOS Y DATOS -->
+  <div class="panel" id="panel-textos" hidden>
+    <main class="wrap app__main">
+      <div class="app__cab">
+        <div><h2>Textos y datos</h2><p class="meta">Contacto, presentación, servicios y sobre mí.</p></div>
+      </div>
+      <div class="textos" id="textos"></div>
+    </main>
+  </div>
+
+  <!-- COTIZADOR -->
+  <div class="panel panel--cotizador" id="panel-cotizador" hidden>
+    <iframe id="marcoCotizador" title="Cotizador"></iframe>
+  </div>
 </div>
+
+<dialog class="accesos selector" id="selector" aria-labelledby="selectorTitulo">
+  <div class="accesos__cab">
+    <h2 id="selectorTitulo">Elegí una foto</h2>
+    <button type="button" class="icono" id="cerrarSelector" aria-label="Cerrar"><i class="ph-light ph-x" aria-hidden="true"></i></button>
+  </div>
+  <div class="selector__chips" id="selectorChips"></div>
+  <div class="selector__grilla" id="selectorGrilla"></div>
+</dialog>
 
 <dialog class="accesos" id="accesos" aria-labelledby="t-accesos">
   <div class="accesos__cab">

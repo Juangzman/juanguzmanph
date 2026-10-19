@@ -11,4 +11,13 @@ window.ESTUDIO_CONFIG = {
   accesos: 'estudio-x7k2/accesos.json', // usuarios y contraseñas (cifrados)
   raizWeb: '../',                       // de esta carpeta a la raíz de la web
   paginaGaleria: 'fotografia.html',     // para el botón "Ver en la web"
+  // Archivos de contenido que se pueden editar (si uno no existe, su pestaña no aparece)
+  datos: {
+    galeria: 'data/galeria.json',       // Fotografía
+    inicio: 'data/inicio.json',         // portada del inicio
+    diseno: 'data/diseno.json',         // logos, placas, redes, videos
+    sitio: 'data/sitio.json',           // textos y datos de contacto
+  },
+  carpetas: { fotos: 'img/f', portada: 'img/h', piezas: 'img/d', videos: 'video' },
+  cotizador: 'cotizador-q4m9/',         // '' para no mostrar la pestaña
 };

@@ -6,6 +6,14 @@
   const ESTUDIO = 'estudio-sesion-juanguzmanph';
   const ACCESOS = '/estudio-x7k2/accesos.json';
   const leer = (k) => { try { return localStorage.getItem(k) || sessionStorage.getItem(k); } catch (e) { return null; } };
+  // Abierto adentro del Interno: sin el menú ni el pie de la web, para no salir del panel
+  if (window.self !== window.top) {
+    html.classList.add('incrustado');
+    const e = document.createElement('style');
+    e.textContent = `html.incrustado .nav, html.incrustado .menu, html.incrustado [data-centinela], html.incrustado .contacto, html.incrustado .sr-only { display: none !important; }
+      html.incrustado .pag-cab { padding-top: 28px !important; }`;
+    document.head.append(e);
+  }
   if (leer(LLAVE) === '1' || leer(ESTUDIO)) return;
 
   html.classList.add('bloqueado');

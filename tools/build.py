@@ -88,7 +88,7 @@ def foto(slug, alt, sizes="100vw", lazy=True, cls=""):
 def pieza(slug, alt, sizes="100vw", lazy=True):
     """Pieza de diseño optimizada en /img/d."""
     w, h = _DIS[slug]
-    return local("d/" + slug, w, h, alt, sizes, lazy)
+    return local("d/" + slug, w, h, alt, sizes, lazy, webp=slug not in DISENO.get("sin_webp", []))
 
 
 # Capturas de webs y sistemas (tools/procesar_web.py -> img/w)
@@ -270,7 +270,7 @@ def foto_sobre():
     alt = "Retrato de Juan Guzman"
     if f.get("remota"):
         return remota(f["remota"], f["w"], f["h"], alt, "(min-width: 900px) 40vw, 100vw")
-    return foto(f["slug"], alt, "(min-width: 900px) 40vw, 100vw")
+    return local("f/" + f["slug"], f["w"], f["h"], alt, "(min-width: 900px) 40vw, 100vw", webp=f.get("webp", True))
 
 
 def img_trabajo(ref, alt, sizes):
@@ -283,6 +283,7 @@ def img_trabajo(ref, alt, sizes):
 
 
 HERO_DIM = {sl: (v["w"], v["h"], v["nombres"], v["reales"]) for sl, v in INICIO["fotos"].items()}
+HERO_SIN_WEBP = {sl for sl, v in INICIO["fotos"].items() if v.get("webp") is False}
 
 
 # Portada en pantallas anchas: las horizontales solas y las verticales agrupadas de a 2 o 3
@@ -295,10 +296,13 @@ def _hero_img(slug, alt, sizes, carga, foco=None):
     if slug in HERO_DIM:
         w, h, nombres, reales = HERO_DIM[slug]
         src = lambda ext: ", ".join(f"/img/h/{slug}-{n}.{ext} {r}w" for n, r in zip(nombres, reales))
-        return (f'<picture><source type="image/webp" srcset="{src("webp")}" sizes="{sizes}">'
-                f'<img src="/img/h/{slug}-1600.jpg" srcset="{src("jpg")}" sizes="{sizes}" width="{w}" height="{h}" {carga} decoding="async" alt="{e(alt)}"{st}></picture>')
+        fuente = "" if slug in HERO_SIN_WEBP else f'<source type="image/webp" srcset="{src("webp")}" sizes="{sizes}">'
+        medio = nombres[min(1, len(nombres) - 1)]
+        return (f'<picture>{fuente}'
+                f'<img src="/img/h/{slug}-{medio}.jpg" srcset="{src("jpg")}" sizes="{sizes}" width="{w}" height="{h}" {carga} decoding="async" alt="{e(alt)}"{st}></picture>')
     w, h = DIM[slug]
-    return (f'<picture><source type="image/webp" srcset="/img/f/{slug}-800.webp 800w, /img/f/{slug}-1600.webp 1600w" sizes="{sizes}">'
+    fuente = "" if slug in SIN_WEBP else f'<source type="image/webp" srcset="/img/f/{slug}-800.webp 800w, /img/f/{slug}-1600.webp 1600w" sizes="{sizes}">'
+    return (f'<picture>{fuente}'
             f'<img src="/img/f/{slug}-1600.jpg" srcset="/img/f/{slug}-800.jpg 800w, /img/f/{slug}-1600.jpg 1600w" sizes="{sizes}" width="{w}" height="{h}" {carga} decoding="async" alt="{e(alt)}"{st}></picture>')
 
 
